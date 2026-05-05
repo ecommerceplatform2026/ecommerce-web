@@ -92,10 +92,15 @@ axiosInstance.interceptors.request.use(
 // ============================================================
 
 let isRefreshing = false
-let pendingRequests: Array<(token: string) => void> = []
+type PendingRequest = {
+    resolve: (token: string) => void
+    reject: (error: unknown) => void
+}
+
+let pendingRequests: PendingRequest[] = []
 
 const processPendingRequests = (newToken: string) => {
-    pendingRequests.forEach(callback => callback(newToken))
+    pendingRequests.forEach(p => p.resolve(newToken))
     pendingRequests = []
 }
 
@@ -141,10 +146,13 @@ axiosInstance.interceptors.response.use(
 
             // Nếu đang refresh rồi → xếp hàng chờ
             if (isRefreshing) {
-                return new Promise(resolve => {
-                    pendingRequests.push((newToken: string) => {
-                        originalRequest.headers.Authorization = `Bearer ${newToken}`
-                        resolve(axiosInstance(originalRequest))
+                return new Promise((resolve, reject) => {
+                    pendingRequests.push({
+                        resolve: (newToken: string) => {
+                            originalRequest.headers.Authorization = `Bearer ${newToken}`
+                            resolve(axiosInstance(originalRequest))
+                        },
+                        reject,
                     })
                 })
             }
@@ -158,18 +166,18 @@ axiosInstance.interceptors.response.use(
                 originalRequest.headers.Authorization = `Bearer ${newToken}`
                 return axiosInstance(originalRequest)
 
-            } catch {
-                // Refresh thất bại → xoá token, về trang login
+            } catch (refreshError) {
+                // Reject tất cả request đang chờ
+                pendingRequests.forEach(p => p.reject(refreshError))
                 pendingRequests = []
+
                 tokenHelper.clearTokens()
 
-                // Chỉ redirect ở phía client
                 if (typeof window !== 'undefined') {
                     window.location.href = ROUTES.AUTH.LOGIN
                 }
 
-                return Promise.reject(error)
-
+                return Promise.reject(refreshError)
             } finally {
                 isRefreshing = false
             }
