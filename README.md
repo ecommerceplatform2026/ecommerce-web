@@ -1,6 +1,6 @@
 # ecommerce-web
 
-A modern, production-ready fashion e-commerce frontend built with Next.js 15 (App Router), React 19, and TypeScript. Designed for performance, scalability, and a clean developer experience.
+A modern, production-ready fashion e-commerce frontend built with Next.js 16 (App Router), React 19, and TypeScript. Designed for performance, scalability, and a clean developer experience.
 
 ---
 
@@ -65,7 +65,7 @@ A modern, production-ready fashion e-commerce frontend built with Next.js 15 (Ap
 
 | Category          | Library / Tool                        |
 |-------------------|---------------------------------------|
-| Framework         | Next.js 15 (App Router)               |
+| Framework         | Next.js 16 (App Router)               |
 | Language          | TypeScript                            |
 | Styling           | Tailwind CSS 4                        |
 | Server State      | TanStack React Query v5               |
@@ -91,7 +91,7 @@ ecommerce-web/
 │   ├── app/                        # Next.js App Router — pages & layouts
 │   │   ├── (auth)/                 # Route group: login, register
 │   │   ├── (shop)/                 # Route group: products, cart, checkout, orders
-│   │   ├── (admin)/                # Route group: dashboard, products, categories, orders
+│   │   ├── admin/                  # Route group: dashboard, products, categories, orders
 │   │   ├── layout.tsx              # Root layout: providers, font, metadata
 │   │   └── page.tsx                # Homepage
 │   │
@@ -227,7 +227,7 @@ NEXT_PUBLIC_PAYOS_CLIENT_ID=your_payos_client_id
 NEXT_PUBLIC_MOMO_PARTNER_CODE=your_momo_partner_code
 ```
 
-> **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Never put secrets in `NEXT_PUBLIC_` variables. All environment variables are validated at startup using Zod — the app will throw a descriptive error if any required variable is missing or malformed.
+> **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser. Never put secrets in `NEXT_PUBLIC_` variables. Planned: environment variables will be validated with Zod. — the app will throw a descriptive error if any required variable is missing or malformed.
 
 ---
 
