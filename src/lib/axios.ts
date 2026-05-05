@@ -5,6 +5,7 @@ import axios, {
     InternalAxiosRequestConfig,
 } from 'axios'
 import Cookies from 'js-cookie'
+import { API_BASE_URL } from '@/constants/api'
 
 import { AUTH_ENDPOINTS } from '@/constants/api'
 import { ROUTES } from '@/constants/routes'
@@ -60,7 +61,7 @@ export const tokenHelper = {
 // ============================================================
 
 const axiosInstance: AxiosInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL,
+    baseURL: API_BASE_URL,
     timeout: 10000,  // 10 giây — NF01 (low latency)
     headers: {
         'Content-Type': 'application/json',
