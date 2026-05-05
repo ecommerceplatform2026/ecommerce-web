@@ -1,15 +1,7 @@
 // ------ Enums ------
 
-export enum UserRole {
-    Admin = 0,
-    User = 1,
-}
+import { UserRole, UserStatus } from '@/constants/enums'
 
-export enum UserStatus {
-    Inactive = 0,
-    Active = 1,
-    Banned = 2,
-}
 
 // ------ Core User ------
 
