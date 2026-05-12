@@ -21,10 +21,10 @@ export const AUTH_ENDPOINTS = {
 // ============================================================
 
 export const USER_ENDPOINTS = {
-    // Profile
-    GET_PROFILE: '/api/users/profile',
-    UPDATE_PROFILE: '/api/users/profile',
-    UPLOAD_AVATAR: '/api/users/profile/avatar',
+    // Profile — backend route: [Route("api/profile")]
+    GET_PROFILE: '/api/profile',
+    UPDATE_PROFILE: '/api/profile',
+    UPLOAD_AVATAR: '/api/profile/avatar',
 
     // Order history (xem lịch sử mua hàng của chính mình)
     GET_ORDER_HISTORY: '/api/users/orders',
