@@ -39,7 +39,7 @@ export interface GetProfileResult {
 
 // Matches C# UpdateUserRequest DTO
 interface BackendUpdateRequest {
-    fullName: string
+    fullName?: string
     avatar?: string
     phoneNumber?: string
     dateOfBirth?: string
@@ -82,7 +82,7 @@ export const profileService = {
         existing?: Partial<UserProfile>,
     ): Promise<GetProfileResult> => {
         const body: BackendUpdateRequest = {
-            fullName: payload.fullName ?? '',
+            ...(payload.fullName !== undefined && { fullName: payload.fullName }),
             avatar: payload.avatarUrl ?? undefined,          // frontend "avatarUrl" → backend "avatar"
             phoneNumber: payload.phoneNumber ?? undefined,
             dateOfBirth: payload.dateOfBirth ?? undefined,
