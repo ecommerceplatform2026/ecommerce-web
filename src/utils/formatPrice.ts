@@ -16,6 +16,7 @@ export function formatPriceShort(value: number): string {
 }
 
 export function formatDiscount(original: number, discounted: number): string {
+    if (original <= 0) return ''
     const pct = Math.round(((original - discounted) / original) * 100)
     return `-${pct}%`
 }
