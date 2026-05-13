@@ -79,6 +79,8 @@ export const reducer = (state: State, action: Action): State => {
     case "REMOVE_TOAST":
       if (action.toastId === undefined) return { ...state, toasts: [] }
       return { ...state, toasts: state.toasts.filter((t) => t.id !== action.toastId) }
+    default:
+      return state
   }
 }
 
@@ -120,7 +122,7 @@ function useToast() {
       const index = listeners.indexOf(setState)
       if (index > -1) listeners.splice(index, 1)
     }
-  }, [state])
+  }, [])
 
   return {
     ...state,
