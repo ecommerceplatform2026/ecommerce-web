@@ -36,7 +36,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
-            className="flex h-12 w-full items-center justify-center gap-2 bg-primary px-5 text-primary-foreground transition-colors hover:bg-primary/90 md:w-39.5"
+            className="flex h-12 w-full items-center justify-center gap-2 bg-primary px-5 text-primary-foreground transition-colors hover:bg-primary/90 md:w-[158px]"
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
@@ -51,7 +51,7 @@ export default function Home() {
             Deploy Now
           </a>
           <a
-            className="flex h-12 w-full items-center justify-center border border-border px-5 text-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground md:w-39.5"
+            className="flex h-12 w-full items-center justify-center border border-border px-5 text-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground md:w-[158px]"
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
             target="_blank"
             rel="noopener noreferrer"
