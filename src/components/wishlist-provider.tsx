@@ -28,10 +28,6 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("wishlist", JSON.stringify(wishlist))
   }, [wishlist])
 
-  useEffect(() => {
-    localStorage.setItem("wishlist", JSON.stringify(wishlist))
-  }, [wishlist])
-
   const addToWishlist = (product: Product) => {
     setWishlist((prev) => {
       if (prev.find((item) => item.id === product.id)) {
