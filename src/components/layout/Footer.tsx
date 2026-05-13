@@ -132,14 +132,15 @@ export function Footer() {
             <h4 className="text-sm font-medium tracking-wide mt-6">THEO DÕI</h4>
             <div className="flex gap-4">
               {[
-                { href: "https://facebook.com", label: "f" },
-                { href: "https://twitter.com", label: "𝕏" },
-                { href: "https://instagram.com", label: "in" },
-                { href: "https://youtube.com", label: "▶" },
-              ].map(({ href, label }) => (
+                { href: "https://facebook.com", label: "f", ariaLabel: "Facebook" },
+                { href: "https://twitter.com", label: "𝕏", ariaLabel: "Twitter" },
+                { href: "https://instagram.com", label: "in", ariaLabel: "Instagram" },
+                { href: "https://youtube.com", label: "▶", ariaLabel: "YouTube" },
+              ].map(({ href, label, ariaLabel }) => (
                 <a
                   key={href}
                   href={href}
+                  aria-label={ariaLabel}
                   className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
                 >
                   {label}
