@@ -375,7 +375,7 @@ export function ProfileContent() {
                                         Chỉnh sửa hồ sơ
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-125">
+                                <DialogContent className="sm:max-w-[500px]">
                                     <DialogHeader>
                                         <DialogTitle>Chỉnh sửa hồ sơ</DialogTitle>
                                         <DialogDescription>
@@ -459,7 +459,7 @@ export function ProfileContent() {
                                         Đổi mật khẩu
                                     </Button>
                                 </DialogTrigger>
-                                <DialogContent className="sm:max-w-125">
+                                <DialogContent className="sm:max-w-[500px]">
                                     <DialogHeader>
                                         <DialogTitle className="flex items-center gap-2">
                                             <Lock className="h-5 w-5" />
