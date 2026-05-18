@@ -14,18 +14,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import toast from 'react-hot-toast'
 import { useAuth } from "@/hooks/useAuth"
-import { useToast } from "@/hooks/useToast"
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const { user, logout } = useAuth()
     const router = useRouter()
-    const { toast } = useToast()
 
     const handleLogout = () => {
         logout()
-        toast({ title: "Đăng xuất thành công", description: "Hẹn gặp lại bạn!" })
+        toast.success("Hẹn gặp lại bạn!")
         router.push("/login")
     }
 
