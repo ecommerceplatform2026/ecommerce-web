@@ -1,17 +1,6 @@
-export interface Product {
-  id: string
-  name: string
-  category: string
-  price: number
-  description: string
-  images: string[]
-  sizes: string[]
-  colors: string[]
-  featured?: boolean
-  stock: number
-}
+import type { LocalProduct } from '@/types/product'
 
-export const products: Product[] = [
+export const products: LocalProduct[] = [
   {
     id: "1",
     name: "Cashmere Overcoat",
@@ -230,48 +219,48 @@ export const products: Product[] = [
   },
 ]
 
-export function getFeaturedProducts() {
+export function getFeaturedProducts(): LocalProduct[] {
   return products.filter((p) => p.featured)
 }
 
-export function getProductById(id: string) {
+export function getProductById(id: string): LocalProduct | undefined {
   return products.find((p) => p.id === id)
 }
 
-export function getProductsByCategory(category: string) {
+export function getProductsByCategory(category: string): LocalProduct[] {
   return products.filter((p) => p.category === category)
 }
 
-export function getCategories() {
+export function getCategories(): { name: string; image: string; href: string }[] {
   const uniqueCategories = Array.from(new Set(products.map((p) => p.category)))
 
   const categoryMap: Record<string, { name: string; image: string; href: string }> = {
-    Outerwear: { name: "Outerwear", image: "/luxury-coat.jpg", href: "/shop?category=Outerwear" },
-    Knitwear: { name: "Knitwear", image: "/soft-cashmere-sweater.png", href: "/shop?category=Knitwear" },
-    Trousers: { name: "Trousers", image: "/tailored-suit.jpg", href: "/shop?category=Trousers" },
-    Shirts: { name: "Shirts", image: "/white-oxford-dress-shirt-luxury.jpg", href: "/shop?category=Shirts" },
-    Footwear: { name: "Footwear", image: "/luxury-black-leather-chelsea-boots.jpg", href: "/shop?category=Footwear" },
-    Accessories: { name: "Accessories", image: "/leather-accessories.jpg", href: "/shop?category=Accessories" },
+    Outerwear: { name: "Outerwear", image: "/luxury-coat.jpg", href: "/products?category=Outerwear" },
+    Knitwear: { name: "Knitwear", image: "/soft-cashmere-sweater.png", href: "/products?category=Knitwear" },
+    Trousers: { name: "Trousers", image: "/tailored-suit.jpg", href: "/products?category=Trousers" },
+    Shirts: { name: "Shirts", image: "/white-oxford-dress-shirt-luxury.jpg", href: "/products?category=Shirts" },
+    Footwear: { name: "Footwear", image: "/luxury-black-leather-chelsea-boots.jpg", href: "/products?category=Footwear" },
+    Accessories: { name: "Accessories", image: "/leather-accessories.jpg", href: "/products?category=Accessories" },
   }
 
   return uniqueCategories.map(
     (category) =>
-      categoryMap[category] || {
+      categoryMap[category] ?? {
         name: category,
         image: "/placeholder.svg?height=800&width=600",
-        href: `/shop?category=${category}`,
+        href: `/products?category=${category}`,
       },
   )
 }
 
-export function getHotProducts() {
+export function getHotProducts(): LocalProduct[] {
   return products.filter((p) => p.stock > 10).slice(0, 4)
 }
 
-export function getBestSellingProducts() {
+export function getBestSellingProducts(): LocalProduct[] {
   return products.filter((p) => p.featured).slice(0, 4)
 }
 
-export function getPromotionalProducts() {
+export function getPromotionalProducts(): LocalProduct[] {
   return products.filter((p) => p.stock < 10).slice(0, 4)
 }
