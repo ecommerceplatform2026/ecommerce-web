@@ -4,12 +4,13 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useToast } from "@/hooks/useToast"
+import toast from 'react-hot-toast'
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useAuth } from "@/hooks/useAuth"
+import type { ApiError } from "@/types/api"
 
 const registerSchema = z
   .object({
@@ -33,7 +34,6 @@ export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const { register: registerUser } = useAuth()
-  const { toast } = useToast()
   const router = useRouter()
 
   const {
@@ -52,21 +52,17 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
       })
-      toast({ title: "Tạo tài khoản thành công!", description: "Chào mừng bạn đến với ATELIER." })
+      toast.success("Chào mừng bạn đến với ATELIER.")
       router.push("/")
-    } catch {
-      toast({
-        title: "Đăng ký thất bại",
-        description: "Đã có lỗi xảy ra. Vui lòng thử lại.",
-        variant: "destructive",
-      })
+    } catch (err) {
+      toast.error((err as ApiError).message ?? 'Đã có lỗi xảy ra. Vui lòng thử lại.')
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       {/* Họ và tên */}
       <div className="space-y-2">
         <label htmlFor="fullName" className="text-sm font-medium leading-none">

@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useToast } from "@/hooks/useToast"
+import toast from 'react-hot-toast'
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useAuth } from "@/hooks/useAuth"
+import type { ApiError } from "@/types/api"
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email không được để trống").email("Email không hợp lệ"),
@@ -28,7 +29,6 @@ export function LoginForm({ redirectTo }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [isPageReady, setIsPageReady] = useState(false)
   const { login } = useAuth()
-  const { toast } = useToast()
   const router = useRouter()
   const toastShownRef = useRef(false)
 
@@ -47,30 +47,9 @@ export function LoginForm({ redirectTo }: Props) {
   useEffect(() => {
     if (isPageReady && redirectTo && !toastShownRef.current) {
       toastShownRef.current = true
-      toast({
-        title: "Bạn phải đăng nhập trước",
-        description: "Vui lòng đăng nhập để tiếp tục.",
-        variant: "destructive",
-      })
+      toast.error("Vui lòng đăng nhập để tiếp tục.")
     }
-  }, [isPageReady, redirectTo, toast])
-
-  const onSubmit = async (data: LoginFormData) => {
-    setIsLoading(true)
-    try {
-      await login(data.email, data.password)
-      toast({ title: "Đăng nhập thành công!", description: "Chào mừng bạn trở lại ATELIER." })
-      router.push(safeRedirect)
-    } catch {
-      toast({
-        title: "Đăng nhập thất bại",
-        description: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [isPageReady, redirectTo])
 
   const {
     register,
@@ -80,8 +59,21 @@ export function LoginForm({ redirectTo }: Props) {
     resolver: zodResolver(loginSchema),
   })
 
+  const onSubmit = async (data: LoginFormData) => {
+    setIsLoading(true)
+    try {
+      await login(data.email, data.password)
+      toast.success("Chào mừng bạn trở lại ATELIER.")
+      router.push(safeRedirect)
+    } catch (err) {
+      toast.error((err as ApiError).message ?? 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
       {/* Email */}
       <div className="space-y-2">
         <label htmlFor="email" className="text-sm font-medium leading-none">
