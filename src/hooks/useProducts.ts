@@ -2,8 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { productService } from '@/services/productService'
 
 export const productKeys = {
-    all:    ['products']              as const,
-    detail: (id: string) => ['products', id] as const,
+    all:    ['products']                        as const,
+    detail: (id: string) => ['products', id]   as const,
+    images: (id: string) => ['products', id, 'images'] as const,
 }
 
 export function useProducts() {
@@ -18,5 +19,13 @@ export function useProduct(id: string) {
         queryKey: productKeys.detail(id),
         queryFn:  () => productService.getById(id),
         enabled:  !!id,
+    })
+}
+
+export function useProductImages(productId: string) {
+    return useQuery({
+        queryKey: productKeys.images(productId),
+        queryFn:  () => productService.getImages(productId),
+        enabled:  !!productId,
     })
 }
