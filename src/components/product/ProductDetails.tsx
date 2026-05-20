@@ -1,14 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Check, Minus, Plus, Star, Heart } from "lucide-react"
+import { Check, Minus, Plus, Star, Heart, AlertCircle, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ROUTES } from "@/constants/routes"
+import { ProductStatus } from "@/constants/enums"
 import { useCart } from "@/hooks/useCart"
 import { useWishlist } from "@/hooks/useWishlist"
-import { useProducts } from "@/hooks/useProducts"
+import { useProducts, useProductImages } from "@/hooks/useProducts"
+import { ProductImageGallery } from "./ProductImageGallery"
 import toast from "react-hot-toast"
 import type { Product } from "@/types/product"
 
@@ -74,24 +76,59 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
+    const variants = product.variants ?? []
+
+    const uniqueSizes = useMemo(
+        () => [...new Set(variants.map(v => v.size).filter((s): s is string => s !== null))],
+        [variants],
+    )
+    const uniqueColors = useMemo(
+        () => [...new Set(variants.map(v => v.color).filter((c): c is string => c !== null))],
+        [variants],
+    )
+
+    const [selectedSize, setSelectedSize] = useState<string | null>(() => {
+        const sizes = [...new Set(product.variants.map(v => v.size).filter((s): s is string => s !== null))]
+        return sizes.length === 1 ? sizes[0] : null
+    })
+    const [selectedColor, setSelectedColor] = useState<string | null>(() => {
+        const colors = [...new Set(product.variants.map(v => v.color).filter((c): c is string => c !== null))]
+        return colors.length === 1 ? colors[0] : null
+    })
     const [quantity, setQuantity] = useState(1)
     const [added, setAdded] = useState(false)
     const [currentReviewPage, setCurrentReviewPage] = useState(1)
 
+    const selectedVariant = useMemo(() => {
+        if (variants.length === 0) return null
+        return (
+            variants.find(v =>
+                (uniqueSizes.length === 0 || v.size === selectedSize) &&
+                (uniqueColors.length === 0 || v.color === selectedColor),
+            ) ?? null
+        )
+    }, [variants, selectedSize, selectedColor, uniqueSizes.length, uniqueColors.length])
+
+    const displayPrice = selectedVariant?.price ?? product.basePrice
+    const isOutOfStock = selectedVariant?.isOutOfStock ?? false
+    const isLowStock = selectedVariant?.isLowStock ?? false
+    const maxStock = selectedVariant ? selectedVariant.stock : 99
+    const needsVariantSelection = variants.length > 0 && selectedVariant === null
+    const isInactive = product.status === ProductStatus.Inactive
+
     const { addItem } = useCart()
     const { toggleItem, isInWishlist } = useWishlist()
     const inWishlist = isInWishlist(product.id)
-
+    const { data: images = [] } = useProductImages(product.id)
     const { data: allProducts = [] } = useProducts()
     const relatedProducts = allProducts
         .filter(p => p.categoryId === product.categoryId && p.id !== product.id)
-        .slice(0, 8)
+        .slice(0, 4)
 
+    const REVIEWS_PER_PAGE = 3
     const averageRating = (
         mockReviews.reduce((sum, r) => sum + r.rating, 0) / mockReviews.length
     ).toFixed(1)
-
-    const REVIEWS_PER_PAGE = 3
     const totalReviewPages = Math.ceil(mockReviews.length / REVIEWS_PER_PAGE)
     const paginatedReviews = mockReviews.slice(
         (currentReviewPage - 1) * REVIEWS_PER_PAGE,
@@ -99,17 +136,30 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     )
 
     const handleAddToCart = () => {
+        if (needsVariantSelection) {
+            const missingSize = uniqueSizes.length > 0 && !selectedSize
+            const missingColor = uniqueColors.length > 0 && !selectedColor
+            if (missingSize && missingColor) toast.error('Vui lòng chọn size và màu sắc')
+            else if (missingSize) toast.error('Vui lòng chọn size')
+            else toast.error('Vui lòng chọn màu sắc')
+            return
+        }
+        if (isOutOfStock) {
+            toast.error('Sản phẩm đã hết hàng')
+            return
+        }
+        const finalQty = Math.min(quantity, maxStock)
         addItem({
             productId: product.id,
-            variantId: product.id,
+            variantId: selectedVariant?.id ?? product.id,
             name: product.name,
-            price: product.basePrice,
-            size: "",
-            color: "",
-            quantity,
-            imageUrl: null,
+            price: displayPrice,
+            size: selectedSize ?? '',
+            color: selectedColor ?? '',
+            quantity: finalQty,
+            imageUrl: images[0]?.imageUrl ?? null,
         })
-        toast.success(`Đã thêm ${quantity} × ${product.name} vào giỏ hàng`)
+        toast.success(`Đã thêm ${finalQty} × ${product.name} vào giỏ hàng`)
         setAdded(true)
         setTimeout(() => setAdded(false), 2000)
     }
@@ -123,18 +173,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         <div className="container mx-auto px-4 lg:px-8 py-16">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
 
-                {/* Image */}
-                <div>
-                    <div className="relative aspect-[3/4] bg-secondary">
-                        <Image
-                            src="/placeholder.svg"
-                            alt={product.name}
-                            fill
-                            className="object-cover"
-                            priority
-                        />
-                    </div>
-                </div>
+                {/* Image Gallery */}
+                <ProductImageGallery images={images} productName={product.name} />
 
                 {/* Details */}
                 <div className="space-y-8">
@@ -143,7 +183,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                             {product.categoryName ?? ""}
                         </p>
                         <h1 className="font-serif text-4xl md:text-5xl mb-4">{product.name}</h1>
-                        <p className="text-2xl">{product.basePrice.toLocaleString("vi-VN")}₫</p>
+                        <div className="flex items-center gap-3 mb-1">
+                            <p className="text-2xl">{displayPrice.toLocaleString("vi-VN")}₫</p>
+                            {product.status === ProductStatus.Inactive && (
+                                <span className="text-xs px-2 py-1 border border-destructive text-destructive uppercase tracking-wide">
+                                    Ngừng kinh doanh
+                                </span>
+                            )}
+                        </div>
                     </div>
 
                     {product.description && (
@@ -152,32 +199,139 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         </p>
                     )}
 
+                    {/* Size selector */}
+                    {uniqueSizes.length > 0 && (
+                        <div className="space-y-3">
+                            <p className="text-sm font-medium tracking-wide">
+                                KÍCH CỠ
+                                {selectedSize && (
+                                    <span className="ml-2 font-normal text-muted-foreground">
+                                        {selectedSize}
+                                    </span>
+                                )}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {uniqueSizes.map(size => {
+                                    const v = variants.find(
+                                        vr => vr.size === size &&
+                                            (uniqueColors.length === 0 || vr.color === selectedColor),
+                                    )
+                                    const unavailable = v?.isOutOfStock ?? false
+                                    return (
+                                        <button
+                                            key={size}
+                                            onClick={() => !unavailable && setSelectedSize(size)}
+                                            disabled={unavailable}
+                                            className={`px-4 py-2 text-sm border transition-colors ${
+                                                selectedSize === size
+                                                    ? 'border-foreground bg-foreground text-background'
+                                                    : unavailable
+                                                    ? 'border-border text-muted-foreground line-through opacity-40 cursor-not-allowed'
+                                                    : 'border-border hover:border-foreground cursor-pointer'
+                                            }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Color selector */}
+                    {uniqueColors.length > 0 && (
+                        <div className="space-y-3">
+                            <p className="text-sm font-medium tracking-wide">
+                                MÀU SẮC
+                                {selectedColor && (
+                                    <span className="ml-2 font-normal text-muted-foreground">
+                                        {selectedColor}
+                                    </span>
+                                )}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {uniqueColors.map(color => {
+                                    const v = variants.find(
+                                        vr => vr.color === color &&
+                                            (uniqueSizes.length === 0 || vr.size === selectedSize),
+                                    )
+                                    const unavailable = v?.isOutOfStock ?? false
+                                    return (
+                                        <button
+                                            key={color}
+                                            onClick={() => !unavailable && setSelectedColor(color)}
+                                            disabled={unavailable}
+                                            className={`px-4 py-2 text-sm border transition-colors ${
+                                                selectedColor === color
+                                                    ? 'border-foreground bg-foreground text-background'
+                                                    : unavailable
+                                                    ? 'border-border text-muted-foreground line-through opacity-40 cursor-not-allowed'
+                                                    : 'border-border hover:border-foreground cursor-pointer'
+                                            }`}
+                                        >
+                                            {color}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Stock status */}
+                    {selectedVariant && (
+                        <div>
+                            {isOutOfStock ? (
+                                <div className="flex items-center gap-2 text-destructive text-sm">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <span>Hết hàng</span>
+                                </div>
+                            ) : isLowStock ? (
+                                <div className="flex items-center gap-2 text-amber-600 text-sm">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <span>Sắp hết hàng — còn {selectedVariant.stock} sản phẩm</span>
+                                </div>
+                            ) : (
+                                <p className="text-sm text-green-600">Còn hàng ({selectedVariant.stock})</p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Variant selection prompt */}
+                    {needsVariantSelection && (
+                        <p className="text-sm text-amber-600">
+                            {!selectedSize && uniqueSizes.length > 0 && !selectedColor && uniqueColors.length > 0
+                                ? 'Vui lòng chọn size và màu sắc để tiếp tục'
+                                : !selectedSize && uniqueSizes.length > 0
+                                ? 'Vui lòng chọn size để tiếp tục'
+                                : 'Vui lòng chọn màu sắc để tiếp tục'}
+                        </p>
+                    )}
+
                     {/* Quantity */}
                     <div className="space-y-3">
-                        <label className="text-sm font-medium tracking-wide">SỐ LƯỢNG</label>
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center border border-border">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
-                                    disabled={quantity <= 1}
-                                    className="h-12 w-12 rounded-none hover:bg-muted cursor-pointer"
-                                >
-                                    <Minus className="h-4 w-4" />
-                                </Button>
-                                <div className="w-16 h-12 flex items-center justify-center border-x border-border">
-                                    <span className="text-base font-medium">{quantity}</span>
-                                </div>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setQuantity(prev => Math.min(prev + 1, 99))}
-                                    className="h-12 w-12 rounded-none hover:bg-muted cursor-pointer"
-                                >
-                                    <Plus className="h-4 w-4" />
-                                </Button>
+                        <p className="text-sm font-medium tracking-wide">SỐ LƯỢNG</p>
+                        <div className="flex items-center border border-border w-fit">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
+                                disabled={quantity <= 1}
+                                className="h-12 w-12 rounded-none hover:bg-muted cursor-pointer"
+                            >
+                                <Minus className="h-4 w-4" />
+                            </Button>
+                            <div className="w-16 h-12 flex items-center justify-center border-x border-border">
+                                <span className="text-base font-medium">{quantity}</span>
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setQuantity(prev => Math.min(prev + 1, maxStock))}
+                                disabled={quantity >= maxStock}
+                                className="h-12 w-12 rounded-none hover:bg-muted cursor-pointer"
+                            >
+                                <Plus className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
 
@@ -186,15 +340,19 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         size="lg"
                         className="w-full text-base h-14 cursor-pointer"
                         onClick={handleAddToCart}
-                        disabled={added}
+                        disabled={added || isOutOfStock || isInactive}
                     >
                         {added ? (
                             <>
                                 <Check className="mr-2 h-5 w-5" />
                                 Đã thêm vào giỏ
                             </>
+                        ) : isInactive ? (
+                            'Ngừng kinh doanh'
+                        ) : isOutOfStock ? (
+                            'Hết hàng'
                         ) : (
-                            "Thêm vào giỏ hàng"
+                            'Thêm vào giỏ hàng'
                         )}
                     </Button>
 
@@ -217,7 +375,6 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         <ul className="space-y-2 text-sm text-muted-foreground">
                             {product.material && <li>• Chất liệu: {product.material}</li>}
                             <li>• Thủ công tinh xảo, chú ý từng chi tiết</li>
-                            <li>• Sản xuất tại Ý</li>
                             <li>• Miễn phí vận chuyển cho đơn từ 2.000.000₫</li>
                             <li>• Đổi trả trong vòng 30 ngày</li>
                         </ul>
@@ -290,7 +447,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                                 Trước
                             </Button>
                             <div className="flex gap-1">
-                                {Array.from({ length: totalReviewPages }, (_, i) => i + 1).map((page) => (
+                                {Array.from({ length: totalReviewPages }, (_, i) => i + 1).map(page => (
                                     <Button
                                         key={page}
                                         variant={currentReviewPage === page ? "default" : "outline"}

@@ -21,16 +21,19 @@ export function ProductCard({ product }: ProductCardProps) {
     const { addItem } = useCart()
     const inWishlist = isInWishlist(product.id)
 
+    const firstVariant = product.variants?.[0]
+
     function handleQuickAdd(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
         e.stopPropagation()
+        if (!firstVariant) return
         addItem({
             productId: product.id,
-            variantId: product.id,
+            variantId: firstVariant.id,
             name: product.name,
-            price: product.basePrice,
-            size: "",
-            color: "",
+            price: firstVariant.price,
+            size: firstVariant.size ?? "",
+            color: firstVariant.color ?? "",
             quantity: 1,
             imageUrl: null,
         })
@@ -66,7 +69,8 @@ export function ProductCard({ product }: ProductCardProps) {
                 >
                     <Button
                         onClick={handleQuickAdd}
-                        className="flex-1 h-12 bg-background text-foreground hover:bg-background/90 border border-border rounded-none"
+                        disabled={!firstVariant || firstVariant.isOutOfStock}
+                        className="flex-1 h-12 bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50"
                     >
                         <ShoppingBag className="h-4 w-4" />
                         Thêm vào giỏ
