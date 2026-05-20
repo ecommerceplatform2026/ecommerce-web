@@ -4,8 +4,9 @@ import Link from "next/link"
 import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useState } from "react"
+import { useState, useRef, useCallback } from "react"
 import { useRouter } from "next/navigation"
+import { ROUTES } from "@/constants/routes"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,8 +20,19 @@ import { useAuth } from "@/hooks/useAuth"
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [searchValue, setSearchValue] = useState('')
     const { user, logout } = useAuth()
     const router = useRouter()
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    const handleSearch = useCallback((value: string) => {
+        setSearchValue(value)
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        debounceRef.current = setTimeout(() => {
+            const qs = value.trim() ? `?search=${encodeURIComponent(value.trim())}` : ''
+            router.push(`${ROUTES.SHOP.PRODUCTS}${qs}`)
+        }, 400)
+    }, [router])
 
     const handleLogout = () => {
         logout()
@@ -68,6 +80,8 @@ export function Header() {
                                 type="search"
                                 placeholder="Tìm kiếm sản phẩm..."
                                 className="pl-10 h-10"
+                                value={searchValue}
+                                onChange={e => handleSearch(e.target.value)}
                             />
                         </div>
                     </div>
@@ -166,6 +180,8 @@ export function Header() {
                                         type="search"
                                         placeholder="Tìm kiếm sản phẩm..."
                                         className="pl-10 h-10"
+                                        value={searchValue}
+                                        onChange={e => handleSearch(e.target.value)}
                                     />
                                 </div>
                             </div>
