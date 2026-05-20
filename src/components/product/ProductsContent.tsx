@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useProducts } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { useProductFilters, PAGE_SIZE } from '@/hooks/useProductFilters'
@@ -16,9 +16,6 @@ export function ProductsContent() {
     const { data: products = [], isLoading, error } = useProducts()
     const { data: categories = [] } = useCategories()
     const { filters, updateFilter, updateFilters, resetFilters, hasActiveFilters } = useProductFilters()
-
-    const updateFilterRef = useRef(updateFilter)
-    useEffect(() => { updateFilterRef.current = updateFilter }, [updateFilter])
 
     const filtered = useMemo(() => applyProductFilters(products, filters), [products, filters])
     const { items: currentProducts, totalPages, currentPage } = useMemo(
