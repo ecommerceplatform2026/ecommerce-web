@@ -1,4 +1,5 @@
 export interface CartItem {
+    itemId?: string         // server-side cart item ID — dùng cho update/remove; undefined khi chưa sync với server
     productId: string
     variantId: string       // unique per size+color — dùng làm key trong cart
     name: string

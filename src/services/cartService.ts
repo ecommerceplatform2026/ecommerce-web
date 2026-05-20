@@ -23,6 +23,7 @@ interface ServerCart {
 
 function mapServerItem(item: ServerCartItem): CartItem {
     return {
+        itemId:    item.itemId,
         productId: item.productId,
         variantId: item.variantId,
         name:      item.name,
