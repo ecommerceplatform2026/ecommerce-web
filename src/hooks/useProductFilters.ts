@@ -42,8 +42,8 @@ function parseFilters(params: URLSearchParams): ProductFilters {
     return {
         search: params.get('search') ?? '',
         categoryId: params.get('categoryId') ?? '',
-        minPrice: minRaw !== null ? Number(minRaw) : null,
-        maxPrice: maxRaw !== null ? Number(maxRaw) : null,
+        minPrice: minRaw !== null && Number.isFinite(Number(minRaw)) ? Number(minRaw) : null,
+        maxPrice: maxRaw !== null && Number.isFinite(Number(maxRaw)) ? Number(maxRaw) : null,
         material: params.get('material') ?? '',
         color: params.get('color') ?? '',
         size: params.get('size') ?? '',

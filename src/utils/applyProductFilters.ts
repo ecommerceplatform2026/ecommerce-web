@@ -19,12 +19,12 @@ export function applyProductFilters(products: Product[], filters: ProductFilters
         result = result.filter(p => p.categoryId === filters.categoryId)
     }
 
-    if (filters.minPrice !== null) {
-        result = result.filter(p => p.basePrice >= (filters.minPrice as number))
+    if (filters.minPrice !== null && Number.isFinite(filters.minPrice)) {
+        result = result.filter(p => p.basePrice >= filters.minPrice!)
     }
 
-    if (filters.maxPrice !== null) {
-        result = result.filter(p => p.basePrice <= (filters.maxPrice as number))
+    if (filters.maxPrice !== null && Number.isFinite(filters.maxPrice)) {
+        result = result.filter(p => p.basePrice <= filters.maxPrice!)
     }
 
     if (filters.material) {
@@ -62,12 +62,13 @@ export function paginateProducts<T>(
     totalPages: number
     currentPage: number
 } {
+    const safePageSize = pageSize > 0 ? pageSize : 1
     const totalCount = items.length
-    const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
+    const totalPages = Math.max(1, Math.ceil(totalCount / safePageSize))
     const currentPage = Math.min(Math.max(page, 1), totalPages)
-    const start = (currentPage - 1) * pageSize
+    const start = (currentPage - 1) * safePageSize
     return {
-        items: items.slice(start, start + pageSize),
+        items: items.slice(start, start + safePageSize),
         totalCount,
         totalPages,
         currentPage,

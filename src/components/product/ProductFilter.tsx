@@ -35,8 +35,10 @@ export function ProductFilter({
     }, [filters.maxPrice])
 
     function handleApplyPrice() {
-        const parsedMin = localMin !== '' ? Number(localMin) : null
-        const parsedMax = localMax !== '' ? Number(localMax) : null
+        const minCandidate = localMin !== '' ? Number(localMin) : null
+        const maxCandidate = localMax !== '' ? Number(localMax) : null
+        const parsedMin = minCandidate !== null && Number.isFinite(minCandidate) ? minCandidate : null
+        const parsedMax = maxCandidate !== null && Number.isFinite(maxCandidate) ? maxCandidate : null
         onUpdate({ minPrice: parsedMin, maxPrice: parsedMax })
     }
 
