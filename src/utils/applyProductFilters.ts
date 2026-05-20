@@ -32,6 +32,16 @@ export function applyProductFilters(products: Product[], filters: ProductFilters
         result = result.filter(p => p.material?.toLowerCase() === mat)
     }
 
+    if (filters.color) {
+        const col = filters.color.toLowerCase()
+        result = result.filter(p => p.variants.some(v => v.color?.toLowerCase() === col))
+    }
+
+    if (filters.size) {
+        const sz = filters.size.toLowerCase()
+        result = result.filter(p => p.variants.some(v => v.size?.toLowerCase() === sz))
+    }
+
     if (filters.sort === ProductSortBy.PriceAsc) {
         result = [...result].sort((a, b) => a.basePrice - b.basePrice)
     } else if (filters.sort === ProductSortBy.PriceDesc) {
@@ -69,6 +79,26 @@ export function getUniqueMaterials(products: Product[]): string[] {
     const seen = new Set<string>()
     for (const p of active) {
         if (p.material) seen.add(p.material)
+    }
+    return Array.from(seen).sort((a, b) => a.localeCompare(b))
+}
+
+export function getUniqueColors(products: Product[]): string[] {
+    const seen = new Set<string>()
+    for (const p of products.filter(p => p.status === ProductStatus.Active)) {
+        for (const v of p.variants) {
+            if (v.color) seen.add(v.color)
+        }
+    }
+    return Array.from(seen).sort((a, b) => a.localeCompare(b))
+}
+
+export function getUniqueSizes(products: Product[]): string[] {
+    const seen = new Set<string>()
+    for (const p of products.filter(p => p.status === ProductStatus.Active)) {
+        for (const v of p.variants) {
+            if (v.size) seen.add(v.size)
+        }
     }
     return Array.from(seen).sort((a, b) => a.localeCompare(b))
 }

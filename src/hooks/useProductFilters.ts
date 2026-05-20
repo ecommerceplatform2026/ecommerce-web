@@ -10,11 +10,13 @@ export interface ProductFilters {
     minPrice: number | null
     maxPrice: number | null
     material: string
+    color: string
+    size: string
     sort: ProductSortBy | ''
     page: number
 }
 
-export const PAGE_SIZE = 12
+export const PAGE_SIZE = 8
 
 const DEFAULT_FILTERS: ProductFilters = {
     search: '',
@@ -22,6 +24,8 @@ const DEFAULT_FILTERS: ProductFilters = {
     minPrice: null,
     maxPrice: null,
     material: '',
+    color: '',
+    size: '',
     sort: '',
     page: 1,
 }
@@ -41,6 +45,8 @@ function parseFilters(params: URLSearchParams): ProductFilters {
         minPrice: minRaw !== null ? Number(minRaw) : null,
         maxPrice: maxRaw !== null ? Number(maxRaw) : null,
         material: params.get('material') ?? '',
+        color: params.get('color') ?? '',
+        size: params.get('size') ?? '',
         sort,
         page: pageRaw ? Math.max(1, parseInt(pageRaw, 10)) : 1,
     }
@@ -54,6 +60,8 @@ function buildParams(filters: ProductFilters): URLSearchParams {
     if (filters.minPrice !== null) params.set('minPrice', String(filters.minPrice))
     if (filters.maxPrice !== null) params.set('maxPrice', String(filters.maxPrice))
     if (filters.material) params.set('material', filters.material)
+    if (filters.color) params.set('color', filters.color)
+    if (filters.size) params.set('size', filters.size)
     if (filters.sort) params.set('sort', filters.sort)
     if (filters.page > 1) params.set('page', String(filters.page))
 
@@ -113,6 +121,8 @@ export function useProductFilters() {
                 filters.minPrice !== null ||
                 filters.maxPrice !== null ||
                 filters.material ||
+                filters.color ||
+                filters.size ||
                 filters.sort
             ),
         [filters],

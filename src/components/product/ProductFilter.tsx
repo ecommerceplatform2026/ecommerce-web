@@ -7,6 +7,8 @@ import type { ProductFilters } from '@/hooks/useProductFilters'
 interface ProductFilterProps {
     filters: ProductFilters
     materials: string[]
+    colors: string[]
+    sizes: string[]
     onUpdate: (updates: Partial<ProductFilters>) => void
     onReset: () => void
     hasActiveFilters: boolean
@@ -15,6 +17,8 @@ interface ProductFilterProps {
 export function ProductFilter({
     filters,
     materials,
+    colors,
+    sizes,
     onUpdate,
     onReset,
     hasActiveFilters,
@@ -81,6 +85,51 @@ export function ProductFilter({
                                 />
                                 {mat}
                             </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {colors.length > 0 && (
+                <div>
+                    <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
+                        Màu sắc
+                    </h3>
+                    <div className="space-y-2">
+                        {colors.map(col => (
+                            <label key={col} className="flex items-center gap-2 cursor-pointer text-sm">
+                                <input
+                                    type="checkbox"
+                                    checked={filters.color === col}
+                                    onChange={() =>
+                                        onUpdate({ color: filters.color === col ? '' : col })
+                                    }
+                                />
+                                {col}
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {sizes.length > 0 && (
+                <div>
+                    <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
+                        Kích cỡ
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                        {sizes.map(sz => (
+                            <button
+                                key={sz}
+                                onClick={() => onUpdate({ size: filters.size === sz ? '' : sz })}
+                                className={`px-3 py-1 text-sm border transition-colors ${
+                                    filters.size === sz
+                                        ? 'border-foreground bg-foreground text-background'
+                                        : 'border-border hover:border-foreground'
+                                }`}
+                            >
+                                {sz}
+                            </button>
                         ))}
                     </div>
                 </div>
