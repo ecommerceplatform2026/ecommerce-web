@@ -1,5 +1,26 @@
 import type { ProductStatus } from '@/constants/enums'
 
+export interface ProductImage {
+    id: string
+    productId: string
+    imageUrl: string
+    isMain: boolean
+}
+
+// Matches C# ProductVariantResponse DTO
+export interface ProductVariantResponse {
+    id: string
+    productId: string
+    sku: string
+    color: string | null
+    size: string | null
+    stock: number
+    lowStockThreshold: number
+    price: number
+    isLowStock: boolean
+    isOutOfStock: boolean
+}
+
 // Matches C# ProductResponse DTO
 export interface Product {
     id: string
@@ -8,22 +29,9 @@ export interface Product {
     name: string
     description: string | null
     material: string | null
-    basePrice: number           // C# long → TS number
+    basePrice: number
     status: ProductStatus
-}
-
-// Local product type — dùng cho mock data và hiển thị UI
-export interface LocalProduct {
-    id: string
-    name: string
-    category: string
-    price: number
-    description: string
-    images: string[]
-    sizes: string[]
-    colors: string[]
-    featured?: boolean
-    stock: number
+    variants: ProductVariantResponse[]
 }
 
 export interface WishlistState {
