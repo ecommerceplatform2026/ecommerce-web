@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useState, useRef, useCallback } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
 import {
@@ -24,6 +24,12 @@ export function Header() {
     const { user, logout } = useAuth()
     const router = useRouter()
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current)
+        }
+    }, [])
 
     const handleSearch = useCallback((value: string) => {
         setSearchValue(value)
