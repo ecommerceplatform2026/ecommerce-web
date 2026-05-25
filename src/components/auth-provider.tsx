@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 emailConfirmed: false,
             }
 
-            dispatch(setCredentials({ user, accessToken: token }))
+            dispatch(setCredentials({ user }))
         } catch {
             tokenHelper.clearTokens()
             dispatch(clearCredentials())

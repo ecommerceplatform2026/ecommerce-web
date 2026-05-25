@@ -4,8 +4,9 @@ import Link from "next/link"
 import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
-import { useState } from "react"
+import { useState, useRef, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import { ROUTES } from "@/constants/routes"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,18 +15,34 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import toast from 'react-hot-toast'
 import { useAuth } from "@/hooks/useAuth"
-import { useToast } from "@/hooks/useToast"
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+    const [searchValue, setSearchValue] = useState('')
     const { user, logout } = useAuth()
     const router = useRouter()
-    const { toast } = useToast()
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current)
+        }
+    }, [])
+
+    const handleSearch = useCallback((value: string) => {
+        setSearchValue(value)
+        if (debounceRef.current) clearTimeout(debounceRef.current)
+        debounceRef.current = setTimeout(() => {
+            const qs = value.trim() ? `?search=${encodeURIComponent(value.trim())}` : ''
+            router.push(`${ROUTES.SHOP.PRODUCTS}${qs}`)
+        }, 400)
+    }, [router])
 
     const handleLogout = () => {
         logout()
-        toast({ title: "Đăng xuất thành công", description: "Hẹn gặp lại bạn!" })
+        toast.success("Hẹn gặp lại bạn!")
         router.push("/login")
     }
 
@@ -69,6 +86,8 @@ export function Header() {
                                 type="search"
                                 placeholder="Tìm kiếm sản phẩm..."
                                 className="pl-10 h-10"
+                                value={searchValue}
+                                onChange={e => handleSearch(e.target.value)}
                             />
                         </div>
                     </div>
@@ -167,6 +186,8 @@ export function Header() {
                                         type="search"
                                         placeholder="Tìm kiếm sản phẩm..."
                                         className="pl-10 h-10"
+                                        value={searchValue}
+                                        onChange={e => handleSearch(e.target.value)}
                                     />
                                 </div>
                             </div>

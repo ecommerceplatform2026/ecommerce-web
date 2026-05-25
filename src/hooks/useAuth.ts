@@ -1,22 +1,22 @@
 import { useAppDispatch, useAppSelector } from '@/redux/hooks'
 import { setCredentials, clearCredentials, setAuthLoading } from '@/redux/slices/authSlice'
+import { selectAuthUser, selectIsAuthenticated, selectAuthIsLoading } from '@/redux/slices/authSlice'
 import { authService } from '@/services/authService'
-import type { ApiError } from '@/types/api'
 
 export function useAuth() {
     const dispatch = useAppDispatch()
-    const { user, accessToken, isAuthenticated, isLoading } = useAppSelector(
-        (state) => state.auth,
-    )
+    const user            = useAppSelector(selectAuthUser)
+    const isAuthenticated = useAppSelector(selectIsAuthenticated)
+    const isLoading       = useAppSelector(selectAuthIsLoading)
 
     const login = async (email: string, password: string): Promise<void> => {
         dispatch(setAuthLoading(true))
         try {
             const result = await authService.login({ email, password })
-            dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }))
+            dispatch(setCredentials({ user: result.user }))
         } catch (err) {
             dispatch(setAuthLoading(false))
-            throw err as ApiError
+            throw err
         }
     }
 
@@ -28,10 +28,10 @@ export function useAuth() {
         dispatch(setAuthLoading(true))
         try {
             const result = await authService.register(data)
-            dispatch(setCredentials({ user: result.user, accessToken: result.accessToken }))
+            dispatch(setCredentials({ user: result.user }))
         } catch (err) {
             dispatch(setAuthLoading(false))
-            throw err as ApiError
+            throw err
         }
     }
 
@@ -40,5 +40,5 @@ export function useAuth() {
         dispatch(clearCredentials())
     }
 
-    return { user, accessToken, isAuthenticated, isLoading, login, register, logout }
+    return { user, isAuthenticated, isLoading, login, register, logout }
 }

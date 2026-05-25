@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { jwtDecode } from 'jwt-decode'
 import { PROTECTED_ROUTES, ADMIN_ROUTES, GUEST_ONLY_ROUTES } from '@/constants/routes'
 
 const ACCESS_TOKEN_COOKIE = 'access_token'
 
+interface JwtPayload {
+    exp?: number
+    'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'?: string
+}
+
 function getRoleFromToken(token: string): string | null {
     try {
-        const [, payload] = token.split('.')
-        const decoded = JSON.parse(
-            atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-        )
+        const decoded = jwtDecode<JwtPayload>(token)
         return decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? null
     } catch {
         return null
@@ -18,8 +21,7 @@ function getRoleFromToken(token: string): string | null {
 
 function isTokenExpired(token: string): boolean {
     try {
-        const [, payload] = token.split('.')
-        const { exp } = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))
+        const { exp } = jwtDecode<JwtPayload>(token)
         return typeof exp === 'number' && exp * 1000 < Date.now()
     } catch {
         return true
