@@ -1,55 +1,41 @@
 // ------ Base Response ------
 
+// Matches C# ApiResponse<T> { Success, Data, Errors } in Presentation layer
 export interface ApiResponse<T> {
     success: boolean
-    message: string
     data: T
-    statusCode: number
+    errors: string[]
 }
 
 // Response không có data (VD: delete, logout)
 export interface ApiResponseNoData {
     success: boolean
-    message: string
-    statusCode: number
+    errors: string[]
 }
 
 // ------ Pagination ------
 
-// Metadata phân trang — BE trả về kèm list
-export interface PaginationMeta {
-    currentPage: number
-    pageSize: number
-    totalItems: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-}
-
 // Response cho mọi API trả về danh sách có phân trang
+// Matches C# ApiResponse<PagedResult<T>> - PagedResult fields are flat inside data
 export interface PaginatedResponse<T> {
     success: boolean
-    message: string
-    statusCode: number
     data: {
         items: T[]
-        pagination: PaginationMeta
+        page: number
+        pageSize: number
+        totalCount: number
+        totalPages: number
     }
+    errors: string[]
 }
 
 // ------ Error ------
 
-// Lỗi validation từ BE (VD: field email đã tồn tại)
-export interface ValidationError {
-    field: string
-    message: string
-}
-
 export interface ApiError {
     success: false
-    message: string
+    message: string   // constructed by FE axios interceptor, not from backend body
     statusCode: number
-    errors?: ValidationError[]  // danh sách lỗi từng field nếu có
+    errors?: string[] // mirrors backend errors: string[]
 }
 
 // ------ Request Params ------
