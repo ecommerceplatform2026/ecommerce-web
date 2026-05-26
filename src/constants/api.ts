@@ -57,12 +57,9 @@ export const CATEGORY_ENDPOINTS = {
 export const PRODUCT_ENDPOINTS = {
     // Public — browse & search
     GET_ALL: '/api/products',              // filter, sort, pagination
-    GET_BY_ID: (id: string) => `/api/products/${id}`,
     SEARCH: '/api/products/search',
 
     // Images
-    GET_IMAGES: (productId: string) => `/api/products/${productId}/images`,
-
     // Variants
     GET_VARIANTS: (productId: string) => `/api/products/${productId}/variants`,
     GET_VARIANT_BY_ID: (productId: string, variantId: string) =>

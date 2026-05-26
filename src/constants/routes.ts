@@ -18,8 +18,6 @@ export const ROUTES = {
         PRODUCTS: '/products',
 
         // Chi tiết sản phẩm — ảnh, variant, giá, tồn kho, review
-        PRODUCT_DETAIL: (id: string) => `/products/${id}`,
-
         // Tìm kiếm
         SEARCH: '/products/search',
     },
