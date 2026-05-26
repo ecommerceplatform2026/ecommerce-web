@@ -1,6 +1,8 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
+import { ROUTES } from "@/constants/routes"
 import type { Product } from "@/types/product"
 
 interface ProductCardProps {
@@ -9,7 +11,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
     return (
-        <article className="group block">
+        <Link href={ROUTES.SHOP.PRODUCT_DETAIL(product.id)} className="group block">
             <div className="relative mb-4 aspect-[3/4] overflow-hidden bg-secondary">
                 <Image
                     src="/placeholder.svg"
@@ -30,6 +32,6 @@ export function ProductCard({ product }: ProductCardProps) {
                     {product.basePrice.toLocaleString("vi-VN")}₫
                 </p>
             </div>
-        </article>
+        </Link>
     )
 }
