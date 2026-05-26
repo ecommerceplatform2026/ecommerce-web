@@ -7,6 +7,7 @@ import type { ProductFilters } from '@/hooks/useProductFilters'
 export const productKeys = {
     all:    ['products']                        as const,
     search: (params: ProductSearchParams) => ['products', 'search', params] as const,
+    detail: (id: string) => ['products', id] as const,
 }
 
 export function useProducts() {
@@ -60,5 +61,13 @@ export function useProductFacetProducts() {
     return useQuery({
         queryKey: productKeys.all,
         queryFn: productService.getAll,
+    })
+}
+
+export function useProductDetail(id: string) {
+    return useQuery({
+        queryKey: productKeys.detail(id),
+        queryFn: () => productService.getDetail(id),
+        enabled: !!id,
     })
 }

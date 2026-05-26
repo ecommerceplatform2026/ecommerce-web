@@ -16,6 +16,7 @@ export const ROUTES = {
     SHOP: {
         // Danh sách sản phẩm — có filter, sort, pagination, search
         PRODUCTS: '/products',
+        PRODUCT_DETAIL: (id: string) => `/products/${id}`,
 
         // Chi tiết sản phẩm — ảnh, variant, giá, tồn kho, review
         // Tìm kiếm

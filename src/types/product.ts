@@ -14,6 +14,11 @@ export interface ProductSearchParams {
     pageSize?: number
 }
 
+export interface ProductImage {
+    id: string
+    imageUrl: string
+}
+
 // Matches C# ProductVariantResponse DTO
 export interface ProductVariantResponse {
     id: string
@@ -28,6 +33,16 @@ export interface ProductVariantResponse {
     isOutOfStock: boolean
 }
 
+export interface ProductDetailVariant {
+    id: string
+    sku: string
+    color: string | null
+    size: string | null
+    stock: number
+    stockStatus: string
+    price: number
+}
+
 // Matches C# ProductResponse DTO
 export interface Product {
     id: string
@@ -39,6 +54,16 @@ export interface Product {
     basePrice: number
     status: ProductStatus
     variants: ProductVariantResponse[]
+}
+
+export interface ProductDetail extends Omit<Product, 'variants'> {
+    price: number
+    minPrice: number
+    maxPrice: number
+    totalStock: number
+    stockStatus: string
+    images: ProductImage[]
+    variants: ProductDetailVariant[]
 }
 
 export interface WishlistState {

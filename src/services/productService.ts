@@ -1,7 +1,7 @@
 import axiosInstance from '@/lib/axios'
 import { PRODUCT_ENDPOINTS } from '@/constants/api'
 import type { ApiResponse, PaginatedResponse } from '@/types/api'
-import type { Product, ProductSearchParams } from '@/types/product'
+import type { Product, ProductDetail, ProductSearchParams } from '@/types/product'
 
 function cleanParams(params: ProductSearchParams): Record<string, string | number> {
     return Object.fromEntries(
@@ -25,6 +25,13 @@ export const productService = {
         const res = await axiosInstance.get<PaginatedResponse<Product>>(
             PRODUCT_ENDPOINTS.SEARCH,
             { params: cleanParams(params) },
+        )
+        return res.data.data
+    },
+
+    getDetail: async (id: string): Promise<ProductDetail> => {
+        const res = await axiosInstance.get<ApiResponse<ProductDetail>>(
+            PRODUCT_ENDPOINTS.GET_DETAIL(id),
         )
         return res.data.data
     },
