@@ -13,6 +13,31 @@ function cleanParams(params: ProductSearchParams): Record<string, string | numbe
     ) as Record<string, string | number>
 }
 
+function toProductDetailFallback(product: Product): ProductDetail {
+    const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
+    const variantPrices = product.variants.map(variant => variant.price)
+    const prices = variantPrices.length > 0 ? variantPrices : [product.basePrice]
+
+    return {
+        ...product,
+        price: Math.min(...prices),
+        minPrice: Math.min(...prices),
+        maxPrice: Math.max(...prices),
+        totalStock,
+        stockStatus: totalStock > 0 ? 'InStock' : 'OutOfStock',
+        images: [],
+        variants: product.variants.map(variant => ({
+            id: variant.id,
+            sku: variant.sku,
+            color: variant.color,
+            size: variant.size,
+            stock: variant.stock,
+            stockStatus: variant.isOutOfStock ? 'OutOfStock' : 'InStock',
+            price: variant.price,
+        })),
+    }
+}
+
 export const productService = {
     getAll: async (): Promise<Product[]> => {
         const res = await axiosInstance.get<ApiResponse<Product[]>>(
@@ -30,10 +55,17 @@ export const productService = {
     },
 
     getDetail: async (id: string): Promise<ProductDetail> => {
-        const res = await axiosInstance.get<ApiResponse<ProductDetail>>(
-            PRODUCT_ENDPOINTS.GET_DETAIL(id),
-        )
-        return res.data.data
+        try {
+            const res = await axiosInstance.get<ApiResponse<ProductDetail>>(
+                PRODUCT_ENDPOINTS.GET_DETAIL(id),
+            )
+            return res.data.data
+        } catch {
+            const fallback = await axiosInstance.get<ApiResponse<Product>>(
+                PRODUCT_ENDPOINTS.GET_BY_ID(id),
+            )
+            return toProductDetailFallback(fallback.data.data)
+        }
     },
 
 }
