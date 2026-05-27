@@ -5,9 +5,7 @@ import axios, {
     InternalAxiosRequestConfig,
 } from 'axios'
 import Cookies from 'js-cookie'
-import { API_BASE_URL } from '@/constants/api'
-
-import { AUTH_ENDPOINTS } from '@/constants/api'
+import { API_BASE_URL, AUTH_ENDPOINTS } from '@/constants/api'
 import { ROUTES } from '@/constants/routes'
 import type { ApiResponse, ApiError } from '@/types/api'
 import type { AuthResponse } from '@/types/user'
@@ -141,7 +139,8 @@ axiosInstance.interceptors.response.use(
         }
 
         // ------ 401 Unauthorized → thử refresh token ------
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Bỏ qua nếu chính là login endpoint — 401 ở đây là sai credentials, không phải token hết hạn
+        if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== AUTH_ENDPOINTS.LOGIN) {
             // Đánh dấu request đã retry để tránh loop vô tận
             originalRequest._retry = true
 
@@ -185,29 +184,32 @@ axiosInstance.interceptors.response.use(
         }
 
         // ------ Chuẩn hoá lỗi từ BE ------
+        const backendErrors = error.response?.data?.errors
+        const firstError = backendErrors?.[0] ?? null
+
         const apiError: ApiError = {
             success: false,
-            message: error.response?.data?.message ?? 'Đã xảy ra lỗi, vui lòng thử lại.',
+            message: firstError ?? 'Đã xảy ra lỗi, vui lòng thử lại.',
             statusCode: error.response?.status ?? 500,
-            errors: error.response?.data?.errors,
+            errors: backendErrors,
         }
 
         // ------ 403 Forbidden → không có quyền ------
         if (error.response?.status === 403) {
-            apiError.message = 'Bạn không có quyền thực hiện thao tác này.'
+            apiError.message = firstError ?? 'Bạn không có quyền thực hiện thao tác này.'
         }
 
         // ------ 404 Not Found ------
         if (error.response?.status === 404) {
-            apiError.message = error.response?.data?.message ?? 'Không tìm thấy dữ liệu.'
+            apiError.message = firstError ?? 'Không tìm thấy dữ liệu.'
         }
 
         // ------ 422 Unprocessable Entity → lỗi validation từ BE ------
         if (error.response?.status === 422) {
-            apiError.message = error.response?.data?.message ?? 'Dữ liệu không hợp lệ.'
+            apiError.message = firstError ?? 'Dữ liệu không hợp lệ.'
         }
 
-        // ------ 500 Server Error ------
+        // ------ 500 Server Error — không expose internal error ra user ------
         if (error.response?.status === 500) {
             apiError.message = 'Lỗi máy chủ, vui lòng thử lại sau.'
         }

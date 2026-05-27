@@ -30,9 +30,9 @@ export const USER_ENDPOINTS = {
     GET_ORDER_HISTORY: '/api/users/orders',
 
     // Admin — quản lý users
-    ADMIN_GET_ALL: '/api/admin/users',
-    ADMIN_GET_BY_ID: (id: string) => `/api/admin/users/${id}`,
-    ADMIN_UPDATE_STATUS: (id: string) => `/api/admin/users/${id}/status`,
+    ADMIN_GET_ALL: '/api/users',
+    ADMIN_GET_BY_ID: (id: string) => `/api/users/${id}`,
+    ADMIN_UPDATE_STATUS: (id: string) => `/api/users/${id}/status`,
 } as const
 
 // ============================================================
@@ -45,9 +45,9 @@ export const CATEGORY_ENDPOINTS = {
     GET_BY_ID: (id: string) => `/api/categories/${id}`,
 
     // Admin
-    ADMIN_CREATE: '/api/admin/categories',
-    ADMIN_UPDATE: (id: string) => `/api/admin/categories/${id}`,
-    ADMIN_DELETE: (id: string) => `/api/admin/categories/${id}`,
+    ADMIN_CREATE: '/api/categories',
+    ADMIN_UPDATE: (id: string) => `/api/categories/${id}`,
+    ADMIN_DELETE: (id: string) => `/api/categories/${id}`,
 } as const
 
 // ============================================================
@@ -57,36 +57,40 @@ export const CATEGORY_ENDPOINTS = {
 export const PRODUCT_ENDPOINTS = {
     // Public — browse & search
     GET_ALL: '/api/products',              // filter, sort, pagination
+    GET_BY_ID: (id: string) => `/api/products/${id}`,
     SEARCH: '/api/products/search',
 
     // Images
+    GET_IMAGES: (productId: string) => `/api/products/${productId}/images`,
+
     // Variants
     GET_VARIANTS: (productId: string) => `/api/products/${productId}/variants`,
     GET_VARIANT_BY_ID: (productId: string, variantId: string) =>
         `/api/products/${productId}/variants/${variantId}`,
 
     // Admin — quản lý sản phẩm
-    ADMIN_GET_ALL: '/api/admin/products',
-    ADMIN_CREATE: '/api/admin/products',
-    ADMIN_UPDATE: (id: string) => `/api/admin/products/${id}`,
-    ADMIN_DELETE: (id: string) => `/api/admin/products/${id}`,
+    ADMIN_GET_ALL: '/api/products',
+    ADMIN_CREATE: '/api/products',
+    ADMIN_UPDATE: (id: string) => `/api/products/${id}`,
+    ADMIN_DELETE: (id: string) => `/api/products/${id}`,
 
     // Admin — quản lý variants
-    ADMIN_CREATE_VARIANT: (productId: string) => `/api/admin/products/${productId}/variants`,
+    ADMIN_CREATE_VARIANT: (productId: string) => `/api/products/${productId}/variants`,
     ADMIN_UPDATE_VARIANT: (productId: string, variantId: string) =>
-        `/api/admin/products/${productId}/variants/${variantId}`,
+        `/api/products/${productId}/variants/${variantId}`,
     ADMIN_DELETE_VARIANT: (productId: string, variantId: string) =>
-        `/api/admin/products/${productId}/variants/${variantId}`,
+        `/api/products/${productId}/variants/${variantId}`,
 
     // Admin — quản lý images
-    ADMIN_UPLOAD_IMAGE: (productId: string) => `/api/admin/products/${productId}/images`,
+    ADMIN_UPLOAD_IMAGE: (productId: string) => `/api/products/${productId}/images`,
     ADMIN_DELETE_IMAGE: (productId: string, imageId: string) =>
-        `/api/admin/products/${productId}/images/${imageId}`,
+        `/api/products/${productId}/images/${imageId}`,
 } as const
 
 // ============================================================
 // CART  (FR10)
 // ============================================================
+// TODO: backend chưa implement
 
 export const CART_ENDPOINTS = {
     // Authenticated user cart (server-side)
@@ -103,6 +107,7 @@ export const CART_ENDPOINTS = {
 // ============================================================
 // ORDERS  (FR11, FR13, FR14)
 // ============================================================
+// TODO: backend chưa implement
 
 export const ORDER_ENDPOINTS = {
     // User
@@ -111,15 +116,16 @@ export const ORDER_ENDPOINTS = {
     GET_BY_ID: (id: string) => `/api/orders/${id}`,     // GET — chi tiết đơn
 
     // Admin
-    ADMIN_GET_ALL: '/api/admin/orders',
-    ADMIN_GET_BY_ID: (id: string) => `/api/admin/orders/${id}`,
-    ADMIN_UPDATE_STATUS: (id: string) => `/api/admin/orders/${id}/status`,
-    ADMIN_CANCEL: (id: string) => `/api/admin/orders/${id}/cancel`,
+    ADMIN_GET_ALL: '/api/orders',
+    ADMIN_GET_BY_ID: (id: string) => `/api/orders/${id}`,
+    ADMIN_UPDATE_STATUS: (id: string) => `/api/orders/${id}/status`,
+    ADMIN_CANCEL: (id: string) => `/api/orders/${id}/cancel`,
 } as const
 
 // ============================================================
 // PAYMENT  (FR12)
 // ============================================================
+// TODO: backend chưa implement
 
 export const PAYMENT_ENDPOINTS = {
     // Khởi tạo thanh toán online
@@ -137,6 +143,7 @@ export const PAYMENT_ENDPOINTS = {
 // ============================================================
 // REVIEWS  (FR08)
 // ============================================================
+// TODO: backend chưa implement
 
 export const REVIEW_ENDPOINTS = {
     // Public
@@ -146,14 +153,15 @@ export const REVIEW_ENDPOINTS = {
     CREATE: (productId: string) => `/api/products/${productId}/reviews`,
 
     // Admin — kiểm duyệt
-    ADMIN_GET_ALL: '/api/admin/reviews',
-    ADMIN_APPROVE: (id: string) => `/api/admin/reviews/${id}/approve`,
-    ADMIN_DELETE: (id: string) => `/api/admin/reviews/${id}`,
+    ADMIN_GET_ALL: '/api/reviews',
+    ADMIN_APPROVE: (id: string) => `/api/reviews/${id}/approve`,
+    ADMIN_DELETE: (id: string) => `/api/reviews/${id}`,
 } as const
 
 // ============================================================
 // UPLOAD  (Sprint 2)
 // ============================================================
+// TODO: backend chưa implement
 
 export const UPLOAD_ENDPOINTS = {
     IMAGE: '/api/upload/image',   // Cloudinary upload qua BE
@@ -165,20 +173,20 @@ export const UPLOAD_ENDPOINTS = {
 
 export const DASHBOARD_ENDPOINTS = {
     // FR15 — Overview KPIs
-    OVERVIEW: '/api/admin/dashboard',
+    OVERVIEW: '/api/dashboard',
 
     // FR16 — Sales & Revenue
-    REVENUE: '/api/admin/dashboard/revenue',
+    REVENUE: '/api/dashboard/revenue',
 
     // FR17 — Product Performance
-    PRODUCT_PERFORMANCE: '/api/admin/dashboard/products',
+    PRODUCT_PERFORMANCE: '/api/dashboard/products',
 
     // FR18 — Customer Analytics
-    CUSTOMER_ANALYTICS: '/api/admin/dashboard/customers',
+    CUSTOMER_ANALYTICS: '/api/dashboard/customers',
 
     // FR19 — Order & Inventory Insights
-    ORDER_INSIGHTS: '/api/admin/dashboard/orders',
+    ORDER_INSIGHTS: '/api/dashboard/orders',
 
     // FR20 — Charts data
-    CHARTS: '/api/admin/dashboard/charts',
+    CHARTS: '/api/dashboard/charts',
 } as const

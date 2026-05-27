@@ -1,17 +1,7 @@
 import axiosInstance from '@/lib/axios'
 import { PRODUCT_ENDPOINTS } from '@/constants/api'
-import type { ApiResponse, PaginatedResponse } from '@/types/api'
-import type { Product, ProductSearchParams } from '@/types/product'
-
-function cleanParams(params: ProductSearchParams): Record<string, string | number> {
-    return Object.fromEntries(
-        Object.entries(params).filter(([, value]) =>
-            value !== undefined &&
-            value !== null &&
-            value !== '',
-        ),
-    ) as Record<string, string | number>
-}
+import type { ApiResponse } from '@/types/api'
+import type { Product, ProductImage } from '@/types/product'
 
 export const productService = {
     getAll: async (): Promise<Product[]> => {
@@ -21,12 +11,17 @@ export const productService = {
         return res.data.data
     },
 
-    search: async (params: ProductSearchParams): Promise<PaginatedResponse<Product>['data']> => {
-        const res = await axiosInstance.get<PaginatedResponse<Product>>(
-            PRODUCT_ENDPOINTS.SEARCH,
-            { params: cleanParams(params) },
+    getById: async (id: string): Promise<Product> => {
+        const res = await axiosInstance.get<ApiResponse<Product>>(
+            PRODUCT_ENDPOINTS.GET_BY_ID(id),
         )
         return res.data.data
     },
 
+    getImages: async (productId: string): Promise<ProductImage[]> => {
+        const res = await axiosInstance.get<ApiResponse<ProductImage[]>>(
+            PRODUCT_ENDPOINTS.GET_IMAGES(productId),
+        )
+        return res.data.data
+    },
 }

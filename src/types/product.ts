@@ -1,17 +1,10 @@
 import type { ProductStatus } from '@/constants/enums'
 
-export interface ProductSearchParams {
-    search?: string
-    categoryId?: string
-    minPrice?: number | null
-    maxPrice?: number | null
-    material?: string
-    color?: string
-    size?: string
-    sortBy?: string
-    sortDirection?: 'asc' | 'desc'
-    page?: number
-    pageSize?: number
+export interface ProductImage {
+    id: string
+    productId: string
+    imageUrl: string
+    isMain: boolean
 }
 
 // Matches C# ProductVariantResponse DTO
