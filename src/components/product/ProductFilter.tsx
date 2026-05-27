@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import type { ProductFilters } from '@/hooks/useProductFilters'
 
@@ -26,6 +26,14 @@ export function ProductFilter({
     const [localMin, setLocalMin] = useState(filters.minPrice !== null ? String(filters.minPrice) : '')
     const [localMax, setLocalMax] = useState(filters.maxPrice !== null ? String(filters.maxPrice) : '')
 
+    useEffect(() => {
+        setLocalMin(filters.minPrice !== null ? String(filters.minPrice) : '')
+    }, [filters.minPrice])
+
+    useEffect(() => {
+        setLocalMax(filters.maxPrice !== null ? String(filters.maxPrice) : '')
+    }, [filters.maxPrice])
+
     function handleApplyPrice() {
         const minCandidate = localMin !== '' ? Number(localMin) : null
         const maxCandidate = localMax !== '' ? Number(localMax) : null
@@ -37,24 +45,24 @@ export function ProductFilter({
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
                     Khoảng giá
                 </h3>
-                <div className="mb-2 flex items-center gap-2">
+                <div className="flex gap-2 items-center mb-2">
                     <input
                         type="number"
                         placeholder="Từ"
                         value={localMin}
-                        onChange={event => setLocalMin(event.target.value)}
-                        className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        onChange={e => setLocalMin(e.target.value)}
+                        className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
-                    <span className="shrink-0 text-muted-foreground">-</span>
+                    <span className="text-muted-foreground shrink-0">—</span>
                     <input
                         type="number"
                         placeholder="Đến"
                         value={localMax}
-                        onChange={event => setLocalMax(event.target.value)}
-                        className="w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                        onChange={e => setLocalMax(e.target.value)}
+                        className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                 </div>
                 <Button variant="outline" size="sm" className="w-full" onClick={handleApplyPrice}>
@@ -64,20 +72,20 @@ export function ProductFilter({
 
             {materials.length > 0 && (
                 <div>
-                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
                         Chất liệu
                     </h3>
                     <div className="space-y-2">
-                        {materials.map(material => (
-                            <label key={material} className="flex cursor-pointer items-center gap-2 text-sm">
+                        {materials.map(mat => (
+                            <label key={mat} className="flex items-center gap-2 cursor-pointer text-sm">
                                 <input
                                     type="checkbox"
-                                    checked={filters.material === material}
+                                    checked={filters.material === mat}
                                     onChange={() =>
-                                        onUpdate({ material: filters.material === material ? '' : material })
+                                        onUpdate({ material: filters.material === mat ? '' : mat })
                                     }
                                 />
-                                {material}
+                                {mat}
                             </label>
                         ))}
                     </div>
@@ -86,20 +94,20 @@ export function ProductFilter({
 
             {colors.length > 0 && (
                 <div>
-                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
                         Màu sắc
                     </h3>
                     <div className="space-y-2">
-                        {colors.map(color => (
-                            <label key={color} className="flex cursor-pointer items-center gap-2 text-sm">
+                        {colors.map(col => (
+                            <label key={col} className="flex items-center gap-2 cursor-pointer text-sm">
                                 <input
                                     type="checkbox"
-                                    checked={filters.color === color}
+                                    checked={filters.color === col}
                                     onChange={() =>
-                                        onUpdate({ color: filters.color === color ? '' : color })
+                                        onUpdate({ color: filters.color === col ? '' : col })
                                     }
                                 />
-                                {color}
+                                {col}
                             </label>
                         ))}
                     </div>
@@ -108,22 +116,21 @@ export function ProductFilter({
 
             {sizes.length > 0 && (
                 <div>
-                    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
                         Kích cỡ
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {sizes.map(size => (
+                        {sizes.map(sz => (
                             <button
-                                key={size}
-                                type="button"
-                                onClick={() => onUpdate({ size: filters.size === size ? '' : size })}
-                                className={`border px-3 py-1 text-sm transition-colors ${
-                                    filters.size === size
+                                key={sz}
+                                onClick={() => onUpdate({ size: filters.size === sz ? '' : sz })}
+                                className={`px-3 py-1 text-sm border transition-colors ${
+                                    filters.size === sz
                                         ? 'border-foreground bg-foreground text-background'
                                         : 'border-border hover:border-foreground'
                                 }`}
                             >
-                                {size}
+                                {sz}
                             </button>
                         ))}
                     </div>

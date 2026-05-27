@@ -33,7 +33,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/Modal"
 import Image from "next/image"
-import { useToast } from "@/hooks/useToast"
+import toast from 'react-hot-toast'
 import { useProfile } from "@/hooks/useProfile"
 import { formatDate } from "@/utils/formatDate"
 import { UserStatus } from "@/constants/enums"
@@ -60,7 +60,6 @@ function statusConfig(status: UserStatus) {
 }
 
 export function ProfileContent() {
-    const { toast } = useToast()
     const { profile, address, isLoading, isUpdating, isUploadingAvatar, error, updateProfile, uploadAvatar } =
         useProfile()
 
@@ -94,7 +93,7 @@ export function ProfileContent() {
     const handleEditProfileSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
         if (!editFormData.fullName.trim()) {
-            toast({ title: "Lỗi xác thực", description: "Vui lòng điền họ và tên.", variant: "destructive" })
+            toast.error("Vui lòng điền họ và tên.")
             return
         }
         try {
@@ -104,30 +103,26 @@ export function ProfileContent() {
                 phoneNumber: editFormData.phoneNumber.trim() || undefined,
                 dateOfBirth: editFormData.dateOfBirth || undefined,
             })
-            toast({ title: "Cập nhật thành công", description: "Thông tin cá nhân đã được cập nhật." })
+            toast.success("Thông tin cá nhân đã được cập nhật.")
             setIsEditDialogOpen(false)
         } catch (err) {
             const apiError = err as ApiError
-            toast({
-                title: "Cập nhật thất bại",
-                description: apiError.message ?? "Đã xảy ra lỗi, vui lòng thử lại.",
-                variant: "destructive",
-            })
+            toast.error(apiError.message ?? "Đã xảy ra lỗi, vui lòng thử lại.")
         }
     }
 
     const handleChangePasswordSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault()
         if (!passwordFormData.currentPassword || !passwordFormData.newPassword || !passwordFormData.confirmPassword) {
-            toast({ title: "Lỗi xác thực", description: "Vui lòng điền đầy đủ thông tin mật khẩu.", variant: "destructive" })
+            toast.error("Vui lòng điền đầy đủ thông tin mật khẩu.")
             return
         }
         if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
-            toast({ title: "Lỗi xác thực", description: "Mật khẩu xác nhận không khớp.", variant: "destructive" })
+            toast.error("Mật khẩu xác nhận không khớp.")
             return
         }
         // TODO: kết nối API đổi mật khẩu khi backend hỗ trợ endpoint
-        toast({ title: "Đổi mật khẩu thành công", description: "Mật khẩu của bạn đã được cập nhật." })
+        toast.success("Mật khẩu của bạn đã được cập nhật.")
         setPasswordFormData({ currentPassword: "", newPassword: "", confirmPassword: "" })
         setIsPasswordDialogOpen(false)
     }
@@ -136,23 +131,19 @@ export function ProfileContent() {
         const file = e.target.files?.[0]
         if (!file) return
         if (!file.type.startsWith("image/")) {
-            toast({ title: "Tệp không hợp lệ", description: "Vui lòng chọn file ảnh.", variant: "destructive" })
+            toast.error("Vui lòng chọn file ảnh.")
             return
         }
         if (file.size > 5 * 1024 * 1024) {
-            toast({ title: "Tệp quá lớn", description: "Ảnh tối đa 5 MB.", variant: "destructive" })
+            toast.error("Ảnh tối đa 5 MB.")
             return
         }
         try {
             await uploadAvatar(file)
-            toast({ title: "Cập nhật ảnh đại diện thành công" })
+            toast.success("Cập nhật ảnh đại diện thành công")
         } catch (err) {
             const apiError = err as ApiError
-            toast({
-                title: "Tải ảnh thất bại",
-                description: apiError.message ?? "Đã xảy ra lỗi, vui lòng thử lại.",
-                variant: "destructive",
-            })
+            toast.error(apiError.message ?? "Đã xảy ra lỗi, vui lòng thử lại.")
         }
         e.target.value = ""
     }
