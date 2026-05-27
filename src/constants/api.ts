@@ -45,9 +45,9 @@ export const CATEGORY_ENDPOINTS = {
     GET_BY_ID: (id: string) => `/api/categories/${id}`,
 
     // Admin
-    ADMIN_CREATE: '/api/admin/categories',
-    ADMIN_UPDATE: (id: string) => `/api/admin/categories/${id}`,
-    ADMIN_DELETE: (id: string) => `/api/admin/categories/${id}`,
+    ADMIN_CREATE: '/api/categories',
+    ADMIN_UPDATE: (id: string) => `/api/categories/${id}`,
+    ADMIN_DELETE: (id: string) => `/api/categories/${id}`,
 } as const
 
 // ============================================================
