@@ -10,10 +10,9 @@ interface ProductSortSelectProps {
 export function ProductSortSelect({ value, onChange }: ProductSortSelectProps) {
     return (
         <select
-            aria-label="Sắp xếp sản phẩm"
             value={value}
-            onChange={event => onChange(event.target.value as ProductSortBy | '')}
-            className="h-10 w-full cursor-pointer rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring sm:w-auto"
+            onChange={e => onChange(e.target.value as ProductSortBy | '')}
+            className="border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring cursor-pointer"
         >
             <option value="">Mặc định</option>
             <option value={ProductSortBy.Newest}>Mới nhất</option>

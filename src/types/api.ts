@@ -16,7 +16,7 @@ export interface ApiResponseNoData {
 // ------ Pagination ------
 
 // Response cho mọi API trả về danh sách có phân trang
-// Matches C# ApiResponse<PagedResult<T>> - PagedResult fields are flat inside data
+// Matches C# ApiResponse<PagedResult<T>> — PagedResult fields are flat inside data
 export interface PaginatedResponse<T> {
     success: boolean
     data: {

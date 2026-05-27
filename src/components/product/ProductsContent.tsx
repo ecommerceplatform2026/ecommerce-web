@@ -1,156 +1,114 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { Search, SlidersHorizontal } from 'lucide-react'
-import { useProductFacetProducts, useProductSearch } from '@/hooks/useProducts'
+import { useMemo } from 'react'
+import { useProducts } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { useProductFilters, PAGE_SIZE } from '@/hooks/useProductFilters'
-import { getUniqueMaterials, getUniqueColors, getUniqueSizes } from '@/utils/applyProductFilters'
+import { applyProductFilters, paginateProducts, getUniqueMaterials, getUniqueColors, getUniqueSizes } from '@/utils/applyProductFilters'
 import { ProductSortSelect } from './ProductSortSelect'
 import { ProductFilter } from './ProductFilter'
 import { ProductGrid } from './ProductGrid'
-import { CategoryList } from './CategoryList'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 
-function ProductSearchInput({
-    value,
-    onSearch,
-}: {
-    value: string
-    onSearch: (value: string) => void
-}) {
-    const [searchInput, setSearchInput] = useState(value)
-
-    useEffect(() => {
-        const nextSearch = searchInput.trim()
-        if (nextSearch === value) return
-
-        const timeoutId = setTimeout(() => {
-            onSearch(nextSearch)
-        }, 400)
-
-        return () => clearTimeout(timeoutId)
-    }, [onSearch, searchInput, value])
-
-    return (
-        <div className="relative w-full sm:w-72">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-                type="search"
-                placeholder="Tìm kiếm sản phẩm..."
-                className="h-10 pl-10"
-                value={searchInput}
-                onChange={event => setSearchInput(event.target.value)}
-            />
-        </div>
-    )
-}
-
 export function ProductsContent() {
+    const { data: products = [], isLoading, error } = useProducts()
     const { data: categories = [] } = useCategories()
     const { filters, updateFilter, updateFilters, resetFilters, hasActiveFilters } = useProductFilters()
-    const { data, isLoading, error } = useProductSearch(filters, PAGE_SIZE)
-    const { data: facetProducts = [] } = useProductFacetProducts()
 
-    const currentProducts = useMemo(() => data?.items ?? [], [data?.items])
-    const totalCount = data?.totalCount ?? 0
-    const totalPages = data?.totalPages ?? 0
-    const currentPage = data?.page ?? filters.page
-
-    const facetById = useMemo(
-        () => new Map(facetProducts.map(product => [product.id, product])),
-        [facetProducts],
+    const filtered = useMemo(() => applyProductFilters(products, filters), [products, filters])
+    const { items: currentProducts, totalPages, currentPage } = useMemo(
+        () => paginateProducts(filtered, filters.page, PAGE_SIZE),
+        [filtered, filters.page],
     )
 
-    const displayProducts = useMemo(
-        () => currentProducts.map(product => {
-            if (product.variants?.length > 0) return product
-
-            const enriched = facetById.get(product.id)
-            return enriched ? { ...product, variants: enriched.variants } : product
-        }),
-        [currentProducts, facetById],
-    )
-
-    const materials = useMemo(() => getUniqueMaterials(facetProducts), [facetProducts])
-    const colors = useMemo(() => getUniqueColors(facetProducts), [facetProducts])
-    const sizes = useMemo(() => getUniqueSizes(facetProducts), [facetProducts])
-
-    const filterPanel = (
-        <ProductFilter
-            key={`${filters.minPrice ?? ''}:${filters.maxPrice ?? ''}`}
-            filters={filters}
-            materials={materials}
-            colors={colors}
-            sizes={sizes}
-            onUpdate={updateFilters}
-            onReset={resetFilters}
-            hasActiveFilters={hasActiveFilters}
-        />
-    )
+    const materials = useMemo(() => getUniqueMaterials(products), [products])
+    const colors = useMemo(() => getUniqueColors(products), [products])
+    const sizes = useMemo(() => getUniqueSizes(products), [products])
 
     return (
         <main className="min-h-screen">
-            <section className="border-b border-border px-4 py-16 lg:px-8">
+            {/* Page Header */}
+            <section className="py-16 px-4 lg:px-8 border-b border-border">
                 <div className="container mx-auto">
-                    <h1 className="mb-4 text-balance font-serif text-5xl md:text-6xl">Tất cả sản phẩm</h1>
-                    <p className="max-w-2xl text-pretty text-lg text-muted-foreground">
+                    <h1 className="font-serif text-5xl md:text-6xl mb-4 text-balance">Tất Cả Sản Phẩm</h1>
+                    <p className="text-lg text-muted-foreground max-w-2xl text-pretty">
                         Khám phá bộ sưu tập thời trang cao cấp dành cho phụ nữ hiện đại
                     </p>
                 </div>
             </section>
 
-            <section className="border-b border-border px-4 py-4 lg:px-8">
-                <div className="container mx-auto flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <CategoryList
-                        categories={categories}
-                        selectedCategoryId={filters.categoryId}
-                        onSelect={categoryId => updateFilter('categoryId', categoryId)}
-                        className="w-full sm:w-64"
-                    />
+            {/* Toolbar */}
+            <section className="py-4 px-4 lg:px-8 border-b border-border">
+                <div className="container mx-auto flex items-center justify-between gap-4">
+                    {/* Category tabs */}
+                    <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+                        <button
+                            onClick={() => updateFilter('categoryId', '')}
+                            className={`shrink-0 px-4 py-1.5 text-sm transition-colors border ${
+                                filters.categoryId === ''
+                                    ? 'border-foreground bg-foreground text-background'
+                                    : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+                            }`}
+                        >
+                            Tất cả
+                        </button>
+                        {categories.map(cat => (
+                            <button
+                                key={cat.id}
+                                onClick={() => updateFilter('categoryId', cat.id)}
+                                className={`shrink-0 px-4 py-1.5 text-sm transition-colors border ${
+                                    filters.categoryId === cat.id
+                                        ? 'border-foreground bg-foreground text-background'
+                                        : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
+                                }`}
+                            >
+                                {cat.name}
+                            </button>
+                        ))}
+                    </div>
 
-                    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-                        <ProductSearchInput
-                            key={filters.search}
-                            value={filters.search}
-                            onSearch={value => updateFilter('search', value)}
-                        />
+                    {/* Sort */}
+                    <div className="shrink-0">
                         <ProductSortSelect
                             value={filters.sort}
-                            onChange={value => updateFilter('sort', value)}
+                            onChange={v => updateFilter('sort', v)}
                         />
                     </div>
                 </div>
             </section>
 
-            <section className="px-4 py-16 lg:px-8">
+            {/* Products Grid + Filter Sidebar */}
+            <section className="py-16 px-4 lg:px-8">
                 <div className="container mx-auto">
-                    <div className="flex items-start gap-10">
-                        <aside className="sticky top-28 hidden w-56 shrink-0 lg:block">
-                            <h2 className="mb-6 text-sm font-semibold uppercase tracking-wide">Bộ lọc</h2>
-                            {filterPanel}
+                    <div className="flex gap-10 items-start">
+
+                        {/* Sidebar filter */}
+                        <aside className="hidden lg:block w-56 shrink-0 sticky top-28">
+                            <h2 className="text-sm font-semibold uppercase tracking-wide mb-6">Bộ lọc</h2>
+                            <ProductFilter
+                                filters={filters}
+                                materials={materials}
+                                colors={colors}
+                                sizes={sizes}
+                                onUpdate={updateFilters}
+                                onReset={resetFilters}
+                                hasActiveFilters={hasActiveFilters}
+                            />
                         </aside>
 
-                        <div className="min-w-0 flex-1">
-                            <details className="mb-8 rounded-md border border-border p-4 lg:hidden">
-                                <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-semibold uppercase tracking-wide [&::-webkit-details-marker]:hidden">
-                                    <span>Bộ lọc</span>
-                                    <SlidersHorizontal className="h-4 w-4" />
-                                </summary>
-                                <div className="mt-6">{filterPanel}</div>
-                            </details>
-
-                            <p className="mb-8 text-sm text-muted-foreground">
-                                {isLoading ? 'Đang tải...' : `${totalCount} sản phẩm`}
+                        {/* Main content */}
+                        <div className="flex-1 min-w-0">
+                            {/* Product count */}
+                            <p className="text-sm text-muted-foreground mb-8">
+                                {isLoading ? 'Đang tải...' : `${filtered.length} sản phẩm`}
                             </p>
 
                             {isLoading ? (
-                                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                                    {Array.from({ length: 8 }).map((_, index) => (
-                                        <div key={index} className="space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {Array.from({ length: 8 }).map((_, i) => (
+                                        <div key={i} className="space-y-3">
                                             <Skeleton className="aspect-[3/4] w-full" />
                                             <Skeleton className="h-4 w-3/4" />
                                             <Skeleton className="h-4 w-1/2" />
@@ -162,7 +120,7 @@ export function ProductsContent() {
                                     title="Không thể tải sản phẩm"
                                     description="Vui lòng thử lại sau"
                                 />
-                            ) : displayProducts.length === 0 ? (
+                            ) : currentProducts.length === 0 ? (
                                 <EmptyState
                                     title="Không tìm thấy sản phẩm"
                                     description={
@@ -179,11 +137,12 @@ export function ProductsContent() {
                                     }
                                 />
                             ) : (
-                                <ProductGrid products={displayProducts} />
+                                <ProductGrid products={currentProducts} />
                             )}
 
+                            {/* Pagination */}
                             {!isLoading && totalPages > 1 && (
-                                <div className="mt-12 flex items-center justify-center gap-2">
+                                <div className="flex justify-center items-center gap-2 mt-12">
                                     <Button
                                         variant="outline"
                                         onClick={() => updateFilter('page', currentPage - 1)}
@@ -193,14 +152,14 @@ export function ProductsContent() {
                                     </Button>
 
                                     <div className="flex gap-2">
-                                        {Array.from({ length: totalPages }, (_, index) => index + 1).map(page => (
+                                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                                             <Button
-                                                key={page}
-                                                variant={page === currentPage ? 'default' : 'outline'}
-                                                onClick={() => updateFilter('page', page)}
+                                                key={p}
+                                                variant={p === currentPage ? 'default' : 'outline'}
+                                                onClick={() => updateFilter('page', p)}
                                                 className="w-10"
                                             >
-                                                {page}
+                                                {p}
                                             </Button>
                                         ))}
                                     </div>

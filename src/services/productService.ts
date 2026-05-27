@@ -1,7 +1,7 @@
 import axiosInstance from '@/lib/axios'
 import { PRODUCT_ENDPOINTS } from '@/constants/api'
 import type { ApiResponse, PaginatedResponse } from '@/types/api'
-import type { Product, ProductDetail, ProductSearchParams } from '@/types/product'
+import type { Product, ProductDetail, ProductImage, ProductSearchParams } from '@/types/product'
 
 function cleanParams(params: ProductSearchParams): Record<string, string | number> {
     return Object.fromEntries(
@@ -17,9 +17,6 @@ function toProductDetailFallback(product: Product): ProductDetail {
     const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
     const variantPrices = product.variants.map(variant => variant.price)
     const prices = variantPrices.length > 0 ? variantPrices : [product.basePrice]
-    const images = product.imageUrl
-        ? [{ id: `${product.id}-primary`, imageUrl: product.imageUrl }]
-        : []
 
     return {
         ...product,
@@ -28,7 +25,7 @@ function toProductDetailFallback(product: Product): ProductDetail {
         maxPrice: Math.max(...prices),
         totalStock,
         stockStatus: totalStock > 0 ? 'InStock' : 'OutOfStock',
-        images,
+        images: [],
         variants: product.variants.map(variant => ({
             id: variant.id,
             sku: variant.sku,
@@ -57,6 +54,13 @@ export const productService = {
         return res.data.data
     },
 
+    getById: async (id: string): Promise<Product> => {
+        const res = await axiosInstance.get<ApiResponse<Product>>(
+            PRODUCT_ENDPOINTS.GET_BY_ID(id),
+        )
+        return res.data.data
+    },
+
     getDetail: async (id: string): Promise<ProductDetail> => {
         try {
             const res = await axiosInstance.get<ApiResponse<ProductDetail>>(
@@ -71,4 +75,10 @@ export const productService = {
         }
     },
 
+    getImages: async (productId: string): Promise<ProductImage[]> => {
+        const res = await axiosInstance.get<ApiResponse<ProductImage[]>>(
+            PRODUCT_ENDPOINTS.GET_IMAGES(productId),
+        )
+        return res.data.data
+    },
 }

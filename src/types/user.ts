@@ -74,7 +74,6 @@ export interface UpdateProfileRequest {
 
 export interface AuthState {
     user: UserProfile | null
-    accessToken: string | null
     isAuthenticated: boolean
     isLoading: boolean
 }

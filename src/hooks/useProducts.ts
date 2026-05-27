@@ -1,19 +1,28 @@
 import { useQuery } from '@tanstack/react-query'
-import { productService } from '@/services/productService'
 import { ProductSortBy } from '@/constants/enums'
-import type { ProductSearchParams } from '@/types/product'
+import { productService } from '@/services/productService'
 import type { ProductFilters } from '@/hooks/useProductFilters'
+import type { ProductSearchParams } from '@/types/product'
 
 export const productKeys = {
-    all:    ['products']                        as const,
+    all: ['products'] as const,
     search: (params: ProductSearchParams) => ['products', 'search', params] as const,
     detail: (id: string) => ['products', id] as const,
+    images: (id: string) => ['products', id, 'images'] as const,
 }
 
 export function useProducts() {
     return useQuery({
         queryKey: productKeys.all,
-        queryFn:  productService.getAll,
+        queryFn: productService.getAll,
+    })
+}
+
+export function useProduct(id: string) {
+    return useQuery({
+        queryKey: productKeys.detail(id),
+        queryFn: () => productService.getById(id),
+        enabled: !!id,
     })
 }
 
@@ -69,5 +78,13 @@ export function useProductDetail(id: string) {
         queryKey: productKeys.detail(id),
         queryFn: () => productService.getDetail(id),
         enabled: !!id,
+    })
+}
+
+export function useProductImages(productId: string) {
+    return useQuery({
+        queryKey: productKeys.images(productId),
+        queryFn: () => productService.getImages(productId),
+        enabled: !!productId,
     })
 }

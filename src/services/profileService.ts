@@ -1,15 +1,9 @@
 import axiosInstance from '@/lib/axios'
 import { USER_ENDPOINTS } from '@/constants/api'
 import { UserRole, UserStatus } from '@/constants/enums'
+import type { ApiResponse } from '@/types/api'
 import type { UserProfile, UpdateProfileRequest } from '@/types/user'
-
-// ── Backend response shapes ────────────────────────────────────────────────
-// Matches C# ApiResponse<T> { Success, Data, Errors }  (camelCase after serialisation)
-interface BackendApiResponse<T> {
-    success: boolean
-    data: T
-    errors: string[]
-}
+import type { ProfileAddress, GetProfileResult } from '@/types/profile'
 
 // Matches C# UserResponse DTO
 interface BackendProfileResponse {
@@ -19,21 +13,6 @@ interface BackendProfileResponse {
     avatar: string | null          // backend field name is "avatar", not "avatarUrl"
     phoneNumber: string | null
     dateOfBirth: string | null     // ISO datetime string, e.g. "1999-12-31T00:00:00"
-    address: ProfileAddress | null
-}
-
-// Matches C# ProfileAddressResponse DTO
-export interface ProfileAddress {
-    receiverName: string
-    phoneNumber: string
-    addressLine: string
-    ward: string | null
-    district: string | null
-    province: string | null
-}
-
-export interface GetProfileResult {
-    user: UserProfile
     address: ProfileAddress | null
 }
 
@@ -67,7 +46,7 @@ function mapToUserProfile(
 // ── Service ────────────────────────────────────────────────────────────────
 export const profileService = {
     getProfile: async (existing?: Partial<UserProfile>): Promise<GetProfileResult> => {
-        const res = await axiosInstance.get<BackendApiResponse<BackendProfileResponse>>(
+        const res = await axiosInstance.get<ApiResponse<BackendProfileResponse>>(
             USER_ENDPOINTS.GET_PROFILE,
         )
         const raw = res.data.data
@@ -88,7 +67,7 @@ export const profileService = {
             dateOfBirth: payload.dateOfBirth ?? undefined,
             // note: "username" is not supported by backend UpdateUserRequest — omitted
         }
-        const res = await axiosInstance.put<BackendApiResponse<BackendProfileResponse>>(
+        const res = await axiosInstance.put<ApiResponse<BackendProfileResponse>>(
             USER_ENDPOINTS.UPDATE_PROFILE,
             body,
         )
@@ -102,7 +81,7 @@ export const profileService = {
     uploadAvatar: async (file: File): Promise<string> => {
         const formData = new FormData()
         formData.append('avatar', file)
-        const res = await axiosInstance.post<BackendApiResponse<{ avatarUrl: string }>>(
+        const res = await axiosInstance.post<ApiResponse<{ avatarUrl: string }>>(
             USER_ENDPOINTS.UPLOAD_AVATAR,
             formData,
             { headers: { 'Content-Type': 'multipart/form-data' } },

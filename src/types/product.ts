@@ -16,7 +16,9 @@ export interface ProductSearchParams {
 
 export interface ProductImage {
     id: string
+    productId?: string
     imageUrl: string
+    isMain?: boolean
 }
 
 // Matches C# ProductVariantResponse DTO
@@ -53,7 +55,6 @@ export interface Product {
     material: string | null
     basePrice: number
     status: ProductStatus
-    imageUrl?: string | null
     variants: ProductVariantResponse[]
 }
 
