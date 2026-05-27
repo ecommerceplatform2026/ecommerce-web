@@ -53,6 +53,7 @@ export interface Product {
     material: string | null
     basePrice: number
     status: ProductStatus
+    imageUrl?: string | null
     variants: ProductVariantResponse[]
 }
 

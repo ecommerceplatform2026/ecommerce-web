@@ -18,18 +18,6 @@ export interface ProductFilters {
 
 export const PAGE_SIZE = 8
 
-const DEFAULT_FILTERS: ProductFilters = {
-    search: '',
-    categoryId: '',
-    minPrice: null,
-    maxPrice: null,
-    material: '',
-    color: '',
-    size: '',
-    sort: '',
-    page: 1,
-}
-
 function parseFilters(params: URLSearchParams): ProductFilters {
     const minRaw = params.get('minPrice')
     const maxRaw = params.get('maxPrice')

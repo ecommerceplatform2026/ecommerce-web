@@ -17,6 +17,9 @@ function toProductDetailFallback(product: Product): ProductDetail {
     const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
     const variantPrices = product.variants.map(variant => variant.price)
     const prices = variantPrices.length > 0 ? variantPrices : [product.basePrice]
+    const images = product.imageUrl
+        ? [{ id: `${product.id}-primary`, imageUrl: product.imageUrl }]
+        : []
 
     return {
         ...product,
@@ -25,7 +28,7 @@ function toProductDetailFallback(product: Product): ProductDetail {
         maxPrice: Math.max(...prices),
         totalStock,
         stockStatus: totalStock > 0 ? 'InStock' : 'OutOfStock',
-        images: [],
+        images,
         variants: product.variants.map(variant => ({
             id: variant.id,
             sku: variant.sku,

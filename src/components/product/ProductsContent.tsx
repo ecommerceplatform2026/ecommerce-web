@@ -15,14 +15,47 @@ import { Input } from '@/components/ui/Input'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 
+function ProductSearchInput({
+    value,
+    onSearch,
+}: {
+    value: string
+    onSearch: (value: string) => void
+}) {
+    const [searchInput, setSearchInput] = useState(value)
+
+    useEffect(() => {
+        const nextSearch = searchInput.trim()
+        if (nextSearch === value) return
+
+        const timeoutId = setTimeout(() => {
+            onSearch(nextSearch)
+        }, 400)
+
+        return () => clearTimeout(timeoutId)
+    }, [onSearch, searchInput, value])
+
+    return (
+        <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="Tìm kiếm sản phẩm..."
+                className="h-10 pl-10"
+                value={searchInput}
+                onChange={event => setSearchInput(event.target.value)}
+            />
+        </div>
+    )
+}
+
 export function ProductsContent() {
     const { data: categories = [] } = useCategories()
     const { filters, updateFilter, updateFilters, resetFilters, hasActiveFilters } = useProductFilters()
-    const [searchInput, setSearchInput] = useState(filters.search)
     const { data, isLoading, error } = useProductSearch(filters, PAGE_SIZE)
     const { data: facetProducts = [] } = useProductFacetProducts()
 
-    const currentProducts = data?.items ?? []
+    const currentProducts = useMemo(() => data?.items ?? [], [data?.items])
     const totalCount = data?.totalCount ?? 0
     const totalPages = data?.totalPages ?? 0
     const currentPage = data?.page ?? filters.page
@@ -46,23 +79,9 @@ export function ProductsContent() {
     const colors = useMemo(() => getUniqueColors(facetProducts), [facetProducts])
     const sizes = useMemo(() => getUniqueSizes(facetProducts), [facetProducts])
 
-    useEffect(() => {
-        setSearchInput(filters.search)
-    }, [filters.search])
-
-    useEffect(() => {
-        const nextSearch = searchInput.trim()
-        if (nextSearch === filters.search) return
-
-        const timeoutId = setTimeout(() => {
-            updateFilter('search', nextSearch)
-        }, 400)
-
-        return () => clearTimeout(timeoutId)
-    }, [filters.search, searchInput, updateFilter])
-
     const filterPanel = (
         <ProductFilter
+            key={`${filters.minPrice ?? ''}:${filters.maxPrice ?? ''}`}
             filters={filters}
             materials={materials}
             colors={colors}
@@ -94,16 +113,11 @@ export function ProductsContent() {
                     />
 
                     <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto">
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input
-                                type="search"
-                                placeholder="Tìm kiếm sản phẩm..."
-                                className="h-10 pl-10"
-                                value={searchInput}
-                                onChange={event => setSearchInput(event.target.value)}
-                            />
-                        </div>
+                        <ProductSearchInput
+                            key={filters.search}
+                            value={filters.search}
+                            onSearch={value => updateFilter('search', value)}
+                        />
                         <ProductSortSelect
                             value={filters.sort}
                             onChange={value => updateFilter('sort', value)}

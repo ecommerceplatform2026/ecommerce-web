@@ -1,11 +1,16 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { AlertCircle, Check, Minus, Plus } from "lucide-react"
+import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus } from "lucide-react"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { ProductStatus } from "@/constants/enums"
+import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
+import { cartService } from "@/services/cartService"
+import { formatPrice } from "@/utils/formatPrice"
+import type { ApiError } from "@/types/api"
+import type { CartItem } from "@/types/cart"
 import type { ProductDetail, ProductDetailVariant } from "@/types/product"
 import { ProductImageGallery } from "./ProductImageGallery"
 
@@ -13,65 +18,139 @@ interface ProductDetailsProps {
     product: ProductDetail
 }
 
-function uniqueValues(values: Array<string | null>): string[] {
-    return Array.from(new Set(values.filter((value): value is string => Boolean(value))))
+function uniqueValues(values: Array<string | null | undefined>): string[] {
+    return Array.from(new Set(values.filter((value): value is string => Boolean(value?.trim()))))
 }
 
-function variantMatches(
-    variant: ProductDetailVariant,
+function variantHasStock(variant: ProductDetailVariant): boolean {
+    return variant.stock > 0 && variant.stockStatus !== "OutOfStock"
+}
+
+function isInactiveStatus(status: ProductDetail["status"]): boolean {
+    return status === ProductStatus.Inactive || String(status).toLowerCase() === "inactive"
+}
+
+function findVariant(
+    variants: ProductDetailVariant[],
     size: string | null,
     color: string | null,
     hasSizes: boolean,
     hasColors: boolean,
 ) {
-    return (!hasSizes || variant.size === size) && (!hasColors || variant.color === color)
+    if ((hasSizes && !size) || (hasColors && !color)) return null
+
+    return variants.find(variant =>
+        (!hasSizes || variant.size === size) &&
+        (!hasColors || variant.color === color),
+    ) ?? null
+}
+
+function hasVariantForSelection(
+    variants: ProductDetailVariant[],
+    size: string | null,
+    color: string | null,
+) {
+    return variants.some(variant =>
+        (!size || variant.size === size) &&
+        (!color || variant.color === color),
+    )
+}
+
+function hasStockForValue(
+    variants: ProductDetailVariant[],
+    key: "size" | "color",
+    value: string,
+) {
+    return variants.some(variant => variant[key] === value && variantHasStock(variant))
+}
+
+function findFirstAvailableForColor(variants: ProductDetailVariant[], color: string) {
+    return variants.find(variant => variant.color === color && variantHasStock(variant))
+        ?? variants.find(variant => variant.color === color)
+        ?? null
+}
+
+function findFirstAvailableForSize(variants: ProductDetailVariant[], size: string) {
+    return variants.find(variant => variant.size === size && variantHasStock(variant))
+        ?? variants.find(variant => variant.size === size)
+        ?? null
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
-    const variants = product.variants ?? []
+    const variants = useMemo(() => product.variants ?? [], [product.variants])
     const sizes = useMemo(() => uniqueValues(variants.map(variant => variant.size)), [variants])
     const colors = useMemo(() => uniqueValues(variants.map(variant => variant.color)), [variants])
-
-    const [selectedSize, setSelectedSize] = useState<string | null>(sizes.length === 1 ? sizes[0] : null)
-    const [selectedColor, setSelectedColor] = useState<string | null>(colors.length === 1 ? colors[0] : null)
-    const [quantity, setQuantity] = useState(1)
-    const [added, setAdded] = useState(false)
-    const { addItem } = useCart()
-
-    const selectedVariant = useMemo(
-        () =>
-            variants.find(variant =>
-                variantMatches(variant, selectedSize, selectedColor, sizes.length > 0, colors.length > 0),
-            ) ?? null,
-        [colors.length, selectedColor, selectedSize, sizes.length, variants],
+    const hasSizes = sizes.length > 0
+    const hasColors = colors.length > 0
+    const firstAvailableVariant = useMemo(
+        () => variants.find(variantHasStock) ?? variants[0] ?? null,
+        [variants],
     )
 
-    const displayPrice = selectedVariant?.price ?? product.price ?? product.basePrice
-    const isInactive = product.status === ProductStatus.Inactive
-    const isOutOfStock = selectedVariant ? selectedVariant.stock <= 0 : product.totalStock <= 0
-    const needsVariant = variants.length > 0 && !selectedVariant
-    const maxQuantity = Math.max(selectedVariant?.stock ?? product.totalStock ?? 1, 1)
+    const [selectedSize, setSelectedSize] = useState<string | null>(firstAvailableVariant?.size ?? null)
+    const [selectedColor, setSelectedColor] = useState<string | null>(firstAvailableVariant?.color ?? null)
+    const [quantity, setQuantity] = useState(1)
+    const [added, setAdded] = useState(false)
+    const [isAdding, setIsAdding] = useState(false)
+    const { items, addItem, removeItem, updateQuantity } = useCart()
+    const { isAuthenticated } = useAuth()
 
-    function hasAvailableVariant(size: string | null, color: string | null) {
-        return variants.some(variant =>
-            variantMatches(variant, size, color, sizes.length > 0, colors.length > 0) &&
-            variant.stock > 0,
-        )
+    const selectedVariant = useMemo(
+        () => findVariant(variants, selectedSize, selectedColor, hasSizes, hasColors),
+        [hasColors, hasSizes, selectedColor, selectedSize, variants],
+    )
+
+    const selectedCombinationExists = hasVariantForSelection(variants, selectedSize, selectedColor)
+    const needsVariantSelection = variants.length > 0 && !selectedVariant
+    const isInactive = isInactiveStatus(product.status)
+    const productStatusLabel = isInactive ? "Ngừng kinh doanh" : "Đang kinh doanh"
+    const stockQuantity = selectedVariant?.stock ?? product.totalStock ?? 0
+    const isOutOfStock = selectedVariant ? !variantHasStock(selectedVariant) : stockQuantity <= 0
+    const maxQuantity = Math.max(stockQuantity, 0)
+    const safeQuantity = Math.max(1, Math.min(quantity, Math.max(maxQuantity, 1)))
+    const displayPrice = selectedVariant?.price ?? product.price ?? product.basePrice
+    const hasPriceRange = product.minPrice !== product.maxPrice
+    const canAddToCart = Boolean(selectedVariant) && !isInactive && !isOutOfStock && !added && !isAdding
+
+    function handleSizeSelect(size: string) {
+        const nextSize = selectedSize === size ? null : size
+        setSelectedSize(nextSize)
+
+        if (nextSize && selectedColor && !hasVariantForSelection(variants, nextSize, selectedColor)) {
+            const fallbackVariant = findFirstAvailableForSize(variants, nextSize)
+            setSelectedColor(fallbackVariant?.color ?? null)
+        }
     }
 
-    function handleAddToCart() {
-        if (needsVariant) {
+    function handleColorSelect(color: string) {
+        const nextColor = selectedColor === color ? null : color
+        setSelectedColor(nextColor)
+
+        if (selectedSize && nextColor && !hasVariantForSelection(variants, selectedSize, nextColor)) {
+            const fallbackVariant = findFirstAvailableForColor(variants, nextColor)
+            setSelectedSize(fallbackVariant?.size ?? null)
+        }
+    }
+
+    async function handleAddToCart() {
+        if (needsVariantSelection) {
             toast.error("Vui lòng chọn đầy đủ size và màu sắc")
             return
         }
 
-        if (!selectedVariant || isOutOfStock || isInactive) {
+        if (!selectedVariant) {
+            toast.error("Sản phẩm chưa có biến thể khả dụng")
+            return
+        }
+
+        if (isInactive || isOutOfStock) {
             toast.error("Sản phẩm hiện không có sẵn")
             return
         }
 
-        const finalQuantity = Math.min(quantity, maxQuantity)
-        addItem({
+        const finalQuantity = Math.min(safeQuantity, maxQuantity)
+        const existingItem = items.find(item => item.variantId === selectedVariant.id)
+        const cartItem: CartItem = {
             productId: product.id,
             variantId: selectedVariant.id,
             name: product.name,
@@ -80,83 +159,94 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             color: selectedVariant.color ?? "",
             quantity: finalQuantity,
             imageUrl: product.images[0]?.imageUrl ?? null,
-        })
-        toast.success(`Đã thêm ${finalQuantity} x ${product.name} vào giỏ hàng`)
-        setAdded(true)
-        setTimeout(() => setAdded(false), 1500)
+        }
+
+        addItem(cartItem)
+        setIsAdding(true)
+
+        try {
+            if (isAuthenticated) {
+                await cartService.addItem(selectedVariant.id, finalQuantity)
+            }
+
+            toast.success(`Đã thêm ${finalQuantity} x ${product.name} vào giỏ hàng`)
+            setAdded(true)
+            setTimeout(() => setAdded(false), 1500)
+        } catch (error) {
+            if (existingItem) {
+                updateQuantity(selectedVariant.id, existingItem.quantity)
+            } else {
+                removeItem(selectedVariant.id)
+            }
+
+            const apiError = error as ApiError
+            toast.error(apiError.message ?? "Không thể thêm sản phẩm vào giỏ hàng")
+        } finally {
+            setIsAdding(false)
+        }
     }
 
     return (
-        <div className="container mx-auto px-4 py-16 lg:px-8">
-            <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="container mx-auto px-4 py-12 lg:px-8 lg:py-16">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
                 <ProductImageGallery images={product.images} productName={product.name} />
 
-                <div className="space-y-8">
+                <section className="space-y-8">
                     <div>
                         <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
-                            {product.categoryName ?? ""}
+                            {product.categoryName ?? "Sản phẩm"}
                         </p>
-                        <h1 className="mb-4 font-serif text-4xl md:text-5xl">{product.name}</h1>
-                        <div className="flex items-center gap-3">
-                            <p className="text-2xl">{displayPrice.toLocaleString("vi-VN")}₫</p>
-                            {isInactive && (
-                                <span className="border border-destructive px-2 py-1 text-xs uppercase tracking-wide text-destructive">
-                                    Ngừng kinh doanh
-                                </span>
+                        <h1 className="mb-4 text-balance font-serif text-4xl md:text-5xl">
+                            {product.name}
+                        </h1>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <p className="text-2xl font-medium">{formatPrice(displayPrice)}</p>
+                            {!selectedVariant && hasPriceRange && (
+                                <p className="text-sm text-muted-foreground">
+                                    {formatPrice(product.minPrice)} - {formatPrice(product.maxPrice)}
+                                </p>
                             )}
                         </div>
                     </div>
 
                     {product.description && (
-                        <p className="text-lg leading-relaxed text-muted-foreground">{product.description}</p>
-                    )}
-
-                    {sizes.length > 0 && (
-                        <div className="space-y-3">
-                            <p className="text-sm font-medium tracking-wide">Kích cỡ</p>
-                            <div className="flex flex-wrap gap-2">
-                                {sizes.map(size => {
-                                    const available = hasAvailableVariant(size, selectedColor)
-                                    return (
-                                        <button
-                                            key={size}
-                                            type="button"
-                                            disabled={!available}
-                                            onClick={() => setSelectedSize(size)}
-                                            className={`border px-4 py-2 text-sm transition-colors ${
-                                                selectedSize === size
-                                                    ? "border-foreground bg-foreground text-background"
-                                                    : available
-                                                    ? "border-border hover:border-foreground"
-                                                    : "cursor-not-allowed border-border text-muted-foreground line-through opacity-50"
-                                            }`}
-                                        >
-                                            {size}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                        </div>
+                        <p className="text-lg leading-relaxed text-muted-foreground">
+                            {product.description}
+                        </p>
                     )}
 
                     {colors.length > 0 && (
                         <div className="space-y-3">
-                            <p className="text-sm font-medium tracking-wide">Màu sắc</p>
+                            <div className="flex items-center justify-between gap-4">
+                                <p className="text-sm font-medium uppercase tracking-wide">
+                                    Màu sắc
+                                </p>
+                                {selectedColor && (
+                                    <p className="text-sm text-muted-foreground">{selectedColor}</p>
+                                )}
+                            </div>
                             <div className="flex flex-wrap gap-2">
                                 {colors.map(color => {
-                                    const available = hasAvailableVariant(selectedSize, color)
+                                    const disabled = selectedSize
+                                        ? !variants.some(variant =>
+                                            variant.color === color &&
+                                            variant.size === selectedSize &&
+                                            variantHasStock(variant),
+                                        )
+                                        : !hasStockForValue(variants, "color", color)
+
                                     return (
                                         <button
                                             key={color}
                                             type="button"
-                                            disabled={!available}
-                                            onClick={() => setSelectedColor(color)}
+                                            disabled={disabled}
+                                            onClick={() => handleColorSelect(color)}
                                             className={`border px-4 py-2 text-sm transition-colors ${
                                                 selectedColor === color
                                                     ? "border-foreground bg-foreground text-background"
-                                                    : available
-                                                    ? "border-border hover:border-foreground"
-                                                    : "cursor-not-allowed border-border text-muted-foreground line-through opacity-50"
+                                                    : disabled
+                                                      ? "cursor-not-allowed border-border text-muted-foreground line-through opacity-50"
+                                                      : "border-border hover:border-foreground"
                                             }`}
                                         >
                                             {color}
@@ -167,45 +257,113 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         </div>
                     )}
 
-                    <div className="text-sm">
-                        {needsVariant ? (
-                            <p className="text-amber-600">Vui lòng chọn biến thể để xem tồn kho</p>
-                        ) : isOutOfStock ? (
-                            <p className="flex items-center gap-2 text-destructive">
-                                <AlertCircle className="h-4 w-4" />
-                                Hết hàng
-                            </p>
-                        ) : (
-                            <p className="text-green-600">Còn hàng ({selectedVariant?.stock ?? product.totalStock})</p>
-                        )}
-                    </div>
+                    {sizes.length > 0 && (
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-4">
+                                <p className="text-sm font-medium uppercase tracking-wide">
+                                    Kích cỡ
+                                </p>
+                                {selectedSize && (
+                                    <p className="text-sm text-muted-foreground">{selectedSize}</p>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2 sm:flex sm:flex-wrap">
+                                {sizes.map(size => {
+                                    const disabled = selectedColor
+                                        ? !variants.some(variant =>
+                                            variant.size === size &&
+                                            variant.color === selectedColor &&
+                                            variantHasStock(variant),
+                                        )
+                                        : !hasStockForValue(variants, "size", size)
 
-                    {product.material && (
-                        <div className="border-t border-border pt-6 text-sm text-muted-foreground">
-                            <span className="font-medium text-foreground">Chất liệu:</span> {product.material}
+                                    return (
+                                        <button
+                                            key={size}
+                                            type="button"
+                                            disabled={disabled}
+                                            onClick={() => handleSizeSelect(size)}
+                                            className={`min-h-10 border px-4 py-2 text-sm transition-colors ${
+                                                selectedSize === size
+                                                    ? "border-foreground bg-foreground text-background"
+                                                    : disabled
+                                                      ? "cursor-not-allowed border-border text-muted-foreground line-through opacity-50"
+                                                      : "border-border hover:border-foreground"
+                                            }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    )
+                                })}
+                            </div>
                         </div>
                     )}
 
+                    <div className="rounded-md border border-border p-4 text-sm">
+                        {isInactive ? (
+                            <p className="flex items-center gap-2 text-destructive">
+                                <PackageX className="h-4 w-4" />
+                                Sản phẩm ngừng kinh doanh
+                            </p>
+                        ) : needsVariantSelection ? (
+                            <p className="flex items-center gap-2 text-amber-600">
+                                <AlertCircle className="h-4 w-4" />
+                                {selectedCombinationExists
+                                    ? "Chọn size và màu sắc để xem tồn kho"
+                                    : "Tổ hợp size và màu sắc này không có sẵn"}
+                            </p>
+                        ) : isOutOfStock ? (
+                            <p className="flex items-center gap-2 text-destructive">
+                                <PackageX className="h-4 w-4" />
+                                Hết hàng
+                            </p>
+                        ) : (
+                            <p className="flex items-center gap-2 text-green-600">
+                                <PackageCheck className="h-4 w-4" />
+                                Còn hàng ({stockQuantity})
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="grid gap-4 border-y border-border py-6 text-sm sm:grid-cols-2">
+                        <div>
+                            <p className="text-muted-foreground">Chất liệu</p>
+                            <p className="mt-1 font-medium">{product.material || "Đang cập nhật"}</p>
+                        </div>
+                        <div>
+                            <p className="text-muted-foreground">Trạng thái</p>
+                            <p className="mt-1 font-medium">
+                                {productStatusLabel}
+                            </p>
+                        </div>
+                        {selectedVariant && (
+                            <div className="sm:col-span-2">
+                                <p className="text-muted-foreground">SKU</p>
+                                <p className="mt-1 font-medium">{selectedVariant.sku}</p>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="space-y-3">
-                        <p className="text-sm font-medium tracking-wide">Số lượng</p>
+                        <p className="text-sm font-medium uppercase tracking-wide">Số lượng</p>
                         <div className="flex w-fit items-center border border-border">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
-                                disabled={quantity <= 1}
+                                onClick={() => setQuantity(Math.max(safeQuantity - 1, 1))}
+                                disabled={safeQuantity <= 1 || !canAddToCart}
                                 className="h-12 w-12 rounded-none"
                             >
                                 <Minus className="h-4 w-4" />
                             </Button>
                             <div className="flex h-12 w-16 items-center justify-center border-x border-border">
-                                {quantity}
+                                {safeQuantity}
                             </div>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setQuantity(prev => Math.min(prev + 1, maxQuantity))}
-                                disabled={quantity >= maxQuantity}
+                                onClick={() => setQuantity(Math.min(safeQuantity + 1, maxQuantity))}
+                                disabled={safeQuantity >= maxQuantity || !canAddToCart}
                                 className="h-12 w-12 rounded-none"
                             >
                                 <Plus className="h-4 w-4" />
@@ -217,20 +375,24 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         size="lg"
                         className="h-14 w-full text-base"
                         onClick={handleAddToCart}
-                        disabled={added || needsVariant || isOutOfStock || isInactive}
+                        disabled={!canAddToCart}
                     >
                         {added ? (
                             <>
                                 <Check className="h-5 w-5" />
                                 Đã thêm vào giỏ
                             </>
+                        ) : isAdding ? (
+                            "Đang thêm..."
+                        ) : needsVariantSelection ? (
+                            "Chọn biến thể"
                         ) : isOutOfStock ? (
                             "Hết hàng"
                         ) : (
                             "Thêm vào giỏ hàng"
                         )}
                     </Button>
-                </div>
+                </section>
             </div>
         </div>
     )

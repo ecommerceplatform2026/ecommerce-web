@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import type { ProductFilters } from '@/hooks/useProductFilters'
 
@@ -25,14 +25,6 @@ export function ProductFilter({
 }: ProductFilterProps) {
     const [localMin, setLocalMin] = useState(filters.minPrice !== null ? String(filters.minPrice) : '')
     const [localMax, setLocalMax] = useState(filters.maxPrice !== null ? String(filters.maxPrice) : '')
-
-    useEffect(() => {
-        setLocalMin(filters.minPrice !== null ? String(filters.minPrice) : '')
-    }, [filters.minPrice])
-
-    useEffect(() => {
-        setLocalMax(filters.maxPrice !== null ? String(filters.maxPrice) : '')
-    }, [filters.maxPrice])
 
     function handleApplyPrice() {
         const minCandidate = localMin !== '' ? Number(localMin) : null
