@@ -75,6 +75,10 @@ interface ProductDetailsProps {
     product: Product
 }
 
+function isVariantOutOfStock(variant: { stock: number; isOutOfStock?: boolean } | null | undefined) {
+    return !variant || variant.isOutOfStock === true || variant.stock <= 0
+}
+
 export function ProductDetails({ product }: ProductDetailsProps) {
     const variants = useMemo(() => product.variants ?? [], [product.variants])
 
@@ -96,6 +100,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         return colors.length === 1 ? colors[0] : null
     })
     const [quantity, setQuantity] = useState(1)
+    const [quantityInput, setQuantityInput] = useState("1")
     const [added, setAdded] = useState(false)
     const [currentReviewPage, setCurrentReviewPage] = useState(1)
 
@@ -109,11 +114,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         )
     }, [variants, selectedSize, selectedColor, uniqueSizes.length, uniqueColors.length])
 
+    const hasRequiredVariantSelection =
+        (uniqueSizes.length === 0 || selectedSize !== null) &&
+        (uniqueColors.length === 0 || selectedColor !== null)
+    const hasUnavailableSelection = variants.length > 0 && hasRequiredVariantSelection && selectedVariant === null
     const displayPrice = selectedVariant?.price ?? product.basePrice
-    const isOutOfStock = selectedVariant?.isOutOfStock ?? false
+    const isOutOfStock = selectedVariant ? isVariantOutOfStock(selectedVariant) : false
     const isLowStock = selectedVariant?.isLowStock ?? false
-    const maxStock = selectedVariant ? selectedVariant.stock : 99
-    const needsVariantSelection = variants.length > 0 && selectedVariant === null
+    const maxStock = selectedVariant?.stock ?? 0
+    const needsVariantSelection = variants.length > 0 && !hasRequiredVariantSelection
     const isInactive = product.status === ProductStatus.Inactive
 
     const { addItem } = useCart()
@@ -136,7 +145,79 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         currentReviewPage * REVIEWS_PER_PAGE,
     )
 
-    const handleAddToCart = () => {
+    function handleSizeSelect(size: string) {
+        setQuantity(1)
+        setQuantityInput("1")
+        if (selectedSize === size) {
+            setSelectedSize(null)
+            return
+        }
+
+        setSelectedSize(size)
+        if (
+            selectedColor &&
+            !variants.some(variant => variant.size === size && variant.color === selectedColor)
+        ) {
+            setSelectedColor(null)
+        }
+    }
+
+    function handleColorSelect(color: string) {
+        setQuantity(1)
+        setQuantityInput("1")
+        if (selectedColor === color) {
+            setSelectedColor(null)
+            return
+        }
+
+        setSelectedColor(color)
+        if (
+            selectedSize &&
+            !variants.some(variant => variant.color === color && variant.size === selectedSize)
+        ) {
+            setSelectedSize(null)
+        }
+    }
+
+    function handleQuantityInput(value: string) {
+        if (!/^\d*$/.test(value)) return
+
+        const maxAllowed = Math.max(1, maxStock)
+        if (value === "") {
+            setQuantityInput("")
+            return
+        }
+
+        const nextQuantity = Number(value)
+        if (!Number.isFinite(nextQuantity)) return
+
+        if (nextQuantity > maxAllowed) {
+            setQuantity(maxAllowed)
+            setQuantityInput(String(maxAllowed))
+            toast.error(`Only ${maxAllowed} item(s) available for this variant.`)
+            return
+        }
+
+        const clampedQuantity = Math.max(1, nextQuantity)
+        setQuantity(clampedQuantity)
+        setQuantityInput(String(clampedQuantity))
+    }
+
+    function handleQuantityBlur() {
+        if (quantityInput === "") {
+            setQuantity(1)
+            setQuantityInput("1")
+        }
+    }
+
+    function setSelectedQuantity(nextQuantity: number) {
+        const maxAllowed = Math.max(1, maxStock)
+        const clampedQuantity = Math.max(1, Math.min(nextQuantity, maxAllowed))
+        setQuantity(clampedQuantity)
+        setQuantityInput(String(clampedQuantity))
+    }
+
+    const handleAddToCart = async () => {
         if (needsVariantSelection) {
             const missingSize = uniqueSizes.length > 0 && !selectedSize
             const missingColor = uniqueColors.length > 0 && !selectedColor
@@ -145,24 +226,40 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             else toast.error('Please select color')
             return
         }
+        if (hasUnavailableSelection) {
+            toast.error('Selected size and color combination is unavailable')
+            return
+        }
+        if (!selectedVariant) {
+            toast.error('Please select a valid product variant')
+            return
+        }
         if (isOutOfStock) {
             toast.error('Product is out of stock')
             return
         }
         const finalQty = Math.min(quantity, maxStock)
-        addItem({
-            productId: product.id,
-            variantId: selectedVariant?.id ?? product.id,
-            name: product.name,
-            price: displayPrice,
-            size: selectedSize ?? '',
-            color: selectedColor ?? '',
-            quantity: finalQty,
-            imageUrl: images[0]?.imageUrl ?? null,
-        })
-        toast.success(`Added ${finalQty} x ${product.name} to cart`)
-        setAdded(true)
-        setTimeout(() => setAdded(false), 2000)
+        try {
+            await addItem({
+                productId: product.id,
+                variantId: selectedVariant.id,
+                sku: selectedVariant.sku,
+                name: product.name,
+                price: displayPrice,
+                size: selectedSize ?? '',
+                color: selectedColor ?? '',
+                quantity: finalQty,
+                stock: selectedVariant.stock,
+                isLowStock: selectedVariant.isLowStock,
+                isOutOfStock: selectedVariant.isOutOfStock,
+                imageUrl: images[0]?.imageUrl ?? product.imageUrl ?? null,
+            })
+            toast.success(`Added ${finalQty} x ${product.name} to cart`)
+            setAdded(true)
+            setTimeout(() => setAdded(false), 2000)
+        } catch (error) {
+            toast.error(typeof error === 'string' ? error : 'Unable to add product to cart.')
+        }
     }
 
     const handleWishlist = () => {
@@ -215,21 +312,20 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 {uniqueSizes.map(size => {
-                                    const v = variants.find(
+                                    const matchingVariants = variants.filter(
                                         vr => vr.size === size &&
-                                            (uniqueColors.length === 0 || vr.color === selectedColor),
+                                            (uniqueColors.length === 0 || selectedColor === null || vr.color === selectedColor),
                                     )
-                                    const unavailable = v?.isOutOfStock ?? false
+                                    const unavailable = matchingVariants.length === 0 || matchingVariants.every(isVariantOutOfStock)
                                     return (
                                         <button
                                             key={size}
-                                            onClick={() => !unavailable && setSelectedSize(size)}
-                                            disabled={unavailable}
+                                            onClick={() => handleSizeSelect(size)}
                                             className={`px-4 py-2 text-sm border transition-colors ${
                                                 selectedSize === size
                                                     ? 'border-foreground bg-foreground text-background'
                                                     : unavailable
-                                                    ? 'border-border text-muted-foreground line-through opacity-40 cursor-not-allowed'
+                                                    ? 'border-border text-muted-foreground line-through opacity-50 hover:border-muted-foreground'
                                                     : 'border-border hover:border-foreground cursor-pointer'
                                             }`}
                                         >
@@ -254,21 +350,20 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                             </p>
                             <div className="flex flex-wrap gap-2">
                                 {uniqueColors.map(color => {
-                                    const v = variants.find(
+                                    const matchingVariants = variants.filter(
                                         vr => vr.color === color &&
-                                            (uniqueSizes.length === 0 || vr.size === selectedSize),
+                                            (uniqueSizes.length === 0 || selectedSize === null || vr.size === selectedSize),
                                     )
-                                    const unavailable = v?.isOutOfStock ?? false
+                                    const unavailable = matchingVariants.length === 0 || matchingVariants.every(isVariantOutOfStock)
                                     return (
                                         <button
                                             key={color}
-                                            onClick={() => !unavailable && setSelectedColor(color)}
-                                            disabled={unavailable}
+                                            onClick={() => handleColorSelect(color)}
                                             className={`px-4 py-2 text-sm border transition-colors ${
                                                 selectedColor === color
                                                     ? 'border-foreground bg-foreground text-background'
                                                     : unavailable
-                                                    ? 'border-border text-muted-foreground line-through opacity-40 cursor-not-allowed'
+                                                    ? 'border-border text-muted-foreground line-through opacity-50 hover:border-muted-foreground'
                                                     : 'border-border hover:border-foreground cursor-pointer'
                                             }`}
                                         >
@@ -299,6 +394,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         </div>
                     )}
 
+                    {hasUnavailableSelection && (
+                        <p className="text-sm text-destructive">
+                            Selected size and color combination is unavailable.
+                        </p>
+                    )}
+
                     {/* Variant selection prompt */}
                     {needsVariantSelection && (
                         <p className="text-sm text-amber-600">
@@ -317,19 +418,27 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setQuantity(prev => Math.max(prev - 1, 1))}
+                                onClick={() => setSelectedQuantity(quantity - 1)}
                                 disabled={quantity <= 1}
                                 className="h-12 w-12 rounded-none hover:bg-muted cursor-pointer"
                             >
                                 <Minus className="h-4 w-4" />
                             </Button>
                             <div className="w-16 h-12 flex items-center justify-center border-x border-border">
-                                <span className="text-base font-medium">{quantity}</span>
+                                <input
+                                    value={quantityInput}
+                                    onChange={event => handleQuantityInput(event.target.value)}
+                                    onBlur={handleQuantityBlur}
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    aria-label="Quantity"
+                                    className="h-full w-full bg-transparent text-center text-base font-medium outline-none"
+                                />
                             </div>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setQuantity(prev => Math.min(prev + 1, maxStock))}
+                                onClick={() => setSelectedQuantity(quantity + 1)}
                                 disabled={quantity >= maxStock}
                                 className="h-12 w-12 rounded-none hover:bg-muted cursor-pointer"
                             >

@@ -23,21 +23,34 @@ export function ProductCard({ product }: ProductCardProps) {
 
     const firstVariant = product.variants?.[0]
 
-    function handleQuickAdd(e: React.MouseEvent<HTMLButtonElement>) {
+    async function handleQuickAdd(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
         e.stopPropagation()
         if (!firstVariant) return
-        addItem({
-            productId: product.id,
-            variantId: firstVariant.id,
-            name: product.name,
-            price: firstVariant.price,
-            size: firstVariant.size ?? "",
-            color: firstVariant.color ?? "",
-            quantity: 1,
-            imageUrl: null,
-        })
-        toast.success('Added to cart')
+        if (firstVariant.isOutOfStock || firstVariant.stock <= 0) {
+            toast.error("Product is out of stock")
+            return
+        }
+
+        try {
+            await addItem({
+                productId: product.id,
+                variantId: firstVariant.id,
+                sku: firstVariant.sku,
+                name: product.name,
+                price: firstVariant.price,
+                size: firstVariant.size ?? "",
+                color: firstVariant.color ?? "",
+                quantity: 1,
+                stock: firstVariant.stock,
+                isLowStock: firstVariant.isLowStock,
+                isOutOfStock: firstVariant.isOutOfStock,
+                imageUrl: product.imageUrl ?? null,
+            })
+            toast.success('Added to cart')
+        } catch (error) {
+            toast.error(typeof error === 'string' ? error : 'Unable to add product to cart.')
+        }
     }
 
     function handleWishlist(e: React.MouseEvent<HTMLButtonElement>) {
