@@ -32,9 +32,9 @@ export function ProductsContent() {
             {/* Page Header */}
             <section className="py-16 px-4 lg:px-8 border-b border-border">
                 <div className="container mx-auto">
-                    <h1 className="font-serif text-5xl md:text-6xl mb-4 text-balance">Tất Cả Sản Phẩm</h1>
+                    <h1 className="font-serif text-5xl md:text-6xl mb-4 text-balance">All Products</h1>
                     <p className="text-lg text-muted-foreground max-w-2xl text-pretty">
-                        Khám phá bộ sưu tập thời trang cao cấp dành cho phụ nữ hiện đại
+                        Explore premium fashion collections for modern women
                     </p>
                 </div>
             </section>
@@ -52,7 +52,7 @@ export function ProductsContent() {
                                     : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'
                             }`}
                         >
-                            Tất cả
+                            All
                         </button>
                         {categories.map(cat => (
                             <button
@@ -86,7 +86,7 @@ export function ProductsContent() {
 
                         {/* Sidebar filter */}
                         <aside className="hidden lg:block w-56 shrink-0 sticky top-28">
-                            <h2 className="text-sm font-semibold uppercase tracking-wide mb-6">Bộ lọc</h2>
+                            <h2 className="text-sm font-semibold uppercase tracking-wide mb-6">Filters</h2>
                             <ProductFilter
                                 filters={filters}
                                 materials={materials}
@@ -102,7 +102,7 @@ export function ProductsContent() {
                         <div className="flex-1 min-w-0">
                             {/* Product count */}
                             <p className="text-sm text-muted-foreground mb-8">
-                                {isLoading ? 'Đang tải...' : `${filtered.length} sản phẩm`}
+                                {isLoading ? 'Loading...' : `${filtered.length} products`}
                             </p>
 
                             {isLoading ? (
@@ -117,21 +117,21 @@ export function ProductsContent() {
                                 </div>
                             ) : error ? (
                                 <EmptyState
-                                    title="Không thể tải sản phẩm"
-                                    description="Vui lòng thử lại sau"
+                                    title="Unable to load products"
+                                    description="Please try again later"
                                 />
                             ) : currentProducts.length === 0 ? (
                                 <EmptyState
-                                    title="Không tìm thấy sản phẩm"
+                                    title="No products found"
                                     description={
                                         hasActiveFilters
-                                            ? 'Thử thay đổi hoặc xoá bộ lọc để xem thêm sản phẩm'
-                                            : 'Hiện chưa có sản phẩm nào'
+                                            ? 'Try changing or clearing filters to see more products'
+                                            : 'There are no products yet'
                                     }
                                     action={
                                         hasActiveFilters ? (
                                             <Button variant="outline" size="sm" onClick={resetFilters}>
-                                                Xoá bộ lọc
+                                                Clear filters
                                             </Button>
                                         ) : undefined
                                     }
@@ -148,7 +148,7 @@ export function ProductsContent() {
                                         onClick={() => updateFilter('page', currentPage - 1)}
                                         disabled={currentPage === 1}
                                     >
-                                        Trước
+                                        Previous
                                     </Button>
 
                                     <div className="flex gap-2">
@@ -169,7 +169,7 @@ export function ProductsContent() {
                                         onClick={() => updateFilter('page', currentPage + 1)}
                                         disabled={currentPage === totalPages}
                                     >
-                                        Sau
+                                        Next
                                     </Button>
                                 </div>
                             )}

@@ -12,10 +12,10 @@ export default async function LoginPage({ searchParams }: Props) {
     <div className="w-full max-w-md">
       <div className="text-center mb-8">
         <h1 className="font-serif text-4xl md:text-5xl mb-3 tracking-tight">
-          Chào mừng trở lại
+          Welcome back
         </h1>
         <p className="text-muted-foreground">
-          Đăng nhập vào tài khoản để tiếp tục
+          Sign in to your account to continue
         </p>
       </div>
 
@@ -26,15 +26,15 @@ export default async function LoginPage({ searchParams }: Props) {
           href="/forgot-password"
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          Quên mật khẩu?
+          Forgot password?
         </Link>
         <p className="text-sm text-muted-foreground">
-          Chưa có tài khoản?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/register"
             className="text-foreground hover:text-muted-foreground transition-colors underline underline-offset-4"
           >
-            Tạo tài khoản
+            Create account
           </Link>
         </p>
       </div>

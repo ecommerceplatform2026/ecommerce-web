@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import type { ProductFilters } from '@/hooks/useProductFilters'
 
@@ -23,16 +23,23 @@ export function ProductFilter({
     onReset,
     hasActiveFilters,
 }: ProductFilterProps) {
-    const [localMin, setLocalMin] = useState(filters.minPrice !== null ? String(filters.minPrice) : '')
-    const [localMax, setLocalMax] = useState(filters.maxPrice !== null ? String(filters.maxPrice) : '')
+    const filterMinText = filters.minPrice !== null ? String(filters.minPrice) : ''
+    const filterMaxText = filters.maxPrice !== null ? String(filters.maxPrice) : ''
+    const [priceDraft, setPriceDraft] = useState({
+        sourceMin: filterMinText,
+        sourceMax: filterMaxText,
+        min: filterMinText,
+        max: filterMaxText,
+    })
 
-    useEffect(() => {
-        setLocalMin(filters.minPrice !== null ? String(filters.minPrice) : '')
-    }, [filters.minPrice])
-
-    useEffect(() => {
-        setLocalMax(filters.maxPrice !== null ? String(filters.maxPrice) : '')
-    }, [filters.maxPrice])
+    const localMin =
+        priceDraft.sourceMin === filterMinText && priceDraft.sourceMax === filterMaxText
+            ? priceDraft.min
+            : filterMinText
+    const localMax =
+        priceDraft.sourceMin === filterMinText && priceDraft.sourceMax === filterMaxText
+            ? priceDraft.max
+            : filterMaxText
 
     function handleApplyPrice() {
         const minCandidate = localMin !== '' ? Number(localMin) : null
@@ -46,34 +53,48 @@ export function ProductFilter({
         <div className="space-y-6">
             <div>
                 <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
-                    Khoảng giá
+                    Price Range
                 </h3>
                 <div className="flex gap-2 items-center mb-2">
                     <input
                         type="number"
-                        placeholder="Từ"
+                        placeholder="From"
                         value={localMin}
-                        onChange={e => setLocalMin(e.target.value)}
+                        onChange={e =>
+                            setPriceDraft({
+                                sourceMin: filterMinText,
+                                sourceMax: filterMaxText,
+                                min: e.target.value,
+                                max: localMax,
+                            })
+                        }
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                     <span className="text-muted-foreground shrink-0">—</span>
                     <input
                         type="number"
-                        placeholder="Đến"
+                        placeholder="To"
                         value={localMax}
-                        onChange={e => setLocalMax(e.target.value)}
+                        onChange={e =>
+                            setPriceDraft({
+                                sourceMin: filterMinText,
+                                sourceMax: filterMaxText,
+                                min: localMin,
+                                max: e.target.value,
+                            })
+                        }
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                 </div>
                 <Button variant="outline" size="sm" className="w-full" onClick={handleApplyPrice}>
-                    Áp dụng
+                    Apply
                 </Button>
             </div>
 
             {materials.length > 0 && (
                 <div>
                     <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
-                        Chất liệu
+                        Material
                     </h3>
                     <div className="space-y-2">
                         {materials.map(mat => (
@@ -95,7 +116,7 @@ export function ProductFilter({
             {colors.length > 0 && (
                 <div>
                     <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
-                        Màu sắc
+                        Color
                     </h3>
                     <div className="space-y-2">
                         {colors.map(col => (
@@ -117,7 +138,7 @@ export function ProductFilter({
             {sizes.length > 0 && (
                 <div>
                     <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
-                        Kích cỡ
+                        Size
                     </h3>
                     <div className="flex flex-wrap gap-2">
                         {sizes.map(sz => (
@@ -139,7 +160,7 @@ export function ProductFilter({
 
             {hasActiveFilters && (
                 <Button variant="ghost" size="sm" className="w-full" onClick={onReset}>
-                    Xoá bộ lọc
+                    Clear filters
                 </Button>
             )}
         </div>

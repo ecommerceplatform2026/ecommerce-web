@@ -1,7 +1,7 @@
 export const ROUTES = {
 
     // ============================================================
-    // PUBLIC — không cần đăng nhập
+    // PUBLIC - no sign-in required
     // ============================================================
 
     HOME: '/',
@@ -14,25 +14,25 @@ export const ROUTES = {
 
     // ------ Shop / Catalog (FR05, FR06) ------
     SHOP: {
-        // Danh sách sản phẩm — có filter, sort, pagination, search
+        // Product list with filter, sort, pagination, and search
         PRODUCTS: '/products',
 
-        // Chi tiết sản phẩm — ảnh, variant, giá, tồn kho, review
+        // Product detail with images, variants, price, stock, and reviews
         PRODUCT_DETAIL: (id: string) => `/products/${id}`,
 
-        // Tìm kiếm
+        // Search
         SEARCH: '/products/search',
     },
 
     // ============================================================
-    // PROTECTED — cần đăng nhập  (middleware chặn nếu chưa login)
+    // PROTECTED - sign-in required (middleware blocks guests)
     // ============================================================
 
     // ------ User Profile (FR02) ------
     PROFILE: {
-        INDEX: '/profile',           // xem thông tin cá nhân
-        EDIT: '/profile/edit',      // cập nhật thông tin
-        CHANGE_PASSWORD: '/profile/password',  // đổi mật khẩu
+        INDEX: '/profile',           // view personal information
+        EDIT: '/profile/edit',      // update information
+        CHANGE_PASSWORD: '/profile/password',  // change password
     },
 
     // ------ Cart (FR10) ------
@@ -40,19 +40,19 @@ export const ROUTES = {
 
     // ------ Checkout (FR11, FR12) ------
     CHECKOUT: {
-        INDEX: '/checkout',           // form địa chỉ + chọn thanh toán
-        SUCCESS: '/checkout/success',   // thanh toán thành công
-        FAILED: '/checkout/failed',    // thanh toán thất bại
+        INDEX: '/checkout',           // address form and payment selection
+        SUCCESS: '/checkout/success',   // payment success
+        FAILED: '/checkout/failed',    // payment failed
     },
 
     // ------ Orders (FR03, FR13) ------
     ORDERS: {
-        INDEX: '/orders',                          // lịch sử đơn hàng
-        DETAIL: (id: string) => `/orders/${id}`,    // chi tiết đơn hàng
+        INDEX: '/orders',                          // order history
+        DETAIL: (id: string) => `/orders/${id}`,    // order detail
     },
 
     // ============================================================
-    // ADMIN — cần role Admin  (middleware chặn nếu không phải admin)
+    // ADMIN - Admin role required (middleware blocks non-admin users)
     // ============================================================
 
     ADMIN: {
@@ -61,45 +61,45 @@ export const ROUTES = {
 
         // ------ Products (FR05, FR06, FR07, FR09) ------
         PRODUCTS: {
-            INDEX: '/admin/products',              // danh sách sản phẩm
-            CREATE: '/admin/products/create',       // thêm sản phẩm mới
-            EDIT: (id: string) => `/admin/products/${id}/edit`,   // sửa sản phẩm
-            DETAIL: (id: string) => `/admin/products/${id}`,        // xem chi tiết
+            INDEX: '/admin/products',              // product list
+            CREATE: '/admin/products/create',       // add new product
+            EDIT: (id: string) => `/admin/products/${id}/edit`,   // edit product
+            DETAIL: (id: string) => `/admin/products/${id}`,        // view detail
         },
 
         // ------ Categories (FR04) ------
         CATEGORIES: {
-            INDEX: '/admin/categories',            // danh sách danh mục
-            CREATE: '/admin/categories/create',     // thêm danh mục
+            INDEX: '/admin/categories',            // category list
+            CREATE: '/admin/categories/create',     // add category
             EDIT: (id: string) => `/admin/categories/${id}/edit`,
         },
 
         // ------ Orders (FR13) ------
         ORDERS: {
-            INDEX: '/admin/orders',                         // danh sách đơn hàng
-            DETAIL: (id: string) => `/admin/orders/${id}`,   // chi tiết + cập nhật status
+            INDEX: '/admin/orders',                         // order list
+            DETAIL: (id: string) => `/admin/orders/${id}`,   // detail and status update
         },
 
         // ------ Users (FR02) ------
         USERS: {
-            INDEX: '/admin/users',                          // danh sách người dùng
-            DETAIL: (id: string) => `/admin/users/${id}`,    // chi tiết user
+            INDEX: '/admin/users',                          // user list
+            DETAIL: (id: string) => `/admin/users/${id}`,    // user detail
         },
 
         // ------ Reviews (FR08) ------
         REVIEWS: {
-            INDEX: '/admin/reviews',   // danh sách review chờ duyệt
+            INDEX: '/admin/reviews',   // pending review list
         },
     },
 
 } as const
 
 // ============================================================
-// HELPER — kiểm tra route có cần auth không
-// Dùng trong middleware.ts
+// HELPER - checks whether a route requires auth
+// Used in middleware.ts
 // ============================================================
 
-// Các route chỉ dành cho user đã đăng nhập
+// Routes for signed-in users only
 export const PROTECTED_ROUTES = [
     '/profile',
     '/cart',
@@ -107,12 +107,12 @@ export const PROTECTED_ROUTES = [
     '/orders',
 ] as const
 
-// Các route chỉ dành cho Admin
+// Routes for Admin only
 export const ADMIN_ROUTES = [
     '/admin',
 ] as const
 
-// Các route chỉ dành cho guest (đã login thì redirect về home)
+// Routes for guests only (signed-in users redirect home)
 export const GUEST_ONLY_ROUTES = [
     ROUTES.AUTH.LOGIN,
     ROUTES.AUTH.REGISTER,

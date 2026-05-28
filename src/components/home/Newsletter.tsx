@@ -14,32 +14,32 @@ export function Newsletter() {
         e.preventDefault()
         if (!email.trim()) return
         setSubmitted(true)
-        toast.success("Đăng ký nhận tin thành công!")
+        toast.success("Newsletter subscription successful!")
     }
 
     return (
         <section className="py-24 px-4 lg:px-8 bg-foreground text-background">
             <div className="container mx-auto max-w-2xl text-center">
                 <p className="text-xs tracking-[0.3em] uppercase opacity-60 mb-4">
-                    Đừng bỏ lỡ
+                    Don&apos;t miss out
                 </p>
                 <h2 className="font-serif text-4xl md:text-5xl mb-4">
-                    Đăng Ký Nhận Tin
+                    Join the Newsletter
                 </h2>
                 <p className="text-background/70 text-lg mb-10">
-                    Cập nhật bộ sưu tập mới nhất, ưu đãi độc quyền và xu hướng thời trang mỗi tuần.
+                    Get updates on the latest collections, exclusive offers, and weekly fashion trends.
                 </p>
 
                 {submitted ? (
                     <div className="flex items-center justify-center gap-3 text-background/80">
                         <Check className="h-5 w-5" />
-                        <span>Cảm ơn bạn đã đăng ký!</span>
+                        <span>Thank you for subscribing!</span>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="flex gap-3 max-w-md mx-auto">
                         <Input
                             type="email"
-                            placeholder="Địa chỉ email của bạn"
+                            placeholder="Your email address"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
@@ -50,13 +50,13 @@ export function Newsletter() {
                             size="lg"
                             className="h-12 rounded-none bg-background text-foreground hover:bg-background/90 shrink-0"
                         >
-                            Đăng ký
+                            Subscribe
                         </Button>
                     </form>
                 )}
 
                 <p className="text-xs text-background/40 mt-4">
-                    Không spam. Hủy đăng ký bất kỳ lúc nào.
+                    No spam. Unsubscribe anytime.
                 </p>
             </div>
         </section>

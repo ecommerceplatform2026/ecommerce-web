@@ -17,7 +17,7 @@ export function CategoryList({ categories, selectedCategoryId, onSelect }: Categ
                 size="sm"
                 onClick={() => onSelect('')}
             >
-                Tất cả
+                All
             </Button>
             {categories.map(cat => (
                 <Button

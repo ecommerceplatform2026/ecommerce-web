@@ -113,7 +113,7 @@ function DialogContent({
           type="button"
           onClick={() => onOpenChange(false)}
           className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring"
-          aria-label="Đóng"
+          aria-label="Close"
         >
           <X className="h-4 w-4" />
         </button>

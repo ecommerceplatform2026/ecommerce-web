@@ -24,7 +24,7 @@ interface SpinnerProps
     label?: string
 }
 
-function Spinner({ className, size, label = 'Đang tải...', ...props }: SpinnerProps) {
+function Spinner({ className, size, label = 'Loading...', ...props }: SpinnerProps) {
     return (
         <span
             role="status"

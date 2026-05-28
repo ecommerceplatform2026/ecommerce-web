@@ -26,14 +26,14 @@ export function useCart() {
         totalPrice,
         isLoading,
 
-        // Optimistic local operations — UI cập nhật ngay, không chờ server
+        // Optimistic local operations - UI updates immediately without waiting for the server
         addItem:        (item: CartItem)        => dispatch(addItem(item)),
         removeItem:     (variantId: string)     => dispatch(removeItem(variantId)),
         updateQuantity: (variantId: string, quantity: number) =>
             dispatch(updateQuantity({ variantId, quantity })),
         clearCart:      ()                      => dispatch(clearCart()),
 
-        // Server sync — gọi khi user đăng nhập hoặc cần merge guest cart
+        // Server sync - call when the user signs in or the guest cart needs merging
         fetchCart:      ()                      => dispatch(fetchCart()),
         mergeGuestCart: (items: CartItem[])     => dispatch(mergeGuestCart(items)),
     }

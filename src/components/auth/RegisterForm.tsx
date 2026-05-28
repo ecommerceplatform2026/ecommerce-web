@@ -14,16 +14,16 @@ import type { ApiError } from "@/types/api"
 
 const registerSchema = z
   .object({
-    fullName: z.string().min(1, "Họ và tên không được để trống").min(2, "Họ và tên phải có ít nhất 2 ký tự"),
-    email: z.string().min(1, "Email không được để trống").email("Email không hợp lệ"),
-    password: z.string().min(1, "Mật khẩu không được để trống").min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
-    confirmPassword: z.string().min(1, "Vui lòng xác nhận mật khẩu"),
+    fullName: z.string().min(1, "Full name is required").min(2, "Full name must be at least 2 characters"),
+    email: z.string().min(1, "Email is required").email("Invalid email"),
+    password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
     acceptTerms: z.boolean().refine((val) => val === true, {
-      message: "Bạn phải đồng ý với điều khoản sử dụng",
+      message: "You must agree to the terms of use",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Mật khẩu xác nhận không khớp",
+    message: "Password confirmation does not match",
     path: ["confirmPassword"],
   })
 
@@ -52,10 +52,10 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
       })
-      toast.success("Chào mừng bạn đến với ATELIER.")
+      toast.success("Welcome to ATELIER.")
       router.push("/")
     } catch (err) {
-      toast.error((err as ApiError).message ?? 'Đã có lỗi xảy ra. Vui lòng thử lại.')
+      toast.error((err as ApiError).message ?? 'Something went wrong. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -63,15 +63,15 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
-      {/* Họ và tên */}
+      {/* Full name */}
       <div className="space-y-2">
         <label htmlFor="fullName" className="text-sm font-medium leading-none">
-          Họ và tên
+          Full name
         </label>
         <Input
           id="fullName"
           type="text"
-          placeholder="Nguyễn Văn A"
+          placeholder="John Smith"
           {...register("fullName")}
           className="h-12"
           disabled={isLoading}
@@ -101,16 +101,16 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Mật khẩu */}
+      {/* Password */}
       <div className="space-y-2">
         <label htmlFor="password" className="text-sm font-medium leading-none">
-          Mật khẩu
+          Password
         </label>
         <div className="relative">
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Tạo mật khẩu (ít nhất 8 ký tự)"
+            placeholder="Create a password (at least 8 characters)"
             {...register("password")}
             className="h-12 pr-10"
             disabled={isLoading}
@@ -130,16 +130,16 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Xác nhận mật khẩu */}
+      {/* Confirm password */}
       <div className="space-y-2">
         <label htmlFor="confirmPassword" className="text-sm font-medium leading-none">
-          Xác nhận mật khẩu
+          Confirm password
         </label>
         <div className="relative">
           <Input
             id="confirmPassword"
             type={showConfirmPassword ? "text" : "password"}
-            placeholder="Nhập lại mật khẩu"
+            placeholder="Re-enter password"
             {...register("confirmPassword")}
             className="h-12 pr-10"
             disabled={isLoading}
@@ -159,7 +159,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Điều khoản */}
+      {/* Terms */}
       <div className="space-y-2">
         <div className="flex items-start gap-2">
           <input
@@ -170,13 +170,13 @@ export function RegisterForm() {
             className="mt-0.5 h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
           />
           <label htmlFor="acceptTerms" className="text-sm font-normal leading-relaxed cursor-pointer">
-            Tôi đồng ý với{" "}
+            I agree to the{" "}
             <a href="/terms" className="underline hover:text-muted-foreground transition-colors">
-              điều khoản sử dụng
+              terms of use
             </a>{" "}
-            và{" "}
+            and{" "}
             <a href="/privacy" className="underline hover:text-muted-foreground transition-colors">
-              chính sách bảo mật
+              privacy policy
             </a>
           </label>
         </div>
@@ -190,7 +190,7 @@ export function RegisterForm() {
         className="w-full h-12 text-base"
         disabled={isLoading}
       >
-        {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
+        {isLoading ? "Creating account..." : "Create account"}
       </Button>
     </form>
   )

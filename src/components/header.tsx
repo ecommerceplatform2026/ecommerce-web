@@ -42,7 +42,7 @@ export function Header() {
 
     const handleLogout = () => {
         logout()
-        toast.success("Hẹn gặp lại bạn!")
+        toast.success("See you again!")
         router.push("/login")
     }
 
@@ -51,7 +51,7 @@ export function Header() {
             <div className="container mx-auto px-4 lg:px-8">
                 <div className="flex items-center justify-between h-20 gap-4">
 
-                    {/* Nút mở menu mobile */}
+                    {/* Mobile menu button */}
                     <button
                         className="lg:hidden"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -78,13 +78,13 @@ export function Header() {
                         </Link>
                     </nav>
 
-                    {/* Thanh tìm kiếm desktop */}
+                    {/* Desktop search */}
                     <div className="hidden md:block flex-1 max-w-md">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 type="search"
-                                placeholder="Tìm kiếm sản phẩm..."
+                                placeholder="Search products..."
                                 className="pl-10 h-10"
                                 value={searchValue}
                                 onChange={e => handleSearch(e.target.value)}
@@ -92,17 +92,17 @@ export function Header() {
                         </div>
                     </div>
 
-                    {/* Nhóm icon bên phải */}
+                    {/* Right icon group */}
                     <div className="flex items-center gap-2">
 
-                        {/* Icon thông báo */}
+                        {/* Notification icon */}
                         <Button variant="ghost" size="icon" className="relative cursor-pointer">
                             <Bell className="h-5 w-5" />
                         </Button>
 
-                        {/* Icon thông tin người dùng:
-                            - Chưa đăng nhập → chuyển đến trang /login
-                            - Đã đăng nhập    → hiện dropdown menu
+                        {/* User info icon:
+                            - Guest -> go to /login
+                            - Signed in -> show dropdown menu
                         */}
                         {user ? (
                             <DropdownMenu>
@@ -126,13 +126,13 @@ export function Header() {
                                     <DropdownMenuItem asChild>
                                         <Link href="/profile" className="cursor-pointer">
                                             <User className="mr-2 h-4 w-4" />
-                                            Thông tin cá nhân
+                                            Profile
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuItem asChild>
                                         <Link href="/orders" className="cursor-pointer">
                                             <Package className="mr-2 h-4 w-4" />
-                                            Đơn hàng của tôi
+                                            My Orders
                                         </Link>
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
@@ -141,7 +141,7 @@ export function Header() {
                                         className="cursor-pointer text-destructive focus:text-destructive"
                                     >
                                         <LogOut className="mr-2 h-4 w-4" />
-                                        Đăng xuất
+                                        Sign out
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -151,7 +151,7 @@ export function Header() {
                                 size="icon"
                                 className="cursor-pointer"
                                 onClick={() => router.push("/login")}
-                                aria-label="Đăng nhập"
+                                aria-label="Sign in"
                             >
                                 <User className="h-5 w-5" />
                             </Button>
@@ -164,7 +164,7 @@ export function Header() {
                             </Button>
                         </Link>
 
-                        {/* Icon giỏ hàng */}
+                        {/* Cart icon */}
                         <Link href="/cart">
                             <Button variant="ghost" size="icon" className="relative cursor-pointer">
                                 <ShoppingBag className="h-5 w-5" />
@@ -178,13 +178,13 @@ export function Header() {
                     <nav className="lg:hidden py-6 border-t border-border">
                         <div className="flex flex-col gap-4">
 
-                            {/* Thanh tìm kiếm mobile */}
+                            {/* Mobile search */}
                             <div className="md:hidden mb-4">
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         type="search"
-                                        placeholder="Tìm kiếm sản phẩm..."
+                                        placeholder="Search products..."
                                         className="pl-10 h-10"
                                         value={searchValue}
                                         onChange={e => handleSearch(e.target.value)}
@@ -214,7 +214,7 @@ export function Header() {
                                 ABOUT
                             </Link>
 
-                            {/* Auth mobile: hiện nút Login/Register nếu chưa đăng nhập */}
+                            {/* Mobile auth: show Login/Register buttons for guests */}
                             {!user && (
                                 <div className="flex gap-3 pt-2 border-t border-border">
                                     <Link
@@ -222,7 +222,7 @@ export function Header() {
                                         className="text-sm tracking-wide hover:text-muted-foreground transition-colors"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Đăng nhập
+                                        Sign in
                                     </Link>
                                     <span className="text-muted-foreground">|</span>
                                     <Link
@@ -230,7 +230,7 @@ export function Header() {
                                         className="text-sm tracking-wide hover:text-muted-foreground transition-colors"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                        Đăng ký
+                                        Register
                                     </Link>
                                 </div>
                             )}

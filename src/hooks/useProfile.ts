@@ -38,7 +38,7 @@ export function useProfile() {
             })
             .catch((err: ApiError) => {
                 if (cancelled) return
-                setError(err.message ?? 'Không thể tải thông tin tài khoản.')
+                setError(err.message ?? 'Unable to load account information.')
                 setIsLoading(false)
             })
 
