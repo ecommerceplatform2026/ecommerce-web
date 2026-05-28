@@ -2,7 +2,7 @@
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? ''
 
-// Helper tạo full URL (dùng trong axios baseURL)
+// Helper for building full URLs (used with axios baseURL)
 export const buildUrl = (path: string) => `${API_BASE_URL}${path}`
 
 // ============================================================
@@ -26,10 +26,10 @@ export const USER_ENDPOINTS = {
     UPDATE_PROFILE: '/api/profile',
     UPLOAD_AVATAR: '/api/profile/avatar',
 
-    // Order history (xem lịch sử mua hàng của chính mình)
+    // Order history for the current user
     GET_ORDER_HISTORY: '/api/users/orders',
 
-    // Admin — quản lý users
+    // Admin user management
     ADMIN_GET_ALL: '/api/users',
     ADMIN_GET_BY_ID: (id: string) => `/api/users/${id}`,
     ADMIN_UPDATE_STATUS: (id: string) => `/api/users/${id}/status`,
@@ -58,6 +58,7 @@ export const PRODUCT_ENDPOINTS = {
     // Public — browse & search
     GET_ALL: '/api/products',              // filter, sort, pagination
     GET_BY_ID: (id: string) => `/api/products/${id}`,
+    GET_DETAIL: (id: string) => `/api/products/${id}/detail`,
     SEARCH: '/api/products/search',
 
     // Images
@@ -68,20 +69,20 @@ export const PRODUCT_ENDPOINTS = {
     GET_VARIANT_BY_ID: (productId: string, variantId: string) =>
         `/api/products/${productId}/variants/${variantId}`,
 
-    // Admin — quản lý sản phẩm
+    // Admin product management
     ADMIN_GET_ALL: '/api/products',
     ADMIN_CREATE: '/api/products',
     ADMIN_UPDATE: (id: string) => `/api/products/${id}`,
     ADMIN_DELETE: (id: string) => `/api/products/${id}`,
 
-    // Admin — quản lý variants
+    // Admin variant management
     ADMIN_CREATE_VARIANT: (productId: string) => `/api/products/${productId}/variants`,
     ADMIN_UPDATE_VARIANT: (productId: string, variantId: string) =>
         `/api/products/${productId}/variants/${variantId}`,
     ADMIN_DELETE_VARIANT: (productId: string, variantId: string) =>
         `/api/products/${productId}/variants/${variantId}`,
 
-    // Admin — quản lý images
+    // Admin image management
     ADMIN_UPLOAD_IMAGE: (productId: string) => `/api/products/${productId}/images`,
     ADMIN_DELETE_IMAGE: (productId: string, imageId: string) =>
         `/api/products/${productId}/images/${imageId}`,
@@ -90,7 +91,7 @@ export const PRODUCT_ENDPOINTS = {
 // ============================================================
 // CART  (FR10)
 // ============================================================
-// TODO: backend chưa implement
+// TODO: backend not implemented yet
 
 export const CART_ENDPOINTS = {
     // Authenticated user cart (server-side)
@@ -100,20 +101,20 @@ export const CART_ENDPOINTS = {
     REMOVE_ITEM: (itemId: string) => `/api/cart/items/${itemId}`,
     CLEAR: '/api/cart/clear',
 
-    // Merge guest cart vào user cart sau khi login
+    // Merge guest cart into the user cart after sign-in
     MERGE: '/api/cart/merge',
 } as const
 
 // ============================================================
 // ORDERS  (FR11, FR13, FR14)
 // ============================================================
-// TODO: backend chưa implement
+// TODO: backend not implemented yet
 
 export const ORDER_ENDPOINTS = {
     // User
     CREATE: '/api/orders',                           // POST — checkout
-    GET_ALL: '/api/orders',                           // GET — lịch sử đơn hàng
-    GET_BY_ID: (id: string) => `/api/orders/${id}`,     // GET — chi tiết đơn
+    GET_ALL: '/api/orders',                           // GET - order history
+    GET_BY_ID: (id: string) => `/api/orders/${id}`,     // GET - order detail
 
     // Admin
     ADMIN_GET_ALL: '/api/orders',
@@ -125,25 +126,25 @@ export const ORDER_ENDPOINTS = {
 // ============================================================
 // PAYMENT  (FR12)
 // ============================================================
-// TODO: backend chưa implement
+// TODO: backend not implemented yet
 
 export const PAYMENT_ENDPOINTS = {
-    // Khởi tạo thanh toán online
+    // Initialize online payment
     CREATE: '/api/payments/create',
 
-    // Webhook / callback từ cổng thanh toán (BE xử lý, FE chỉ cần biết để redirect)
+    // Webhook / callback from payment gateway (BE handles it, FE only needs redirect awareness)
     PAYOS_CALLBACK: '/api/payments/payos/callback',
     MOMO_CALLBACK: '/api/payments/momo/callback',
     ZALOPAY_CALLBACK: '/api/payments/zalopay/callback',
 
-    // Kiểm tra trạng thái thanh toán
+    // Check payment status
     GET_STATUS: (orderCode: string) => `/api/payments/${orderCode}/status`,
 } as const
 
 // ============================================================
 // REVIEWS  (FR08)
 // ============================================================
-// TODO: backend chưa implement
+// TODO: backend not implemented yet
 
 export const REVIEW_ENDPOINTS = {
     // Public
@@ -152,7 +153,7 @@ export const REVIEW_ENDPOINTS = {
     // Authenticated user
     CREATE: (productId: string) => `/api/products/${productId}/reviews`,
 
-    // Admin — kiểm duyệt
+    // Admin moderation
     ADMIN_GET_ALL: '/api/reviews',
     ADMIN_APPROVE: (id: string) => `/api/reviews/${id}/approve`,
     ADMIN_DELETE: (id: string) => `/api/reviews/${id}`,
@@ -161,10 +162,10 @@ export const REVIEW_ENDPOINTS = {
 // ============================================================
 // UPLOAD  (Sprint 2)
 // ============================================================
-// TODO: backend chưa implement
+// TODO: backend not implemented yet
 
 export const UPLOAD_ENDPOINTS = {
-    IMAGE: '/api/upload/image',   // Cloudinary upload qua BE
+    IMAGE: '/api/upload/image',   // Cloudinary upload via BE
 } as const
 
 // ============================================================

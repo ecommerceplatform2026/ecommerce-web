@@ -10,6 +10,36 @@ import { ROUTES } from '@/constants/routes'
 import type { ApiResponse, ApiError } from '@/types/api'
 import type { AuthResponse } from '@/types/user'
 
+type BackendErrorData = {
+    errors?: unknown
+    Errors?: unknown
+    message?: string
+    Message?: string
+    title?: string
+    Title?: string
+}
+
+function normalizeBackendErrors(errors: unknown): string[] | undefined {
+    if (Array.isArray(errors)) {
+        const messages = errors.filter((error): error is string => typeof error === 'string')
+        return messages.length > 0 ? messages : undefined
+    }
+
+    if (typeof errors === 'object' && errors !== null) {
+        const messages = Object.values(errors).flatMap(value => {
+            if (Array.isArray(value)) {
+                return value.filter((error): error is string => typeof error === 'string')
+            }
+
+            return typeof value === 'string' ? [value] : []
+        })
+
+        return messages.length > 0 ? messages : undefined
+    }
+
+    return undefined
+}
+
 // ============================================================
 // COOKIE KEYS
 // ============================================================
@@ -31,14 +61,14 @@ export const tokenHelper = {
         Cookies.get(COOKIE_KEYS.REFRESH_TOKEN) ?? null,
 
     setTokens: (accessToken: string, refreshToken?: string) => {
-        // Access token: hết hạn sau 1 ngày
+        // Access token expires after 1 day
         Cookies.set(COOKIE_KEYS.ACCESS_TOKEN, accessToken, {
             expires: 1,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
         })
 
-        // Refresh token: hết hạn sau 7 ngày
+        // Refresh token expires after 7 days
         if (refreshToken) {
             Cookies.set(COOKIE_KEYS.REFRESH_TOKEN, refreshToken, {
                 expires: 7,
@@ -55,12 +85,12 @@ export const tokenHelper = {
 }
 
 // ============================================================
-// TẠO AXIOS INSTANCE
+// CREATE AXIOS INSTANCE
 // ============================================================
 
 const axiosInstance: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
-    timeout: 10000,  // 10 giây — NF01 (low latency)
+    timeout: 10000,  // 10 seconds - NF01 (low latency)
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -69,7 +99,7 @@ const axiosInstance: AxiosInstance = axios.create({
 
 // ============================================================
 // REQUEST INTERCEPTOR
-// Gắn JWT token vào mọi request
+// Attach JWT token to every request
 // ============================================================
 
 axiosInstance.interceptors.request.use(
@@ -87,7 +117,7 @@ axiosInstance.interceptors.request.use(
 
 // ============================================================
 // REFRESH TOKEN LOGIC
-// Tránh nhiều request cùng refresh cùng lúc (race condition)
+// Prevent multiple requests from refreshing at the same time (race condition)
 // ============================================================
 
 let isRefreshing = false
@@ -122,29 +152,29 @@ const refreshAccessToken = async (): Promise<string> => {
 
 // ============================================================
 // RESPONSE INTERCEPTOR
-// Xử lý lỗi 401 → tự refresh token
-// Xử lý lỗi khác → chuẩn hoá thành ApiError
+// Handle 401 errors by refreshing the token
+// Normalize other errors into ApiError
 // NF03: centralized error handling
 // ============================================================
 
 axiosInstance.interceptors.response.use(
 
-    // ---- Thành công ----
+    // ---- Success ----
     (response: AxiosResponse) => response,
 
-    // ---- Thất bại ----
+    // ---- Failure ----
     async (error: AxiosError<ApiError>) => {
         const originalRequest = error.config as InternalAxiosRequestConfig & {
             _retry?: boolean
         }
 
-        // ------ 401 Unauthorized → thử refresh token ------
-        // Bỏ qua nếu chính là login endpoint — 401 ở đây là sai credentials, không phải token hết hạn
+        // ------ 401 Unauthorized - try refreshing token ------
+        // Skip login endpoint because 401 means invalid credentials, not an expired token
         if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== AUTH_ENDPOINTS.LOGIN) {
-            // Đánh dấu request đã retry để tránh loop vô tận
+            // Mark request as retried to avoid an infinite loop
             originalRequest._retry = true
 
-            // Nếu đang refresh rồi → xếp hàng chờ
+            // If refresh is already in progress, queue this request
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     pendingRequests.push({
@@ -157,7 +187,7 @@ axiosInstance.interceptors.response.use(
                 })
             }
 
-            // Bắt đầu refresh
+            // Start refresh
             isRefreshing = true
 
             try {
@@ -167,7 +197,7 @@ axiosInstance.interceptors.response.use(
                 return axiosInstance(originalRequest)
 
             } catch (refreshError) {
-                // Reject tất cả request đang chờ
+                // Reject all queued requests
                 pendingRequests.forEach(p => p.reject(refreshError))
                 pendingRequests = []
 
@@ -183,40 +213,49 @@ axiosInstance.interceptors.response.use(
             }
         }
 
-        // ------ Chuẩn hoá lỗi từ BE ------
-        const backendErrors = error.response?.data?.errors
-        const firstError = backendErrors?.[0] ?? null
+        // ------ Normalize BE errors ------
+        const responseData = error.response?.data as BackendErrorData | undefined
+        const backendErrors =
+            normalizeBackendErrors(responseData?.errors) ??
+            normalizeBackendErrors(responseData?.Errors)
+        const firstError =
+            backendErrors?.[0] ??
+            responseData?.message ??
+            responseData?.Message ??
+            responseData?.title ??
+            responseData?.Title ??
+            null
 
         const apiError: ApiError = {
             success: false,
-            message: firstError ?? 'Đã xảy ra lỗi, vui lòng thử lại.',
+            message: firstError ?? 'Something went wrong. Please try again.',
             statusCode: error.response?.status ?? 500,
             errors: backendErrors,
         }
 
-        // ------ 403 Forbidden → không có quyền ------
+        // ------ 403 Forbidden - no permission ------
         if (error.response?.status === 403) {
-            apiError.message = firstError ?? 'Bạn không có quyền thực hiện thao tác này.'
+            apiError.message = firstError ?? 'You do not have permission to perform this action.'
         }
 
         // ------ 404 Not Found ------
         if (error.response?.status === 404) {
-            apiError.message = firstError ?? 'Không tìm thấy dữ liệu.'
+            apiError.message = firstError ?? 'Data not found.'
         }
 
-        // ------ 422 Unprocessable Entity → lỗi validation từ BE ------
+        // ------ 422 Unprocessable Entity - validation error from BE ------
         if (error.response?.status === 422) {
-            apiError.message = firstError ?? 'Dữ liệu không hợp lệ.'
+            apiError.message = firstError ?? 'Invalid data.'
         }
 
-        // ------ 500 Server Error — không expose internal error ra user ------
+        // ------ 500 Server Error - do not expose internal errors to users ------
         if (error.response?.status === 500) {
-            apiError.message = 'Lỗi máy chủ, vui lòng thử lại sau.'
+            apiError.message = 'Server error. Please try again later.'
         }
 
-        // ------ Network Error (không kết nối được BE) ------
+        // ------ Network Error (cannot connect to BE) ------
         if (!error.response) {
-            apiError.message = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra mạng.'
+            apiError.message = 'Cannot connect to the server. Please check your network connection.'
             apiError.statusCode = 0
         }
 

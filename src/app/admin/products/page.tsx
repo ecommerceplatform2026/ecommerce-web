@@ -1,3 +1,5 @@
+import { ProductManagement } from "@/components/admin/ProductManagement"
+
 export default function AdminProductsPage() {
-    return <div>Admin Products Page</div>
+    return <ProductManagement />
 }
