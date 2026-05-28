@@ -16,13 +16,14 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
     const activeUrl = sorted[activeIndex]?.imageUrl ?? '/placeholder.svg'
 
     return (
-        <div className="space-y-4">
-            <div className="relative aspect-[3/4] bg-secondary overflow-hidden">
+        <div className="mx-auto w-full max-w-[520px] space-y-3 lg:mx-0">
+            <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
                 <Image
                     src={activeUrl}
                     alt={productName}
                     fill
-                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 520px"
+                    className="object-contain"
                     priority
                 />
             </div>
@@ -33,16 +34,17 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                         <button
                             key={img.id}
                             onClick={() => setActiveIndex(i)}
-                            className={`relative flex-shrink-0 w-20 aspect-[3/4] bg-secondary overflow-hidden border-2 transition-colors ${
+                            className={`relative aspect-[3/4] w-16 flex-shrink-0 overflow-hidden border bg-secondary transition-colors sm:w-20 ${
                                 activeIndex === i
                                     ? 'border-foreground'
-                                    : 'border-transparent hover:border-muted-foreground'
+                                    : 'border-border hover:border-muted-foreground'
                             }`}
                         >
                             <Image
                                 src={img.imageUrl}
                                 alt={`${productName} ${i + 1}`}
                                 fill
+                                sizes="80px"
                                 className="object-cover"
                             />
                         </button>

@@ -16,7 +16,7 @@ export function ShopByCategory() {
                 <div className="text-center mb-16">
                     <h2 className="font-serif text-4xl md:text-5xl mb-4">Shop by Category</h2>
                     <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-                        Khám phá các bộ sưu tập được tuyển chọn kỹ lưỡng
+                        Explore carefully curated collections
                     </p>
                 </div>
 
@@ -39,6 +39,7 @@ export function ShopByCategory() {
                                         src="/placeholder.svg"
                                         alt={category.name}
                                         fill
+                                        sizes="288px"
                                         className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent group-hover:from-foreground/50 transition-colors duration-500" />
@@ -46,13 +47,13 @@ export function ShopByCategory() {
                                     <div className="absolute inset-0 p-6 flex flex-col justify-end">
                                         <div className="space-y-3">
                                             <p className="text-background/80 text-xs tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                                Bộ sưu tập
+                                                Collection
                                             </p>
                                             <h3 className="font-serif text-background text-2xl leading-tight">
                                                 {category.name}
                                             </h3>
                                             <div className="flex items-center gap-2 text-background/90 text-sm tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                                <span>Khám phá</span>
+                                                <span>Explore</span>
                                                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                                             </div>
                                         </div>
@@ -67,7 +68,7 @@ export function ShopByCategory() {
                             const slider = document.getElementById("categorySlider")
                             if (slider) slider.scrollBy({ left: -300, behavior: "smooth" })
                         }}
-                        aria-label="Cuộn trái"
+                        aria-label="Scroll left"
                         className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-6 z-10 bg-foreground hover:bg-foreground/90 text-background p-2 rounded-full transition-all cursor-pointer"
                     >
                         <ChevronLeft className="h-6 w-6" />
@@ -78,7 +79,7 @@ export function ShopByCategory() {
                             const slider = document.getElementById("categorySlider")
                             if (slider) slider.scrollBy({ left: 300, behavior: "smooth" })
                         }}
-                        aria-label="Cuộn phải"
+                        aria-label="Scroll right"
                         className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-6 z-10 bg-foreground hover:bg-foreground/90 text-background p-2 rounded-full transition-all cursor-pointer"
                     >
                         <ChevronRight className="h-6 w-6" />

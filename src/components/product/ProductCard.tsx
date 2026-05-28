@@ -37,14 +37,14 @@ export function ProductCard({ product }: ProductCardProps) {
             quantity: 1,
             imageUrl: null,
         })
-        toast.success(`Đã thêm vào giỏ hàng`)
+        toast.success('Added to cart')
     }
 
     function handleWishlist(e: React.MouseEvent<HTMLButtonElement>) {
         e.preventDefault()
         e.stopPropagation()
         toggleItem(product)
-        toast.success(inWishlist ? "Đã xoá khỏi yêu thích" : "Đã thêm vào yêu thích")
+        toast.success(inWishlist ? "Removed from wishlist" : "Added to wishlist")
     }
 
     return (
@@ -59,6 +59,7 @@ export function ProductCard({ product }: ProductCardProps) {
                     src="/placeholder.svg"
                     alt={product.name}
                     fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className={`object-cover transition-opacity duration-500 ${isHovered ? "opacity-0" : "opacity-100"}`}
                 />
 
@@ -73,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
                         className="flex-1 h-12 bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50"
                     >
                         <ShoppingBag className="h-4 w-4" />
-                        Thêm vào giỏ
+                        Add to cart
                     </Button>
                     <Button
                         onClick={handleWishlist}

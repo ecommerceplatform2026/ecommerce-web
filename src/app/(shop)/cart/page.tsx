@@ -111,12 +111,12 @@ export default function CartPage() {
             <div className="container mx-auto px-4 lg:px-8 py-24">
                 <div className="max-w-2xl mx-auto text-center space-y-6">
                     <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground opacity-40" />
-                    <h1 className="font-serif text-4xl md:text-5xl">Giỏ hàng trống</h1>
+                    <h1 className="font-serif text-4xl md:text-5xl">Your cart is empty</h1>
                     <p className="text-lg text-muted-foreground">
-                        Khám phá bộ sưu tập thời trang cao cấp của chúng tôi
+                        Explore our premium fashion collection
                     </p>
                     <Button asChild size="lg">
-                        <Link href={ROUTES.SHOP.PRODUCTS}>Tiếp tục mua sắm</Link>
+                        <Link href={ROUTES.SHOP.PRODUCTS}>Continue shopping</Link>
                     </Button>
                 </div>
             </div>
@@ -126,7 +126,7 @@ export default function CartPage() {
     // ── Cart ─────────────────────────────────────────────────────
     return (
         <div className="container mx-auto px-4 lg:px-8 py-16">
-            <h1 className="font-serif text-4xl md:text-5xl mb-12">Giỏ hàng</h1>
+            <h1 className="font-serif text-4xl md:text-5xl mb-12">Cart</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
@@ -143,6 +143,7 @@ export default function CartPage() {
                                     src={item.imageUrl || "/placeholder.svg"}
                                     alt={item.name}
                                     fill
+                                    sizes="128px"
                                     className="object-cover"
                                 />
                             </div>
@@ -153,13 +154,13 @@ export default function CartPage() {
                                     <div>
                                         <h3 className="font-serif text-xl mb-1">{item.name}</h3>
                                         <p className="text-sm text-muted-foreground">
-                                            Size: {item.size} • Màu: {item.color}
+                                            Size: {item.size} • Color: {item.color}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => handleRemove(item.variantId)}
                                         className="text-muted-foreground hover:text-foreground transition-colors"
-                                        aria-label={`Xóa ${item.name}`}
+                                        aria-label={`Remove ${item.name}`}
                                     >
                                         <X className="h-5 w-5" />
                                     </button>
@@ -202,7 +203,7 @@ export default function CartPage() {
                                 disabled={currentPage === 1}
                                 className="px-4 py-2 border border-border rounded hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                Trước
+                                Previous
                             </button>
                             <span className="text-sm text-muted-foreground">
                                 Trang {currentPage} / {totalPages}
@@ -221,26 +222,26 @@ export default function CartPage() {
                 {/* Order Summary */}
                 <div className="lg:col-span-1">
                     <div className="border border-border p-8 space-y-6 sticky top-24">
-                        <h2 className="font-serif text-2xl">Tóm tắt đơn hàng</h2>
+                        <h2 className="font-serif text-2xl">Order Summary</h2>
 
                         <div className="space-y-3">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">
-                                    Tạm tính ({items.reduce((n, i) => n + i.quantity, 0)} sản phẩm)
+                                    Subtotal ({items.reduce((n, i) => n + i.quantity, 0)} products)
                                 </span>
                                 <span>{subtotal.toLocaleString("vi-VN")}₫</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Phí vận chuyển</span>
+                                <span className="text-muted-foreground">Shipping fee</span>
                                 {shipping === 0 ? (
-                                    <span className="text-green-600 font-medium">Miễn phí</span>
+                                    <span className="text-green-600 font-medium">Free</span>
                                 ) : (
                                     <span>{shipping.toLocaleString("vi-VN")}₫</span>
                                 )}
                             </div>
                             {shipping > 0 && (
                                 <p className="text-xs text-muted-foreground">
-                                    Miễn phí vận chuyển cho đơn từ{" "}
+                                    Free shipping for orders from{" "}
                                     {FREE_SHIPPING_THRESHOLD.toLocaleString("vi-VN")}₫
                                 </p>
                             )}
@@ -248,17 +249,17 @@ export default function CartPage() {
 
                         <div className="py-6 border-y border-border">
                             <div className="flex justify-between text-lg font-medium">
-                                <span>Tổng cộng</span>
+                                <span>Total</span>
                                 <span>{total.toLocaleString("vi-VN")}₫</span>
                             </div>
                         </div>
 
                         <Button asChild size="lg" className="w-full text-base h-14">
-                            <Link href={ROUTES.CHECKOUT.INDEX}>Tiến hành thanh toán</Link>
+                            <Link href={ROUTES.CHECKOUT.INDEX}>Proceed to checkout</Link>
                         </Button>
 
                         <Button asChild variant="outline" size="lg" className="w-full bg-transparent">
-                            <Link href={ROUTES.SHOP.PRODUCTS}>Tiếp tục mua sắm</Link>
+                            <Link href={ROUTES.SHOP.PRODUCTS}>Continue shopping</Link>
                         </Button>
                     </div>
                 </div>

@@ -17,57 +17,57 @@ import type { Product } from "@/types/product"
 const mockReviews = [
     {
         id: 1,
-        author: "Nguyễn Văn Minh",
+        author: "Michael Nguyen",
         rating: 5,
         date: "2025-01-10",
-        title: "Chất lượng xuất sắc",
+        title: "Excellent quality",
         comment:
-            "Chất liệu rất cao cấp, đường may tinh tế. Hoàn toàn xứng đáng với mức giá. Tôi rất hài lòng với sản phẩm này.",
+            "The material feels premium and the stitching is refined. Completely worth the price. I am very happy with this product.",
     },
     {
         id: 2,
-        author: "Trần Đức Anh",
+        author: "Daniel Tran",
         rating: 5,
         date: "2025-01-08",
-        title: "Vừa size, rất đẹp",
+        title: "True to size and beautiful",
         comment:
-            "Mua đúng size như bình thường, vừa in. Chất vải mềm mại, sang trọng. Giao hàng đúng hẹn, đóng gói cẩn thận.",
+            "I ordered my usual size and it fits perfectly. The fabric is soft and elegant. Delivery was on time and carefully packaged.",
     },
     {
         id: 3,
-        author: "Phạm Tuấn Khải",
+        author: "Kevin Pham",
         rating: 4,
         date: "2025-01-05",
-        title: "Sản phẩm tốt",
+        title: "Good product",
         comment:
-            "Nhìn chung rất hài lòng. Chỉ có điều giao hàng hơi chậm hơn dự kiến một chút, nhưng sản phẩm đáng giá.",
+            "Overall very satisfied. Delivery was slightly slower than expected, but the product is worth it.",
     },
     {
         id: 4,
-        author: "Lê Hoàng Nam",
+        author: "Henry Le",
         rating: 5,
         date: "2025-01-02",
-        title: "Trải nghiệm đẳng cấp",
+        title: "Premium experience",
         comment:
-            "Từ bao bì đến sản phẩm đều rất chỉn chu. Đây mới đúng là thời trang cao cấp. Chắc chắn sẽ mua lại.",
+            "Everything from the packaging to the product feels polished. This is what premium fashion should feel like. I will buy again.",
     },
     {
         id: 5,
-        author: "Vũ Thanh Tùng",
+        author: "Thomas Vu",
         rating: 4,
         date: "2024-12-28",
-        title: "Đáng để đầu tư",
+        title: "Worth the investment",
         comment:
-            "Giá hơi cao nhưng chất lượng xứng đáng. Chất vải bền đẹp, kiểu dáng cổ điển mà vẫn hiện đại.",
+            "The price is a bit high, but the quality is worth it. Durable fabric with a classic yet modern look.",
     },
     {
         id: 6,
-        author: "Đỗ Quang Huy",
+        author: "Brian Do",
         rating: 5,
         date: "2024-12-25",
-        title: "Mua tặng rất ý nghĩa",
+        title: "A meaningful gift",
         comment:
-            "Mua tặng ba nhân dịp sinh nhật. Ông rất thích, khen chất lượng tốt và thiết kế tinh tế. Cảm ơn Atelier!",
+            "I bought this as a birthday gift for my father. He loved it and praised the quality and refined design. Thank you, Atelier!",
     },
 ]
 
@@ -76,7 +76,7 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
-    const variants = product.variants ?? []
+    const variants = useMemo(() => product.variants ?? [], [product.variants])
 
     const uniqueSizes = useMemo(
         () => [...new Set(variants.map(v => v.size).filter((s): s is string => s !== null))],
@@ -88,11 +88,11 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     )
 
     const [selectedSize, setSelectedSize] = useState<string | null>(() => {
-        const sizes = [...new Set(product.variants.map(v => v.size).filter((s): s is string => s !== null))]
+        const sizes = [...new Set(variants.map(v => v.size).filter((s): s is string => s !== null))]
         return sizes.length === 1 ? sizes[0] : null
     })
     const [selectedColor, setSelectedColor] = useState<string | null>(() => {
-        const colors = [...new Set(product.variants.map(v => v.color).filter((c): c is string => c !== null))]
+        const colors = [...new Set(variants.map(v => v.color).filter((c): c is string => c !== null))]
         return colors.length === 1 ? colors[0] : null
     })
     const [quantity, setQuantity] = useState(1)
@@ -124,6 +124,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     const relatedProducts = allProducts
         .filter(p => p.categoryId === product.categoryId && p.id !== product.id)
         .slice(0, 4)
+    const relatedImage = (item: Product) => item.imageUrl ?? "/placeholder.svg"
 
     const REVIEWS_PER_PAGE = 3
     const averageRating = (
@@ -139,13 +140,13 @@ export function ProductDetails({ product }: ProductDetailsProps) {
         if (needsVariantSelection) {
             const missingSize = uniqueSizes.length > 0 && !selectedSize
             const missingColor = uniqueColors.length > 0 && !selectedColor
-            if (missingSize && missingColor) toast.error('Vui lòng chọn size và màu sắc')
-            else if (missingSize) toast.error('Vui lòng chọn size')
-            else toast.error('Vui lòng chọn màu sắc')
+            if (missingSize && missingColor) toast.error('Please select size and color')
+            else if (missingSize) toast.error('Please select size')
+            else toast.error('Please select color')
             return
         }
         if (isOutOfStock) {
-            toast.error('Sản phẩm đã hết hàng')
+            toast.error('Product is out of stock')
             return
         }
         const finalQty = Math.min(quantity, maxStock)
@@ -159,42 +160,44 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             quantity: finalQty,
             imageUrl: images[0]?.imageUrl ?? null,
         })
-        toast.success(`Đã thêm ${finalQty} × ${product.name} vào giỏ hàng`)
+        toast.success(`Added ${finalQty} x ${product.name} to cart`)
         setAdded(true)
         setTimeout(() => setAdded(false), 2000)
     }
 
     const handleWishlist = () => {
         toggleItem(product)
-        toast.success(inWishlist ? "Đã xoá khỏi yêu thích" : "Đã thêm vào yêu thích")
+        toast.success(inWishlist ? "Removed from wishlist" : "Added to wishlist")
     }
 
     return (
-        <div className="container mx-auto px-4 lg:px-8 py-16">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:py-10 lg:px-8 lg:py-12">
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,520px)_minmax(0,1fr)] lg:items-start lg:gap-12 xl:gap-16">
 
                 {/* Image Gallery */}
-                <ProductImageGallery images={images} productName={product.name} />
+                <div className="lg:sticky lg:top-24">
+                    <ProductImageGallery images={images} productName={product.name} />
+                </div>
 
                 {/* Details */}
-                <div className="space-y-8">
+                <div className="mx-auto w-full max-w-xl space-y-6 lg:mx-0 lg:py-2">
                     <div>
                         <p className="text-xs tracking-widest text-muted-foreground uppercase mb-2">
                             {product.categoryName ?? ""}
                         </p>
-                        <h1 className="font-serif text-4xl md:text-5xl mb-4">{product.name}</h1>
-                        <div className="flex items-center gap-3 mb-1">
-                            <p className="text-2xl">{displayPrice.toLocaleString("vi-VN")}₫</p>
+                        <h1 className="mb-4 font-serif text-3xl leading-tight md:text-4xl">{product.name}</h1>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <p className="text-2xl font-medium">{displayPrice.toLocaleString("vi-VN")}₫</p>
                             {product.status === ProductStatus.Inactive && (
                                 <span className="text-xs px-2 py-1 border border-destructive text-destructive uppercase tracking-wide">
-                                    Ngừng kinh doanh
+                                    Discontinued
                                 </span>
                             )}
                         </div>
                     </div>
 
                     {product.description && (
-                        <p className="text-lg text-muted-foreground leading-relaxed">
+                        <p className="border-y border-border py-5 text-base leading-7 text-muted-foreground">
                             {product.description}
                         </p>
                     )}
@@ -203,7 +206,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     {uniqueSizes.length > 0 && (
                         <div className="space-y-3">
                             <p className="text-sm font-medium tracking-wide">
-                                KÍCH CỠ
+                                SIZE
                                 {selectedSize && (
                                     <span className="ml-2 font-normal text-muted-foreground">
                                         {selectedSize}
@@ -242,7 +245,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     {uniqueColors.length > 0 && (
                         <div className="space-y-3">
                             <p className="text-sm font-medium tracking-wide">
-                                MÀU SẮC
+                                COLOR
                                 {selectedColor && (
                                     <span className="ml-2 font-normal text-muted-foreground">
                                         {selectedColor}
@@ -283,15 +286,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                             {isOutOfStock ? (
                                 <div className="flex items-center gap-2 text-destructive text-sm">
                                     <AlertCircle className="h-4 w-4" />
-                                    <span>Hết hàng</span>
+                                    <span>Out of stock</span>
                                 </div>
                             ) : isLowStock ? (
                                 <div className="flex items-center gap-2 text-amber-600 text-sm">
                                     <AlertTriangle className="h-4 w-4" />
-                                    <span>Sắp hết hàng — còn {selectedVariant.stock} sản phẩm</span>
+                                    <span>Low stock - {selectedVariant.stock} left</span>
                                 </div>
                             ) : (
-                                <p className="text-sm text-green-600">Còn hàng ({selectedVariant.stock})</p>
+                                <p className="text-sm text-green-600">In stock ({selectedVariant.stock})</p>
                             )}
                         </div>
                     )}
@@ -300,16 +303,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     {needsVariantSelection && (
                         <p className="text-sm text-amber-600">
                             {!selectedSize && uniqueSizes.length > 0 && !selectedColor && uniqueColors.length > 0
-                                ? 'Vui lòng chọn size và màu sắc để tiếp tục'
+                                ? 'Please select size and color to continue'
                                 : !selectedSize && uniqueSizes.length > 0
-                                ? 'Vui lòng chọn size để tiếp tục'
-                                : 'Vui lòng chọn màu sắc để tiếp tục'}
+                                ? 'Please select size to continue'
+                                : 'Please select color to continue'}
                         </p>
                     )}
 
                     {/* Quantity */}
                     <div className="space-y-3">
-                        <p className="text-sm font-medium tracking-wide">SỐ LƯỢNG</p>
+                        <p className="text-sm font-medium tracking-wide">QUANTITY</p>
                         <div className="flex items-center border border-border w-fit">
                             <Button
                                 variant="ghost"
@@ -336,58 +339,60 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </div>
 
                     {/* Add to Cart */}
-                    <Button
-                        size="lg"
-                        className="w-full text-base h-14 cursor-pointer"
-                        onClick={handleAddToCart}
-                        disabled={added || isOutOfStock || isInactive}
-                    >
-                        {added ? (
-                            <>
-                                <Check className="mr-2 h-5 w-5" />
-                                Đã thêm vào giỏ
-                            </>
-                        ) : isInactive ? (
-                            'Ngừng kinh doanh'
-                        ) : isOutOfStock ? (
-                            'Hết hàng'
-                        ) : (
-                            'Thêm vào giỏ hàng'
-                        )}
-                    </Button>
+                    <div className="space-y-3">
+                        <Button
+                            size="lg"
+                            className="h-[52px] w-full cursor-pointer text-base"
+                            onClick={handleAddToCart}
+                            disabled={added || isOutOfStock || isInactive}
+                        >
+                            {added ? (
+                                <>
+                                    <Check className="mr-2 h-5 w-5" />
+                                    Added to cart
+                                </>
+                            ) : isInactive ? (
+                                'Discontinued'
+                            ) : isOutOfStock ? (
+                                'Out of stock'
+                            ) : (
+                                'Add to cart'
+                            )}
+                        </Button>
 
-                    {/* Wishlist */}
-                    <Button
-                        variant="outline"
-                        size="lg"
-                        className={`w-full h-12 cursor-pointer gap-2 ${
-                            inWishlist ? "border-primary text-primary" : ""
-                        }`}
-                        onClick={handleWishlist}
-                    >
-                        <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
-                        {inWishlist ? "Đã thêm vào yêu thích" : "Thêm vào yêu thích"}
-                    </Button>
+                        {/* Wishlist */}
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className={`h-12 w-full cursor-pointer gap-2 ${
+                                inWishlist ? "border-primary text-primary" : ""
+                            }`}
+                            onClick={handleWishlist}
+                        >
+                            <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
+                            {inWishlist ? "Added to wishlist" : "Add to wishlist"}
+                        </Button>
+                    </div>
 
                     {/* Product Details */}
-                    <div className="pt-8 border-t border-border space-y-4">
-                        <h3 className="text-sm font-medium tracking-wide">CHI TIẾT SẢN PHẨM</h3>
+                    <div className="border-t border-border pt-6 space-y-4">
+                        <h3 className="text-sm font-medium tracking-wide">PRODUCT DETAILS</h3>
                         <ul className="space-y-2 text-sm text-muted-foreground">
-                            {product.material && <li>• Chất liệu: {product.material}</li>}
-                            <li>• Thủ công tinh xảo, chú ý từng chi tiết</li>
-                            <li>• Miễn phí vận chuyển cho đơn từ 2.000.000₫</li>
-                            <li>• Đổi trả trong vòng 30 ngày</li>
+                            {product.material && <li>Material: {product.material}</li>}
+                            <li>Expert craftsmanship with attention to every detail</li>
+                            <li>Free shipping for orders from 2,000,000 VND</li>
+                            <li>30-day returns</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             {/* Customer Reviews */}
-            <div className="mt-24 pt-16 border-t border-border">
-                <div className="max-w-4xl">
-                    <div className="mb-12">
-                        <h2 className="font-serif text-3xl mb-4">Đánh giá khách hàng</h2>
-                        <div className="flex items-center gap-4">
+            <div className="mt-16 border-t border-border pt-12 lg:mt-20 lg:pt-14">
+                <div className="max-w-3xl">
+                    <div className="mb-10">
+                        <h2 className="mb-4 font-serif text-3xl">Customer Reviews</h2>
+                        <div className="flex flex-wrap items-center gap-4">
                             <div className="flex items-center gap-1">
                                 {[...Array(5)].map((_, i) => (
                                     <Star
@@ -402,7 +407,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                             </div>
                             <span className="text-lg font-medium">{averageRating} / 5</span>
                             <span className="text-sm text-muted-foreground">
-                                ({mockReviews.length} đánh giá)
+                                ({mockReviews.length} reviews)
                             </span>
                         </div>
                     </div>
@@ -444,7 +449,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                                 disabled={currentReviewPage === 1}
                                 className="cursor-pointer"
                             >
-                                Trước
+                                Previous
                             </Button>
                             <div className="flex gap-1">
                                 {Array.from({ length: totalReviewPages }, (_, i) => i + 1).map(page => (
@@ -473,27 +478,28 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
             {/* Related Products */}
             {relatedProducts.length > 0 && (
-                <div className="mt-24 pt-16 border-t border-border">
-                    <h2 className="font-serif text-3xl mb-12">Sản phẩm liên quan</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="mt-16 border-t border-border pt-12 lg:mt-20 lg:pt-14">
+                    <h2 className="mb-10 font-serif text-3xl">Related Products</h2>
+                    <div className="grid grid-cols-2 gap-5 md:grid-cols-4 lg:gap-6">
                         {relatedProducts.map((p) => (
                             <Link
                                 key={p.id}
                                 href={ROUTES.SHOP.PRODUCT_DETAIL(p.id)}
                                 className="group"
                             >
-                                <div className="relative aspect-[3/4] bg-secondary mb-4 overflow-hidden">
+                                <div className="relative mb-3 aspect-[3/4] overflow-hidden bg-secondary">
                                     <Image
-                                        src="/placeholder.svg"
+                                        src={relatedImage(p)}
                                         alt={p.name}
                                         fill
+                                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 260px"
                                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                                     />
                                 </div>
-                                <h3 className="font-medium text-sm tracking-wide mb-2 group-hover:text-muted-foreground transition-colors">
+                                <h3 className="mb-1 line-clamp-2 text-sm font-medium tracking-wide transition-colors group-hover:text-muted-foreground">
                                     {p.name}
                                 </h3>
-                                <p className="text-lg font-medium">
+                                <p className="text-sm font-medium md:text-base">
                                     {p.basePrice.toLocaleString("vi-VN")}₫
                                 </p>
                             </Link>
