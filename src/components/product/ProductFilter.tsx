@@ -34,6 +34,12 @@ export function ProductFilter({
         onUpdate({ minPrice: parsedMin, maxPrice: parsedMax })
     }
 
+    function handleResetFilters() {
+        setLocalMin('')
+        setLocalMax('')
+        onReset()
+    }
+
     return (
         <div className="space-y-6">
             <div>
@@ -116,11 +122,10 @@ export function ProductFilter({
                             <button
                                 key={sz}
                                 onClick={() => onUpdate({ size: filters.size === sz ? '' : sz })}
-                                className={`px-3 py-1 text-sm border transition-colors ${
-                                    filters.size === sz
-                                        ? 'border-foreground bg-foreground text-background'
-                                        : 'border-border hover:border-foreground'
-                                }`}
+                                className={`px-3 py-1 text-sm border transition-colors ${filters.size === sz
+                                    ? 'border-foreground bg-foreground text-background'
+                                    : 'border-border hover:border-foreground'
+                                    }`}
                             >
                                 {sz}
                             </button>
@@ -130,7 +135,7 @@ export function ProductFilter({
             )}
 
             {hasActiveFilters && (
-                <Button variant="ghost" size="sm" className="w-full" onClick={onReset}>
+                <Button variant="ghost" size="sm" className="w-full" onClick={handleResetFilters}>
                     Xoá bộ lọc
                 </Button>
             )}
