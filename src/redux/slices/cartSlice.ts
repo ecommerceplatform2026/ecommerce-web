@@ -166,6 +166,24 @@ export const mergeGuestCart = createAsyncThunk(
     },
 )
 
+export const mergeStoredGuestCart = createAsyncThunk(
+    'cart/mergeStoredGuestCart',
+    async (_, { rejectWithValue }) => {
+        try {
+            const guestItems = readGuestCart()
+            if (guestItems.length === 0) {
+                return { items: await cartService.getCart(), mode: 'user' as const }
+            }
+
+            const merged = await cartService.mergeGuestCart(guestItems)
+            writeGuestCart([])
+            return { items: merged, mode: 'user' as const }
+        } catch (error) {
+            return rejectWithValue(getErrorMessage(error))
+        }
+    },
+)
+
 const cartSlice = createSlice({
     name: 'cart',
     initialState,
@@ -220,6 +238,13 @@ const cartSlice = createSlice({
             .addCase(mergeGuestCart.pending, pending)
             .addCase(mergeGuestCart.fulfilled, fulfilled)
             .addCase(mergeGuestCart.rejected, rejected)
+            .addCase(mergeStoredGuestCart.pending, (state) => {
+                state.isLoading = true
+                state.error = null
+                state.mode = 'user'
+            })
+            .addCase(mergeStoredGuestCart.fulfilled, fulfilled)
+            .addCase(mergeStoredGuestCart.rejected, rejected)
     },
 })
 
