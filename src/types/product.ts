@@ -1,10 +1,24 @@
 import type { ProductStatus } from '@/constants/enums'
 
+export interface ProductSearchParams {
+    search?: string
+    categoryId?: string
+    minPrice?: number | null
+    maxPrice?: number | null
+    material?: string
+    color?: string
+    size?: string
+    sortBy?: string
+    sortDirection?: 'asc' | 'desc'
+    page?: number
+    pageSize?: number
+}
+
 export interface ProductImage {
     id: string
-    productId: string
+    productId?: string
     imageUrl: string
-    isMain: boolean
+    isMain?: boolean
 }
 
 // Matches C# ProductVariantResponse DTO
@@ -21,6 +35,16 @@ export interface ProductVariantResponse {
     isOutOfStock: boolean
 }
 
+export interface ProductDetailVariant {
+    id: string
+    sku: string
+    color: string | null
+    size: string | null
+    stock: number
+    stockStatus: string
+    price: number
+}
+
 // Matches C# ProductResponse DTO
 export interface Product {
     id: string
@@ -32,6 +56,16 @@ export interface Product {
     basePrice: number
     status: ProductStatus
     variants: ProductVariantResponse[]
+}
+
+export interface ProductDetail extends Omit<Product, 'variants'> {
+    price: number
+    minPrice: number
+    maxPrice: number
+    totalStock: number
+    stockStatus: string
+    images: ProductImage[]
+    variants: ProductDetailVariant[]
 }
 
 export interface WishlistState {

@@ -58,6 +58,7 @@ export const PRODUCT_ENDPOINTS = {
     // Public — browse & search
     GET_ALL: '/api/products',              // filter, sort, pagination
     GET_BY_ID: (id: string) => `/api/products/${id}`,
+    GET_DETAIL: (id: string) => `/api/products/${id}/detail`,
     SEARCH: '/api/products/search',
 
     // Images

@@ -1,49 +1,84 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import Image from 'next/image'
-import type { ProductImage } from '@/types/product'
+import { useState } from "react"
+import Image from "next/image"
+import { ImageIcon } from "lucide-react"
+import type { ProductImage } from "@/types/product"
 
 interface ProductImageGalleryProps {
     images: ProductImage[]
     productName: string
 }
 
-export function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
-    const [activeIndex, setActiveIndex] = useState(0)
+function ProductImageFrame({
+    src,
+    alt,
+    priority = false,
+}: {
+    src: string
+    alt: string
+    priority?: boolean
+}) {
+    return (
+        <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            className="object-cover"
+            priority={priority}
+            unoptimized={src.startsWith("http")}
+        />
+    )
+}
 
-    const sorted = [...images].sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0))
-    const activeUrl = sorted[activeIndex]?.imageUrl ?? '/placeholder.svg'
+function EmptyImageState() {
+    return (
+        <div className="flex h-full w-full items-center justify-center bg-secondary text-muted-foreground">
+            <ImageIcon className="h-12 w-12" aria-hidden="true" />
+        </div>
+    )
+}
+
+export function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
+    const validImages = images.filter(image => image.imageUrl?.trim())
+    const [activeIndex, setActiveIndex] = useState(0)
+    const safeActiveIndex = validImages.length > 0
+        ? Math.min(activeIndex, validImages.length - 1)
+        : 0
+    const activeImage = validImages[safeActiveIndex]
 
     return (
         <div className="space-y-4">
-            <div className="relative aspect-[3/4] bg-secondary overflow-hidden">
-                <Image
-                    src={activeUrl}
-                    alt={productName}
-                    fill
-                    className="object-cover"
-                    priority
-                />
+            <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
+                {activeImage ? (
+                    <ProductImageFrame
+                        src={activeImage.imageUrl}
+                        alt={productName}
+                        priority
+                    />
+                ) : (
+                    <EmptyImageState />
+                )}
             </div>
 
-            {sorted.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-1">
-                    {sorted.map((img, i) => (
+            {validImages.length > 1 && (
+                <div className="grid grid-cols-4 gap-3 sm:grid-cols-5">
+                    {validImages.map((image, index) => (
                         <button
-                            key={img.id}
-                            onClick={() => setActiveIndex(i)}
-                            className={`relative flex-shrink-0 w-20 aspect-[3/4] bg-secondary overflow-hidden border-2 transition-colors ${
-                                activeIndex === i
-                                    ? 'border-foreground'
-                                    : 'border-transparent hover:border-muted-foreground'
+                            key={image.id}
+                            type="button"
+                            onClick={() => setActiveIndex(index)}
+                            className={`relative aspect-[3/4] overflow-hidden border bg-secondary transition-colors ${
+                                safeActiveIndex === index
+                                    ? "border-foreground"
+                                    : "border-border hover:border-muted-foreground"
                             }`}
+                            aria-label={`Xem ảnh ${index + 1} của ${productName}`}
                         >
-                            <Image
-                                src={img.imageUrl}
-                                alt={`${productName} ${i + 1}`}
-                                fill
-                                className="object-cover"
+                            <ProductImageFrame
+                                src={image.imageUrl}
+                                alt={`${productName} ${index + 1}`}
                             />
                         </button>
                     ))}

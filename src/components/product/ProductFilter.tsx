@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef } from 'react'
 import { Button } from '@/components/ui/Button'
 import type { ProductFilters } from '@/hooks/useProductFilters'
 
@@ -23,21 +23,17 @@ export function ProductFilter({
     onReset,
     hasActiveFilters,
 }: ProductFilterProps) {
-    const [localMin, setLocalMin] = useState(filters.minPrice !== null ? String(filters.minPrice) : '')
-    const [localMax, setLocalMax] = useState(filters.maxPrice !== null ? String(filters.maxPrice) : '')
+    const minInputRef = useRef<HTMLInputElement>(null)
+    const maxInputRef = useRef<HTMLInputElement>(null)
 
     function handleApplyPrice() {
+        const localMin = minInputRef.current?.value ?? ''
+        const localMax = maxInputRef.current?.value ?? ''
         const minCandidate = localMin !== '' ? Number(localMin) : null
         const maxCandidate = localMax !== '' ? Number(localMax) : null
         const parsedMin = minCandidate !== null && Number.isFinite(minCandidate) ? minCandidate : null
         const parsedMax = maxCandidate !== null && Number.isFinite(maxCandidate) ? maxCandidate : null
         onUpdate({ minPrice: parsedMin, maxPrice: parsedMax })
-    }
-
-    function handleResetFilters() {
-        setLocalMin('')
-        setLocalMax('')
-        onReset()
     }
 
     return (
@@ -50,16 +46,18 @@ export function ProductFilter({
                     <input
                         type="number"
                         placeholder="Từ"
-                        value={localMin}
-                        onChange={e => setLocalMin(e.target.value)}
+                        ref={minInputRef}
+                        key={`min-${filters.minPrice ?? ''}`}
+                        defaultValue={filters.minPrice ?? ''}
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                     <span className="text-muted-foreground shrink-0">—</span>
                     <input
                         type="number"
                         placeholder="Đến"
-                        value={localMax}
-                        onChange={e => setLocalMax(e.target.value)}
+                        ref={maxInputRef}
+                        key={`max-${filters.maxPrice ?? ''}`}
+                        defaultValue={filters.maxPrice ?? ''}
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                 </div>
@@ -122,10 +120,11 @@ export function ProductFilter({
                             <button
                                 key={sz}
                                 onClick={() => onUpdate({ size: filters.size === sz ? '' : sz })}
-                                className={`px-3 py-1 text-sm border transition-colors ${filters.size === sz
-                                    ? 'border-foreground bg-foreground text-background'
-                                    : 'border-border hover:border-foreground'
-                                    }`}
+                                className={`px-3 py-1 text-sm border transition-colors ${
+                                    filters.size === sz
+                                        ? 'border-foreground bg-foreground text-background'
+                                        : 'border-border hover:border-foreground'
+                                }`}
                             >
                                 {sz}
                             </button>
@@ -135,7 +134,7 @@ export function ProductFilter({
             )}
 
             {hasActiveFilters && (
-                <Button variant="ghost" size="sm" className="w-full" onClick={handleResetFilters}>
+                <Button variant="ghost" size="sm" className="w-full" onClick={onReset}>
                     Xoá bộ lọc
                 </Button>
             )}

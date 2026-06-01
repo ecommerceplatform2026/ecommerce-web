@@ -1,37 +1,36 @@
 "use client"
 
-import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { useProduct } from "@/hooks/useProducts"
-import { ProductDetails } from "@/components/product/ProductDetails"
+import { useParams, useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
+import { ProductDetails } from "@/components/product/ProductDetails"
+import { useProductDetail } from "@/hooks/useProducts"
+
 export default function ProductDetailPage() {
     const params = useParams()
-    const id = params.id as string
     const router = useRouter()
-    const { data: product, isLoading, error } = useProduct(id)
+    const id = params.id as string
+    const { data: product, isLoading, error } = useProductDetail(id)
 
     useEffect(() => {
         if (!isLoading && (error || !product)) {
             router.replace('/not-found')
         }
-    }, [isLoading, error, product, router])
+    }, [error, isLoading, product, router])
 
     if (isLoading) {
         return (
-            <main className="min-h-screen flex items-center justify-center">
+            <main className="flex min-h-screen items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </main>
         )
     }
 
-    if (!product) {
-        return null
-    }
+    if (!product) return null
 
     return (
         <main className="min-h-screen">
-            <ProductDetails product={product} />
+            <ProductDetails key={product.id} product={product} />
         </main>
     )
 }
