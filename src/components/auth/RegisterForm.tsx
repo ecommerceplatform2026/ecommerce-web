@@ -10,14 +10,30 @@ import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useAuth } from "@/hooks/useAuth"
+import { rejectEdgeWhitespace } from "@/utils/inputValidation"
 import type { ApiError } from "@/types/api"
 
 const registerSchema = z
   .object({
-    fullName: z.string().min(1, "Full name is required").min(2, "Full name must be at least 2 characters"),
-    email: z.string().min(1, "Email is required").email("Invalid email"),
-    password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(1, "Please confirm your password"),
+    fullName: z
+      .string()
+      .min(1, "Full name is required")
+      .refine(rejectEdgeWhitespace, "Full name must not start or end with spaces")
+      .min(2, "Full name must be at least 2 characters"),
+    email: z
+      .string()
+      .min(1, "Email is required")
+      .refine(rejectEdgeWhitespace, "Email must not start or end with spaces")
+      .email("Invalid email"),
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .refine(rejectEdgeWhitespace, "Password must not start or end with spaces")
+      .min(8, "Password must be at least 8 characters"),
+    confirmPassword: z
+      .string()
+      .min(1, "Please confirm your password")
+      .refine(rejectEdgeWhitespace, "Confirm password must not start or end with spaces"),
     acceptTerms: z.boolean().refine((val) => val === true, {
       message: "You must agree to the terms of use",
     }),

@@ -36,6 +36,7 @@ import Image from "next/image"
 import toast from 'react-hot-toast'
 import { useProfile } from "@/hooks/useProfile"
 import { formatDate } from "@/utils/formatDate"
+import { hasEdgeWhitespace } from "@/utils/inputValidation"
 import { UserStatus } from "@/constants/enums"
 import type { ApiError } from "@/types/api"
 
@@ -96,6 +97,18 @@ export function ProfileContent() {
             toast.error("Please enter your full name.")
             return
         }
+        if (hasEdgeWhitespace(editFormData.fullName)) {
+            toast.error("Full name must not start or end with spaces.")
+            return
+        }
+        if (editFormData.username && hasEdgeWhitespace(editFormData.username)) {
+            toast.error("Username must not start or end with spaces.")
+            return
+        }
+        if (editFormData.phoneNumber && hasEdgeWhitespace(editFormData.phoneNumber)) {
+            toast.error("Phone number must not start or end with spaces.")
+            return
+        }
         try {
             await updateProfile({
                 fullName: editFormData.fullName.trim(),
@@ -115,6 +128,14 @@ export function ProfileContent() {
         e.preventDefault()
         if (!passwordFormData.currentPassword || !passwordFormData.newPassword || !passwordFormData.confirmPassword) {
             toast.error("Please fill in all password fields.")
+            return
+        }
+        if (
+            hasEdgeWhitespace(passwordFormData.currentPassword) ||
+            hasEdgeWhitespace(passwordFormData.newPassword) ||
+            hasEdgeWhitespace(passwordFormData.confirmPassword)
+        ) {
+            toast.error("Password fields must not start or end with spaces.")
             return
         }
         if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {

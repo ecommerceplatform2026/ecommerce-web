@@ -10,11 +10,20 @@ import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useAuth } from "@/hooks/useAuth"
+import { rejectEdgeWhitespace } from "@/utils/inputValidation"
 import type { ApiError } from "@/types/api"
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email"),
-  password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
+  email: z
+    .string()
+    .min(1, "Email is required")
+    .refine(rejectEdgeWhitespace, "Email must not start or end with spaces")
+    .email("Invalid email"),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .refine(rejectEdgeWhitespace, "Password must not start or end with spaces")
+    .min(8, "Password must be at least 8 characters"),
   rememberMe: z.boolean().optional(),
 })
 

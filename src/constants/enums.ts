@@ -74,6 +74,7 @@ export enum PaymentMethod {
     MoMo = 1,
     ZaloPay = 2,
     PayOS = 3,
+    VNPay = 4,
 }
 
 // Payment status - used in payment flow (FR12)
@@ -156,6 +157,7 @@ export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
     [PaymentMethod.MoMo]: 'MoMo Wallet',
     [PaymentMethod.ZaloPay]: 'ZaloPay',
     [PaymentMethod.PayOS]: 'PayOS',
+    [PaymentMethod.VNPay]: 'VNPay',
 }
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {

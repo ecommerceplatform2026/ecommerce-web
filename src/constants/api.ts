@@ -108,9 +108,12 @@ export const CART_ENDPOINTS = {
 // ============================================================
 // TODO: backend not implemented yet
 
+export const CHECKOUT_ENDPOINTS = {
+    CREATE: '/api/checkout',
+} as const
+
 export const ORDER_ENDPOINTS = {
     // User
-    CREATE: '/api/orders',                           // POST — checkout
     GET_ALL: '/api/orders',                           // GET - order history
     GET_BY_ID: (id: string) => `/api/orders/${id}`,     // GET - order detail
 

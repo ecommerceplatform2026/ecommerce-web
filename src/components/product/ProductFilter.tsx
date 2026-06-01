@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
+import { preventInvalidNumberInput, toNonNegativeNumberDraft } from '@/utils/inputValidation'
 import type { ProductFilters } from '@/hooks/useProductFilters'
 
 interface ProductFilterProps {
@@ -58,13 +59,15 @@ export function ProductFilter({
                 <div className="flex gap-2 items-center mb-2">
                     <input
                         type="number"
+                        min="0"
                         placeholder="From"
                         value={localMin}
+                        onKeyDown={preventInvalidNumberInput}
                         onChange={e =>
                             setPriceDraft({
                                 sourceMin: filterMinText,
                                 sourceMax: filterMaxText,
-                                min: e.target.value,
+                                min: toNonNegativeNumberDraft(e.target.value),
                                 max: localMax,
                             })
                         }
@@ -73,14 +76,16 @@ export function ProductFilter({
                     <span className="text-muted-foreground shrink-0">—</span>
                     <input
                         type="number"
+                        min="0"
                         placeholder="To"
                         value={localMax}
+                        onKeyDown={preventInvalidNumberInput}
                         onChange={e =>
                             setPriceDraft({
                                 sourceMin: filterMinText,
                                 sourceMax: filterMaxText,
                                 min: localMin,
-                                max: e.target.value,
+                                max: toNonNegativeNumberDraft(e.target.value),
                             })
                         }
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
