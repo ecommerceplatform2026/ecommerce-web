@@ -7,7 +7,8 @@ import type { ProductSearchParams } from '@/types/product'
 export const productKeys = {
     all: ['products'] as const,
     search: (params: ProductSearchParams) => ['products', 'search', params] as const,
-    detail: (id: string) => ['products', id] as const,
+    summary: (id: string) => ['products', 'summary', id] as const,
+    detail: (id: string) => ['products', 'detail', id] as const,
     images: (id: string) => ['products', id, 'images'] as const,
 }
 
@@ -20,7 +21,7 @@ export function useProducts() {
 
 export function useProduct(id: string) {
     return useQuery({
-        queryKey: productKeys.detail(id),
+        queryKey: productKeys.summary(id),
         queryFn: () => productService.getById(id),
         enabled: !!id,
     })
