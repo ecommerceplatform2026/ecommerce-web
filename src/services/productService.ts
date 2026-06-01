@@ -1,6 +1,6 @@
 import axiosInstance from '@/lib/axios'
 import { PRODUCT_ENDPOINTS } from '@/constants/api'
-import type { ApiResponse } from '@/types/api'
+import type { ApiError, ApiResponse } from '@/types/api'
 import type {
     Product,
     ProductDetail,
@@ -19,6 +19,10 @@ type ProductVariantApiPayload = {
     Price: number
 }
 
+function isNotFoundError(error: unknown): boolean {
+    return (error as ApiError).statusCode === 404
+}
+
 function toProductVariantApiPayload(payload: ProductVariantFormValues): ProductVariantApiPayload {
     return {
         SKU: payload.sku,
@@ -27,6 +31,22 @@ function toProductVariantApiPayload(payload: ProductVariantFormValues): ProductV
         Stock: payload.stock,
         LowStockThreshold: payload.lowStockThreshold,
         Price: payload.price,
+    }
+}
+
+function toProductDetailFallback(product: Product, images: ProductImage[]): ProductDetail {
+    const variantPrices = product.variants.map(variant => variant.price)
+    const prices = variantPrices.length > 0 ? variantPrices : [product.basePrice]
+    const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
+
+    return {
+        ...product,
+        price: Math.min(...prices),
+        minPrice: product.minPrice ?? Math.min(...prices),
+        maxPrice: product.maxPrice ?? Math.max(...prices),
+        totalStock: product.totalStock ?? totalStock,
+        stockStatus: product.stockStatus ?? (totalStock > 0 ? 'InStock' : 'OutOfStock'),
+        images,
     }
 }
 
@@ -53,15 +73,31 @@ export const productService = {
     },
 
     getDetail: async (id: string): Promise<ProductDetail> => {
-        const res = await axiosInstance.get<ApiResponse<ProductDetail>>(
-            PRODUCT_ENDPOINTS.GET_DETAIL(id),
-        )
-        return res.data.data
+        try {
+            const res = await axiosInstance.get<ApiResponse<ProductDetail>>(
+                PRODUCT_ENDPOINTS.GET_DETAIL(id),
+            )
+            return res.data.data
+        } catch (error) {
+            if (!isNotFoundError(error)) {
+                throw error
+            }
+
+            const [fallback, images] = await Promise.all([
+                axiosInstance.get<ApiResponse<Product>>(
+                    PRODUCT_ENDPOINTS.GET_BY_ID(id),
+                ),
+                productService.getImages(id),
+            ])
+            return toProductDetailFallback(fallback.data.data, images)
+        }
     },
 
     getImages: async (productId: string): Promise<ProductImage[]> => {
-        const detail = await productService.getDetail(productId)
-        return detail.images
+        const res = await axiosInstance.get<ApiResponse<ProductImage[]>>(
+            PRODUCT_ENDPOINTS.GET_IMAGES(productId),
+        )
+        return res.data.data
     },
 
     create: async (payload: ProductFormValues): Promise<Product> => {

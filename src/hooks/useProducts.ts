@@ -2,9 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { productService } from '@/services/productService'
 
 export const productKeys = {
-    all:    ['products']                        as const,
+    all: ['products'] as const,
     adminAll: ['products', 'admin'] as const,
-    detail: (id: string) => ['products', id]   as const,
+    summary: (id: string) => ['products', 'summary', id] as const,
+    detail: (id: string) => ['products', 'detail', id] as const,
     images: (id: string) => ['products', id, 'images'] as const,
     variants: (id: string) => ['products', id, 'variants'] as const,
 }
@@ -12,15 +13,23 @@ export const productKeys = {
 export function useProducts() {
     return useQuery({
         queryKey: productKeys.all,
-        queryFn:  productService.getAll,
+        queryFn: productService.getAll,
+    })
+}
+
+export function useProductSummary(id: string) {
+    return useQuery({
+        queryKey: productKeys.summary(id),
+        queryFn: () => productService.getById(id),
+        enabled: !!id,
     })
 }
 
 export function useProduct(id: string) {
     return useQuery({
         queryKey: productKeys.detail(id),
-        queryFn:  () => productService.getDetail(id),
-        enabled:  !!id,
+        queryFn: () => productService.getDetail(id),
+        enabled: !!id,
     })
 }
 
@@ -34,8 +43,8 @@ export function useAdminProducts() {
 export function useProductImages(productId: string) {
     return useQuery({
         queryKey: productKeys.images(productId),
-        queryFn:  () => productService.getImages(productId),
-        enabled:  !!productId,
+        queryFn: () => productService.getImages(productId),
+        enabled: !!productId,
     })
 }
 
