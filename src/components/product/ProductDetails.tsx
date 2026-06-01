@@ -76,7 +76,7 @@ interface ProductDetailsProps {
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
-    const variants = product.variants ?? []
+    const variants = useMemo(() => product.variants ?? [], [product.variants])
 
     const uniqueSizes = useMemo(
         () => [...new Set(variants.map(v => v.size).filter((s): s is string => s !== null))],

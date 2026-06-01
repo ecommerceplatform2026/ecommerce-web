@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import type { ProductFilters } from '@/hooks/useProductFilters'
 
@@ -26,20 +26,18 @@ export function ProductFilter({
     const [localMin, setLocalMin] = useState(filters.minPrice !== null ? String(filters.minPrice) : '')
     const [localMax, setLocalMax] = useState(filters.maxPrice !== null ? String(filters.maxPrice) : '')
 
-    useEffect(() => {
-        setLocalMin(filters.minPrice !== null ? String(filters.minPrice) : '')
-    }, [filters.minPrice])
-
-    useEffect(() => {
-        setLocalMax(filters.maxPrice !== null ? String(filters.maxPrice) : '')
-    }, [filters.maxPrice])
-
     function handleApplyPrice() {
         const minCandidate = localMin !== '' ? Number(localMin) : null
         const maxCandidate = localMax !== '' ? Number(localMax) : null
         const parsedMin = minCandidate !== null && Number.isFinite(minCandidate) ? minCandidate : null
         const parsedMax = maxCandidate !== null && Number.isFinite(maxCandidate) ? maxCandidate : null
         onUpdate({ minPrice: parsedMin, maxPrice: parsedMax })
+    }
+
+    function handleResetFilters() {
+        setLocalMin('')
+        setLocalMax('')
+        onReset()
     }
 
     return (
@@ -124,11 +122,10 @@ export function ProductFilter({
                             <button
                                 key={sz}
                                 onClick={() => onUpdate({ size: filters.size === sz ? '' : sz })}
-                                className={`px-3 py-1 text-sm border transition-colors ${
-                                    filters.size === sz
-                                        ? 'border-foreground bg-foreground text-background'
-                                        : 'border-border hover:border-foreground'
-                                }`}
+                                className={`px-3 py-1 text-sm border transition-colors ${filters.size === sz
+                                    ? 'border-foreground bg-foreground text-background'
+                                    : 'border-border hover:border-foreground'
+                                    }`}
                             >
                                 {sz}
                             </button>
@@ -138,7 +135,7 @@ export function ProductFilter({
             )}
 
             {hasActiveFilters && (
-                <Button variant="ghost" size="sm" className="w-full" onClick={onReset}>
+                <Button variant="ghost" size="sm" className="w-full" onClick={handleResetFilters}>
                     Xoá bộ lọc
                 </Button>
             )}
