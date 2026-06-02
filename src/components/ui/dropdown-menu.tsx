@@ -1,7 +1,7 @@
 // src/components/ui/dropdown-menu.tsx
-// DropdownMenu component chuẩn Shadcn/UI – Tailwind v4
-// Hỗ trợ: dark mode, animation mượt, focus ring, sub-menu, checkbox, radio
-// Exports đầy đủ theo yêu cầu dự án
+// Shadcn/UI-style DropdownMenu component for Tailwind v4
+// Supports dark mode, smooth animation, focus ring, submenu, checkbox, and radio
+// Exports all primitives required by the project
 
 'use client'
 
@@ -57,28 +57,28 @@ function DropdownMenuContent({
         sideOffset={sideOffset}
         align={align}
         className={cn(
-          // Nền & chữ
+          // Background & text
           'bg-popover text-popover-foreground',
-          // Bo góc, viền, đổ bóng
+          // Radius, border, shadow
           'min-w-[8rem] rounded-lg border border-border shadow-md',
-          // Padding nội dung
+          // Content padding
           'p-1',
           // z-index
           'z-50',
-          // Giới hạn chiều cao tối đa (scrollable khi nhiều item)
+          // Max height limit (scrollable with many items)
           'max-h-(--radix-dropdown-menu-content-available-height)',
           'overflow-x-hidden overflow-y-auto',
-          // Transform origin để animation đúng hướng
+          // Transform origin for correct animation direction
           'origin-(--radix-dropdown-menu-content-transform-origin)',
-          // ── Animation mở ──
+          // Open animation
           'data-[state=open]:animate-in',
           'data-[state=open]:fade-in-0',
           'data-[state=open]:zoom-in-95',
-          // ── Animation đóng ──
+          // Close animation
           'data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0',
           'data-[state=closed]:zoom-out-95',
-          // ── Slide theo hướng mở ──
+          // Slide in opening direction
           'data-[side=top]:slide-in-from-bottom-2',
           'data-[side=bottom]:slide-in-from-top-2',
           'data-[side=left]:slide-in-from-right-2',
@@ -111,7 +111,7 @@ function DropdownMenuLabel({
   inset,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
-  /** Thụt vào để căn thẳng với item có icon */
+  /** Indent to align with items that have icons */
   inset?: boolean
 }) {
   return (
@@ -137,7 +137,7 @@ function DropdownMenuItem({
   variant = 'default',
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
-  /** Thụt vào để căn thẳng với item có icon */
+  /** Indent to align with items that have icons */
   inset?: boolean
   /** default | destructive */
   variant?: 'default' | 'destructive'
@@ -236,7 +236,7 @@ function DropdownMenuCheckboxItem({
       checked={checked}
       {...props}
     >
-      {/* Indicator vùng bên trái */}
+      {/* Left-side indicator area */}
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <CheckIcon className="size-4" />
@@ -331,7 +331,7 @@ function DropdownMenuSubTrigger({
       {...props}
     >
       {children}
-      {/* Mũi tên chỉ ra sub-menu */}
+      {/* Arrow pointing to submenu */}
       <ChevronRightIcon className="ml-auto size-4" />
     </DropdownMenuPrimitive.SubTrigger>
   )

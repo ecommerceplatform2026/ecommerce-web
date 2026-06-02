@@ -27,7 +27,6 @@ function ProductImageFrame({
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
             priority={priority}
-            unoptimized={src.startsWith("http")}
         />
     )
 }
@@ -74,7 +73,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                                     ? "border-foreground"
                                     : "border-border hover:border-muted-foreground"
                             }`}
-                            aria-label={`Xem ảnh ${index + 1} của ${productName}`}
+                            aria-label={`View image ${index + 1} of ${productName}`}
                         >
                             <ProductImageFrame
                                 src={image.imageUrl}

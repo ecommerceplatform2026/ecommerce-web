@@ -4,19 +4,19 @@ import { ROUTES } from "@/constants/routes"
 
 const banners = [
     {
-        tag: "Mới nhất",
-        title: "Áo Khoác\nMùa Thu",
-        description: "Thanh lịch và ấm áp cho những ngày se lạnh",
-        cta: "Xem ngay",
+        tag: "New Arrivals",
+        title: "Fall\nOuterwear",
+        description: "Elegant and warm for cooler days",
+        cta: "Shop now",
         bg: "bg-zinc-800",
         textColor: "text-white",
         href: ROUTES.SHOP.PRODUCTS,
     },
     {
-        tag: "Bán chạy",
-        title: "Quần Tây\nCao Cấp",
-        description: "Chuẩn công sở, hoàn hảo mọi dịp",
-        cta: "Khám phá",
+        tag: "Best Seller",
+        title: "Premium\nTrousers",
+        description: "Office-ready and polished for every occasion",
+        cta: "Explore",
         bg: "bg-stone-100",
         textColor: "text-foreground",
         href: ROUTES.SHOP.PRODUCTS,

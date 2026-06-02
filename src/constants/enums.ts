@@ -1,11 +1,11 @@
-// Bảng Users — cột Role
+// Users table - Role column
 // SRS: 0 = Admin, 1 = User
 export enum UserRole {
     Admin = 0,
     User = 1,
 }
 
-// Bảng Users — cột Status
+// Users table - Status column
 // SRS: Inactive = 0, Active = 1, Banned = 2
 export enum UserStatus {
     Inactive = 0,
@@ -17,7 +17,7 @@ export enum UserStatus {
 // CATEGORY
 // ============================================================
 
-// Bảng Categories — cột Status
+// Categories table - Status column
 // SRS: Inactive = 0, Active = 1
 export enum CategoryStatus {
     Inactive = 0,
@@ -28,14 +28,14 @@ export enum CategoryStatus {
 // PRODUCT
 // ============================================================
 
-// Bảng Products — cột Status
+// Products table - Status column
 // SRS: Inactive = 0, Active = 1
 export enum ProductStatus {
     Inactive = 0,
     Active = 1,
 }
 
-// Bảng ProductVariants — cột Size
+// ProductVariants table - Size column
 // SRS: Size (S, M, L, XL, XXL...)
 export enum ProductSize {
     XS = 'XS',
@@ -50,7 +50,7 @@ export enum ProductSize {
 // ORDER
 // ============================================================
 
-// Bảng Orders — cột Status
+// Orders table - Status column
 // SRS: 0=Pending, 1=Confirmed, 2=Processing, 3=Shipping,
 //      4=Delivered, 5=Cancelled, 6=Returned
 export enum OrderStatus {
@@ -67,7 +67,7 @@ export enum OrderStatus {
 // PAYMENT
 // ============================================================
 
-// Bảng Orders — cột PaymentMethod
+// Orders table - PaymentMethod column
 // SRS: 0 = COD, 1 = MoMo, 2 = ZaloPay, 3 = PayOS
 export enum PaymentMethod {
     COD = 0,
@@ -76,7 +76,7 @@ export enum PaymentMethod {
     PayOS = 3,
 }
 
-// Trạng thái thanh toán — dùng trong Payment flow (FR12)
+// Payment status - used in payment flow (FR12)
 export enum PaymentStatus {
     Pending = 0,
     Paid = 1,
@@ -89,7 +89,7 @@ export enum PaymentStatus {
 // REVIEW
 // ============================================================
 
-// Bảng Reviews — cột Rating
+// Reviews table - Rating column
 // SRS: 1 to 5 stars
 export enum ReviewRating {
     One = 1,
@@ -99,7 +99,7 @@ export enum ReviewRating {
     Five = 5,
 }
 
-// Trạng thái review — dùng cho Admin moderation (Sprint 4)
+// Review status - used for Admin moderation (Sprint 4)
 export enum ReviewStatus {
     Pending = 0,
     Approved = 1,
@@ -107,7 +107,7 @@ export enum ReviewStatus {
 }
 
 // ============================================================
-// SORT & FILTER (dùng cho Product listing — FR05)
+// SORT & FILTER (used for product listing - FR05)
 // ============================================================
 
 export enum SortOrder {
@@ -126,7 +126,7 @@ export enum ProductSortBy {
 // DASHBOARD (FR15 → FR20)
 // ============================================================
 
-// Filter theo khoảng thời gian — Admin Dashboard
+// Date range filter - Admin Dashboard
 export enum DateRangeFilter {
     Today = 'today',
     Last7Days = 'last_7_days',
@@ -138,43 +138,43 @@ export enum DateRangeFilter {
 
 // ============================================================
 // LABEL MAPS
-// Dùng để hiển thị text tiếng Việt ra UI — tránh hardcode ở component
+// Used to display UI labels and avoid hardcoding in components
 // ============================================================
 
 export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
-    [OrderStatus.Pending]: 'Chờ xác nhận',
-    [OrderStatus.Confirmed]: 'Đã xác nhận',
-    [OrderStatus.Processing]: 'Đang xử lý',
-    [OrderStatus.Shipping]: 'Đang giao hàng',
-    [OrderStatus.Delivered]: 'Đã giao hàng',
-    [OrderStatus.Cancelled]: 'Đã huỷ',
-    [OrderStatus.Returned]: 'Đã hoàn trả',
+    [OrderStatus.Pending]: 'Pending',
+    [OrderStatus.Confirmed]: 'Confirmed',
+    [OrderStatus.Processing]: 'Processing',
+    [OrderStatus.Shipping]: 'Shipping',
+    [OrderStatus.Delivered]: 'Delivered',
+    [OrderStatus.Cancelled]: 'Cancelled',
+    [OrderStatus.Returned]: 'Returned',
 }
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
-    [PaymentMethod.COD]: 'Thanh toán khi nhận hàng (COD)',
-    [PaymentMethod.MoMo]: 'Ví MoMo',
+    [PaymentMethod.COD]: 'Cash on delivery (COD)',
+    [PaymentMethod.MoMo]: 'MoMo Wallet',
     [PaymentMethod.ZaloPay]: 'ZaloPay',
     [PaymentMethod.PayOS]: 'PayOS',
 }
 
 export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
-    [PaymentStatus.Pending]: 'Chờ thanh toán',
-    [PaymentStatus.Paid]: 'Đã thanh toán',
-    [PaymentStatus.Failed]: 'Thanh toán thất bại',
-    [PaymentStatus.Cancelled]: 'Đã huỷ',
-    [PaymentStatus.Refunded]: 'Đã hoàn tiền',
+    [PaymentStatus.Pending]: 'Pending',
+    [PaymentStatus.Paid]: 'Paid',
+    [PaymentStatus.Failed]: 'Failed',
+    [PaymentStatus.Cancelled]: 'Cancelled',
+    [PaymentStatus.Refunded]: 'Refunded',
 }
 
 export const USER_STATUS_LABEL: Record<UserStatus, string> = {
-    [UserStatus.Inactive]: 'Chưa kích hoạt',
-    [UserStatus.Active]: 'Đang hoạt động',
-    [UserStatus.Banned]: 'Đã bị khoá',
+    [UserStatus.Inactive]: 'Inactive',
+    [UserStatus.Active]: 'Active',
+    [UserStatus.Banned]: 'Banned',
 }
 
 export const USER_ROLE_LABEL: Record<UserRole, string> = {
-    [UserRole.Admin]: 'Quản trị viên',
-    [UserRole.User]: 'Người dùng',
+    [UserRole.Admin]: 'Admin',
+    [UserRole.User]: 'User',
 }
 
 export const PRODUCT_SIZE_LABEL: Record<ProductSize, string> = {
@@ -187,17 +187,17 @@ export const PRODUCT_SIZE_LABEL: Record<ProductSize, string> = {
 }
 
 export const DATE_RANGE_LABEL: Record<DateRangeFilter, string> = {
-    [DateRangeFilter.Today]: 'Hôm nay',
-    [DateRangeFilter.Last7Days]: '7 ngày qua',
-    [DateRangeFilter.Last30Days]: '30 ngày qua',
-    [DateRangeFilter.Monthly]: 'Theo tháng',
-    [DateRangeFilter.Yearly]: 'Theo năm',
-    [DateRangeFilter.Custom]: 'Tuỳ chọn',
+    [DateRangeFilter.Today]: 'Today',
+    [DateRangeFilter.Last7Days]: 'Last 7 days',
+    [DateRangeFilter.Last30Days]: 'Last 30 days',
+    [DateRangeFilter.Monthly]: 'Monthly',
+    [DateRangeFilter.Yearly]: 'Yearly',
+    [DateRangeFilter.Custom]: 'Custom',
 }
 
 // ============================================================
-// COLOR MAP cho Badge / Tag hiển thị trạng thái đơn hàng
-// Dùng với clsx hoặc Tailwind className
+// Color map for order status badges/tags
+// Used with clsx or Tailwind className
 // ============================================================
 
 export const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {

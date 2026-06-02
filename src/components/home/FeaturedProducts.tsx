@@ -21,15 +21,15 @@ export function FeaturedProducts() {
                 <div className="flex items-end justify-between mb-16">
                     <div>
                         <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase mb-3">
-                            Được yêu thích nhất
+                            Most loved
                         </p>
-                        <h2 className="font-serif text-4xl md:text-5xl">Sản Phẩm Nổi Bật</h2>
+                        <h2 className="font-serif text-4xl md:text-5xl">Featured Products</h2>
                     </div>
                     <Link
                         href={ROUTES.SHOP.PRODUCTS}
                         className="hidden md:flex items-center gap-2 text-sm tracking-wide hover:text-muted-foreground transition-colors group"
                     >
-                        Xem tất cả
+                        View all
                         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                 </div>
@@ -55,7 +55,7 @@ export function FeaturedProducts() {
                         href={ROUTES.SHOP.PRODUCTS}
                         className="flex items-center gap-2 text-sm tracking-wide border border-foreground px-8 py-3 hover:bg-foreground hover:text-background transition-colors"
                     >
-                        Xem tất cả sản phẩm
+                        View all products
                         <ArrowRight className="h-4 w-4" />
                     </Link>
                 </div>

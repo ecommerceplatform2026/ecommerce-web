@@ -6,10 +6,12 @@ import type { ProductSearchParams } from '@/types/product'
 
 export const productKeys = {
     all: ['products'] as const,
+    adminAll: ['products', 'admin'] as const,
     search: (params: ProductSearchParams) => ['products', 'search', params] as const,
     summary: (id: string) => ['products', 'summary', id] as const,
     detail: (id: string) => ['products', 'detail', id] as const,
     images: (id: string) => ['products', id, 'images'] as const,
+    variants: (id: string) => ['products', id, 'variants'] as const,
 }
 
 export function useProducts() {
@@ -82,10 +84,25 @@ export function useProductDetail(id: string) {
     })
 }
 
+export function useAdminProducts() {
+    return useQuery({
+        queryKey: productKeys.adminAll,
+        queryFn: productService.getAdminAll,
+    })
+}
+
 export function useProductImages(productId: string) {
     return useQuery({
         queryKey: productKeys.images(productId),
         queryFn: () => productService.getImages(productId),
+        enabled: !!productId,
+    })
+}
+
+export function useProductVariants(productId: string) {
+    return useQuery({
+        queryKey: productKeys.variants(productId),
+        queryFn: () => productService.getVariants(productId),
         enabled: !!productId,
     })
 }

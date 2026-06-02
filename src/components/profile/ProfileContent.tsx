@@ -51,11 +51,11 @@ function getInitials(name: string): string {
 function statusConfig(status: UserStatus) {
     switch (status) {
         case UserStatus.Active:
-            return { label: "Hoạt động", className: "bg-green-500 hover:bg-green-600" }
+            return { label: "Active", className: "bg-green-500 hover:bg-green-600" }
         case UserStatus.Inactive:
-            return { label: "Không hoạt động", className: "bg-gray-400 hover:bg-gray-500" }
+            return { label: "Inactive", className: "bg-gray-400 hover:bg-gray-500" }
         case UserStatus.Banned:
-            return { label: "Bị khoá", className: "bg-destructive hover:bg-destructive/90" }
+            return { label: "Banned", className: "bg-destructive hover:bg-destructive/90" }
     }
 }
 
@@ -93,7 +93,7 @@ export function ProfileContent() {
     const handleEditProfileSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
         if (!editFormData.fullName.trim()) {
-            toast.error("Vui lòng điền họ và tên.")
+            toast.error("Please enter your full name.")
             return
         }
         try {
@@ -103,26 +103,26 @@ export function ProfileContent() {
                 phoneNumber: editFormData.phoneNumber.trim() || undefined,
                 dateOfBirth: editFormData.dateOfBirth || undefined,
             })
-            toast.success("Thông tin cá nhân đã được cập nhật.")
+            toast.success("Your profile has been updated.")
             setIsEditDialogOpen(false)
         } catch (err) {
             const apiError = err as ApiError
-            toast.error(apiError.message ?? "Đã xảy ra lỗi, vui lòng thử lại.")
+            toast.error(apiError.message ?? "Something went wrong. Please try again.")
         }
     }
 
     const handleChangePasswordSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault()
         if (!passwordFormData.currentPassword || !passwordFormData.newPassword || !passwordFormData.confirmPassword) {
-            toast.error("Vui lòng điền đầy đủ thông tin mật khẩu.")
+            toast.error("Please fill in all password fields.")
             return
         }
         if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
-            toast.error("Mật khẩu xác nhận không khớp.")
+            toast.error("Password confirmation does not match.")
             return
         }
-        // TODO: kết nối API đổi mật khẩu khi backend hỗ trợ endpoint
-        toast.success("Mật khẩu của bạn đã được cập nhật.")
+        // TODO: connect change-password API when the backend supports this endpoint
+        toast.success("Your password has been updated.")
         setPasswordFormData({ currentPassword: "", newPassword: "", confirmPassword: "" })
         setIsPasswordDialogOpen(false)
     }
@@ -131,19 +131,19 @@ export function ProfileContent() {
         const file = e.target.files?.[0]
         if (!file) return
         if (!file.type.startsWith("image/")) {
-            toast.error("Vui lòng chọn file ảnh.")
+            toast.error("Please select an image file.")
             return
         }
         if (file.size > 5 * 1024 * 1024) {
-            toast.error("Ảnh tối đa 5 MB.")
+            toast.error("Image size must be 5 MB or less.")
             return
         }
         try {
             await uploadAvatar(file)
-            toast.success("Cập nhật ảnh đại diện thành công")
+            toast.success("Avatar updated successfully")
         } catch (err) {
             const apiError = err as ApiError
-            toast.error(apiError.message ?? "Đã xảy ra lỗi, vui lòng thử lại.")
+            toast.error(apiError.message ?? "Something went wrong. Please try again.")
         }
         e.target.value = ""
     }
@@ -172,7 +172,7 @@ export function ProfileContent() {
         return (
             <div className="py-16 px-4 lg:px-8">
                 <div className="container mx-auto max-w-4xl">
-                    <EmptyState title="Không thể tải thông tin" description={error} />
+                    <EmptyState title="Unable to load information" description={error} />
                 </div>
             </div>
         )
@@ -203,7 +203,7 @@ export function ProfileContent() {
                         )}
                         <button
                             type="button"
-                            aria-label="Thay đổi ảnh đại diện"
+                            aria-label="Change avatar"
                             disabled={isUploadingAvatar}
                             onClick={() => avatarInputRef.current?.click()}
                             className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 transition-colors"
@@ -233,28 +233,28 @@ export function ProfileContent() {
                 </div>
 
                 <div className="grid gap-6">
-                    {/* Thông tin cá nhân */}
+                    {/* Personal information */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <User className="h-5 w-5" />
-                                Thông tin cá nhân
+                                Personal Information
                             </CardTitle>
-                            <CardDescription>Thông tin tài khoản của bạn</CardDescription>
+                            <CardDescription>Your account information</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-5">
                             <div className="grid md:grid-cols-2 gap-5">
                                 <div className="space-y-1.5">
                                     <Label className="text-muted-foreground flex items-center gap-1.5">
                                         <User className="h-3.5 w-3.5" />
-                                        Họ và tên
+                                        Full name
                                     </Label>
                                     <p className="text-base font-medium">{profile.fullName}</p>
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-muted-foreground flex items-center gap-1.5">
                                         <AtSign className="h-3.5 w-3.5" />
-                                        Tên người dùng
+                                        Username
                                     </Label>
                                     <p className="text-base font-medium">
                                         {profile.username ? `@${profile.username}` : "—"}
@@ -273,7 +273,7 @@ export function ProfileContent() {
                                 <div className="space-y-1.5">
                                     <Label className="text-muted-foreground flex items-center gap-1.5">
                                         <Phone className="h-3.5 w-3.5" />
-                                        Số điện thoại
+                                        Phone number
                                     </Label>
                                     <p className="text-base font-medium">{profile.phoneNumber ?? "—"}</p>
                                 </div>
@@ -283,7 +283,7 @@ export function ProfileContent() {
                                 <div className="space-y-1.5">
                                     <Label className="text-muted-foreground flex items-center gap-1.5">
                                         <Calendar className="h-3.5 w-3.5" />
-                                        Ngày sinh
+                                        Date of birth
                                     </Label>
                                     <p className="text-base font-medium">
                                         {profile.dateOfBirth ? formatDate(profile.dateOfBirth) : "—"}
@@ -292,7 +292,7 @@ export function ProfileContent() {
                                 <div className="space-y-1.5">
                                     <Label className="text-muted-foreground flex items-center gap-1.5">
                                         <ShieldCheck className="h-3.5 w-3.5" />
-                                        Trạng thái tài khoản
+                                        Account status
                                     </Label>
                                     <Badge className={status.className}>{status.label}</Badge>
                                 </div>
@@ -300,14 +300,14 @@ export function ProfileContent() {
                         </CardContent>
                     </Card>
 
-                    {/* Địa chỉ giao hàng */}
+                    {/* Shipping address */}
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <MapPin className="h-5 w-5" />
-                                Địa chỉ giao hàng
+                                Shipping Address
                             </CardTitle>
-                            <CardDescription>Địa chỉ nhận hàng mặc định</CardDescription>
+                            <CardDescription>Your default delivery address</CardDescription>
                         </CardHeader>
                         <CardContent>
                             {address ? (
@@ -329,18 +329,18 @@ export function ProfileContent() {
                                     </div>
                                     <Badge variant="outline" className="shrink-0 flex items-center gap-1 text-xs">
                                         <Star className="h-3 w-3" />
-                                        Mặc định
+                                        Default
                                     </Badge>
                                 </div>
                             ) : (
                                 <EmptyState
                                     icon={<MapPin />}
-                                    title="Chưa có địa chỉ giao hàng"
-                                    description="Thêm địa chỉ để thanh toán nhanh hơn."
+                                    title="No shipping address yet"
+                                    description="Add an address for faster checkout."
                                     action={
                                         <Button variant="outline" size="sm" className="bg-transparent" disabled>
                                             <Plus className="h-4 w-4" />
-                                            Thêm địa chỉ
+                                            Add address
                                         </Button>
                                     }
                                 />
@@ -348,14 +348,14 @@ export function ProfileContent() {
                         </CardContent>
                     </Card>
 
-                    {/* Thao tác tài khoản */}
+                    {/* Account actions */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>Thao tác tài khoản</CardTitle>
-                            <CardDescription>Chỉnh sửa thông tin và bảo mật</CardDescription>
+                            <CardTitle>Account Actions</CardTitle>
+                            <CardDescription>Edit your information and security settings</CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-wrap gap-3">
-                            {/* Dialog chỉnh sửa hồ sơ */}
+                            {/* Edit profile dialog */}
                             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button
@@ -363,19 +363,19 @@ export function ProfileContent() {
                                         className="bg-transparent"
                                         onClick={openEditDialog}
                                     >
-                                        Chỉnh sửa hồ sơ
+                                        Edit profile
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[500px]">
                                     <DialogHeader>
-                                        <DialogTitle>Chỉnh sửa hồ sơ</DialogTitle>
+                                        <DialogTitle>Edit profile</DialogTitle>
                                         <DialogDescription>
-                                            Cập nhật thông tin cá nhân của bạn
+                                            Update your personal information
                                         </DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleEditProfileSubmit} className="space-y-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="edit-fullName">Họ và tên</Label>
+                                            <Label htmlFor="edit-fullName">Full name</Label>
                                             <Input
                                                 id="edit-fullName"
                                                 value={editFormData.fullName}
@@ -385,7 +385,7 @@ export function ProfileContent() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="edit-username">Tên người dùng</Label>
+                                            <Label htmlFor="edit-username">Username</Label>
                                             <Input
                                                 id="edit-username"
                                                 value={editFormData.username}
@@ -395,7 +395,7 @@ export function ProfileContent() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="edit-phone">Số điện thoại</Label>
+                                            <Label htmlFor="edit-phone">Phone number</Label>
                                             <Input
                                                 id="edit-phone"
                                                 value={editFormData.phoneNumber}
@@ -405,7 +405,7 @@ export function ProfileContent() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="edit-dob">Ngày sinh</Label>
+                                            <Label htmlFor="edit-dob">Date of birth</Label>
                                             <Input
                                                 id="edit-dob"
                                                 type="date"
@@ -421,7 +421,7 @@ export function ProfileContent() {
                                                 {profile.email}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                Email không thể thay đổi.
+                                                Email cannot be changed.
                                             </p>
                                         </div>
                                         <div className="flex gap-2 justify-end pt-2">
@@ -430,39 +430,39 @@ export function ProfileContent() {
                                                 variant="outline"
                                                 onClick={() => setIsEditDialogOpen(false)}
                                             >
-                                                Huỷ
+                                                Cancel
                                             </Button>
                                             <Button type="submit" disabled={isUpdating}>
                                                 {isUpdating && (
                                                     <Spinner size="sm" className="mr-1.5" />
                                                 )}
-                                                Lưu thay đổi
+                                                Save changes
                                             </Button>
                                         </div>
                                     </form>
                                 </DialogContent>
                             </Dialog>
 
-                            {/* Dialog đổi mật khẩu */}
+                            {/* Change password dialog */}
                             <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="outline" className="bg-transparent">
-                                        Đổi mật khẩu
+                                        Change password
                                     </Button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[500px]">
                                     <DialogHeader>
                                         <DialogTitle className="flex items-center gap-2">
                                             <Lock className="h-5 w-5" />
-                                            Đổi mật khẩu
+                                            Change password
                                         </DialogTitle>
                                         <DialogDescription>
-                                            Cập nhật mật khẩu tài khoản của bạn
+                                            Update your account password
                                         </DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={handleChangePasswordSubmit} className="space-y-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="currentPassword">Mật khẩu hiện tại</Label>
+                                            <Label htmlFor="currentPassword">Current password</Label>
                                             <Input
                                                 id="currentPassword"
                                                 type="password"
@@ -476,7 +476,7 @@ export function ProfileContent() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="newPassword">Mật khẩu mới</Label>
+                                            <Label htmlFor="newPassword">New password</Label>
                                             <Input
                                                 id="newPassword"
                                                 type="password"
@@ -490,7 +490,7 @@ export function ProfileContent() {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="confirmPassword">Xác nhận mật khẩu mới</Label>
+                                            <Label htmlFor="confirmPassword">Confirm new password</Label>
                                             <Input
                                                 id="confirmPassword"
                                                 type="password"
@@ -509,9 +509,9 @@ export function ProfileContent() {
                                                 variant="outline"
                                                 onClick={() => setIsPasswordDialogOpen(false)}
                                             >
-                                                Huỷ
+                                                Cancel
                                             </Button>
-                                            <Button type="submit">Đổi mật khẩu</Button>
+                                            <Button type="submit">Change password</Button>
                                         </div>
                                     </form>
                                 </DialogContent>

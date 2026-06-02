@@ -103,7 +103,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     const selectedCombinationExists = hasVariantForSelection(variants, selectedSize, selectedColor)
     const needsVariantSelection = variants.length > 0 && !selectedVariant
     const isInactive = isInactiveStatus(product.status)
-    const productStatusLabel = isInactive ? "Ngừng kinh doanh" : "Đang kinh doanh"
+    const productStatusLabel = isInactive ? "Discontinued" : "Available"
     const stockQuantity = selectedVariant?.stock ?? product.totalStock ?? 0
     const isOutOfStock = selectedVariant ? !variantHasStock(selectedVariant) : stockQuantity <= 0
     const maxQuantity = Math.max(stockQuantity, 0)
@@ -134,17 +134,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
     async function handleAddToCart() {
         if (needsVariantSelection) {
-            toast.error("Vui lòng chọn đầy đủ size và màu sắc")
+            toast.error("Please select size and color")
             return
         }
 
         if (!selectedVariant) {
-            toast.error("Sản phẩm chưa có biến thể khả dụng")
+            toast.error("This product has no available variant")
             return
         }
 
         if (isInactive || isOutOfStock) {
-            toast.error("Sản phẩm hiện không có sẵn")
+            toast.error("This product is not available")
             return
         }
 
@@ -169,7 +169,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 await cartService.addItem(selectedVariant.id, finalQuantity)
             }
 
-            toast.success(`Đã thêm ${finalQuantity} x ${product.name} vào giỏ hàng`)
+            toast.success(`Added ${finalQuantity} x ${product.name} to cart`)
             setAdded(true)
             setTimeout(() => setAdded(false), 1500)
         } catch (error) {
@@ -180,7 +180,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             }
 
             const apiError = error as ApiError
-            toast.error(apiError.message ?? "Không thể thêm sản phẩm vào giỏ hàng")
+            toast.error(apiError.message ?? "Could not add product to cart")
         } finally {
             setIsAdding(false)
         }
@@ -194,7 +194,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 <section className="space-y-8">
                     <div>
                         <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
-                            {product.categoryName ?? "Sản phẩm"}
+                            {product.categoryName ?? "Product"}
                         </p>
                         <h1 className="mb-4 text-balance font-serif text-4xl md:text-5xl">
                             {product.name}
@@ -219,7 +219,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         <div className="space-y-3">
                             <div className="flex items-center justify-between gap-4">
                                 <p className="text-sm font-medium uppercase tracking-wide">
-                                    Màu sắc
+                                    Color
                                 </p>
                                 {selectedColor && (
                                     <p className="text-sm text-muted-foreground">{selectedColor}</p>
@@ -261,7 +261,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         <div className="space-y-3">
                             <div className="flex items-center justify-between gap-4">
                                 <p className="text-sm font-medium uppercase tracking-wide">
-                                    Kích cỡ
+                                    Size
                                 </p>
                                 {selectedSize && (
                                     <p className="text-sm text-muted-foreground">{selectedSize}</p>
@@ -303,35 +303,35 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         {isInactive ? (
                             <p className="flex items-center gap-2 text-destructive">
                                 <PackageX className="h-4 w-4" />
-                                Sản phẩm ngừng kinh doanh
+                                Product discontinued
                             </p>
                         ) : needsVariantSelection ? (
                             <p className="flex items-center gap-2 text-amber-600">
                                 <AlertCircle className="h-4 w-4" />
                                 {selectedCombinationExists
-                                    ? "Chọn size và màu sắc để xem tồn kho"
-                                    : "Tổ hợp size và màu sắc này không có sẵn"}
+                                    ? "Select size and color to view stock"
+                                    : "This size and color combination is unavailable"}
                             </p>
                         ) : isOutOfStock ? (
                             <p className="flex items-center gap-2 text-destructive">
                                 <PackageX className="h-4 w-4" />
-                                Hết hàng
+                                Out of stock
                             </p>
                         ) : (
                             <p className="flex items-center gap-2 text-green-600">
                                 <PackageCheck className="h-4 w-4" />
-                                Còn hàng ({stockQuantity})
+                                In stock ({stockQuantity})
                             </p>
                         )}
                     </div>
 
                     <div className="grid gap-4 border-y border-border py-6 text-sm sm:grid-cols-2">
                         <div>
-                            <p className="text-muted-foreground">Chất liệu</p>
-                            <p className="mt-1 font-medium">{product.material || "Đang cập nhật"}</p>
+                            <p className="text-muted-foreground">Material</p>
+                            <p className="mt-1 font-medium">{product.material || "Updating"}</p>
                         </div>
                         <div>
-                            <p className="text-muted-foreground">Trạng thái</p>
+                            <p className="text-muted-foreground">Status</p>
                             <p className="mt-1 font-medium">
                                 {productStatusLabel}
                             </p>
@@ -345,7 +345,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </div>
 
                     <div className="space-y-3">
-                        <p className="text-sm font-medium uppercase tracking-wide">Số lượng</p>
+                        <p className="text-sm font-medium uppercase tracking-wide">Quantity</p>
                         <div className="flex w-fit items-center border border-border">
                             <Button
                                 variant="ghost"
@@ -380,16 +380,16 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                         {added ? (
                             <>
                                 <Check className="h-5 w-5" />
-                                Đã thêm vào giỏ
+                                Added to cart
                             </>
                         ) : isAdding ? (
-                            "Đang thêm..."
+                            "Adding..."
                         ) : needsVariantSelection ? (
-                            "Chọn biến thể"
+                            "Select variant"
                         ) : isOutOfStock ? (
-                            "Hết hàng"
+                            "Out of stock"
                         ) : (
-                            "Thêm vào giỏ hàng"
+                            "Add to cart"
                         )}
                     </Button>
                 </section>

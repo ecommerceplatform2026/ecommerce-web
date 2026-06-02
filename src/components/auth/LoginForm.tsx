@@ -13,8 +13,8 @@ import { useAuth } from "@/hooks/useAuth"
 import type { ApiError } from "@/types/api"
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email không được để trống").email("Email không hợp lệ"),
-  password: z.string().min(1, "Mật khẩu không được để trống").min(8, "Mật khẩu phải có ít nhất 8 ký tự"),
+  email: z.string().min(1, "Email is required").email("Invalid email"),
+  password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
   rememberMe: z.boolean().optional(),
 })
 
@@ -32,10 +32,10 @@ export function LoginForm({ redirectTo }: Props) {
   const router = useRouter()
   const toastShownRef = useRef(false)
 
-  // Chỉ cho phép redirect nội bộ — chống open redirect
+  // Only allow internal redirects to prevent open redirects
   const safeRedirect = redirectTo?.startsWith("/") ? redirectTo : "/"
 
-  // Đánh dấu page đã mount và navigation hoàn tất sau 1 tick
+  // Mark the page as mounted and navigation-ready after one tick
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsPageReady(true)
@@ -43,11 +43,11 @@ export function LoginForm({ redirectTo }: Props) {
     return () => clearTimeout(timer)
   }, [])
 
-  // Hiện toast sau khi page ready — useRef đảm bảo chỉ hiện đúng 1 lần
+  // Show the toast after the page is ready; useRef ensures it only appears once
   useEffect(() => {
     if (isPageReady && redirectTo && !toastShownRef.current) {
       toastShownRef.current = true
-      toast.error("Vui lòng đăng nhập để tiếp tục.")
+      toast.error("Please sign in to continue.")
     }
   }, [isPageReady, redirectTo])
 
@@ -63,10 +63,10 @@ export function LoginForm({ redirectTo }: Props) {
     setIsLoading(true)
     try {
       await login(data.email, data.password)
-      toast.success("Chào mừng bạn trở lại ATELIER.")
+      toast.success("Welcome back to ATELIER.")
       router.push(safeRedirect)
     } catch (err) {
-      toast.error((err as ApiError).message ?? 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.')
+      toast.error((err as ApiError).message ?? 'Invalid email or password. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -93,16 +93,16 @@ export function LoginForm({ redirectTo }: Props) {
         )}
       </div>
 
-      {/* Mật khẩu */}
+      {/* Password */}
       <div className="space-y-2">
         <label htmlFor="password" className="text-sm font-medium leading-none">
-          Mật khẩu
+          Password
         </label>
         <div className="relative">
           <Input
             id="password"
             type={showPassword ? "text" : "password"}
-            placeholder="Nhập mật khẩu"
+            placeholder="Enter password"
             {...register("password")}
             className="h-12 pr-10"
             disabled={isLoading}
@@ -122,7 +122,7 @@ export function LoginForm({ redirectTo }: Props) {
         )}
       </div>
 
-      {/* Ghi nhớ đăng nhập */}
+      {/* Remember sign-in */}
       <div className="flex items-center gap-2">
         <input
           id="rememberMe"
@@ -132,7 +132,7 @@ export function LoginForm({ redirectTo }: Props) {
           className="h-4 w-4 rounded border-border accent-primary cursor-pointer"
         />
         <label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
-          Ghi nhớ đăng nhập
+          Remember me
         </label>
       </div>
 
@@ -141,7 +141,7 @@ export function LoginForm({ redirectTo }: Props) {
         className="w-full h-12 text-base"
         disabled={isLoading}
       >
-        {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+        {isLoading ? "Signing in..." : "Sign in"}
       </Button>
     </form>
   )

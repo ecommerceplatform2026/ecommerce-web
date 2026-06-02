@@ -1,7 +1,24 @@
 import axiosInstance from '@/lib/axios'
 import { PRODUCT_ENDPOINTS } from '@/constants/api'
 import type { ApiError, ApiResponse, PaginatedResponse } from '@/types/api'
-import type { Product, ProductDetail, ProductImage, ProductSearchParams } from '@/types/product'
+import type {
+    Product,
+    ProductDetail,
+    ProductFormValues,
+    ProductImage,
+    ProductSearchParams,
+    ProductVariantFormValues,
+    ProductVariantResponse,
+} from '@/types/product'
+
+type ProductVariantApiPayload = {
+    SKU: string
+    Color: string | null
+    Size: string | null
+    Stock: number
+    LowStockThreshold: number
+    Price: number
+}
 
 function cleanParams(params: ProductSearchParams): Record<string, string | number> {
     return Object.fromEntries(
@@ -15,6 +32,17 @@ function cleanParams(params: ProductSearchParams): Record<string, string | numbe
 
 function isNotFoundError(error: unknown): boolean {
     return (error as ApiError).statusCode === 404
+}
+
+function toProductVariantApiPayload(payload: ProductVariantFormValues): ProductVariantApiPayload {
+    return {
+        SKU: payload.sku,
+        Color: payload.color,
+        Size: payload.size,
+        Stock: payload.stock,
+        LowStockThreshold: payload.lowStockThreshold,
+        Price: payload.price,
+    }
 }
 
 function toProductDetailFallback(product: Product, images: ProductImage[]): ProductDetail {
@@ -58,6 +86,13 @@ export const productService = {
         return res.data.data
     },
 
+    getAdminAll: async (): Promise<Product[]> => {
+        const res = await axiosInstance.get<ApiResponse<Product[]>>(
+            PRODUCT_ENDPOINTS.ADMIN_GET_ALL,
+        )
+        return res.data.data
+    },
+
     getById: async (id: string): Promise<Product> => {
         const res = await axiosInstance.get<ApiResponse<Product>>(
             PRODUCT_ENDPOINTS.GET_BY_ID(id),
@@ -89,6 +124,85 @@ export const productService = {
     getImages: async (productId: string): Promise<ProductImage[]> => {
         const res = await axiosInstance.get<ApiResponse<ProductImage[]>>(
             PRODUCT_ENDPOINTS.GET_IMAGES(productId),
+        )
+        return res.data.data
+    },
+
+    create: async (payload: ProductFormValues): Promise<Product> => {
+        const res = await axiosInstance.post<ApiResponse<Product>>(
+            PRODUCT_ENDPOINTS.ADMIN_CREATE,
+            payload,
+        )
+        return res.data.data
+    },
+
+    update: async (id: string, payload: ProductFormValues): Promise<Product> => {
+        const res = await axiosInstance.put<ApiResponse<Product>>(
+            PRODUCT_ENDPOINTS.ADMIN_UPDATE(id),
+            payload,
+        )
+        return res.data.data
+    },
+
+    delete: async (id: string): Promise<boolean> => {
+        const res = await axiosInstance.delete<ApiResponse<boolean>>(
+            PRODUCT_ENDPOINTS.ADMIN_DELETE(id),
+        )
+        return res.data.data
+    },
+
+    getVariants: async (productId: string): Promise<ProductVariantResponse[]> => {
+        const res = await axiosInstance.get<ApiResponse<ProductVariantResponse[]>>(
+            PRODUCT_ENDPOINTS.GET_VARIANTS(productId),
+        )
+        return res.data.data
+    },
+
+    createVariant: async (
+        productId: string,
+        payload: ProductVariantFormValues,
+    ): Promise<ProductVariantResponse> => {
+        const res = await axiosInstance.post<ApiResponse<ProductVariantResponse>>(
+            PRODUCT_ENDPOINTS.ADMIN_CREATE_VARIANT(productId),
+            toProductVariantApiPayload(payload),
+        )
+        return res.data.data
+    },
+
+    updateVariant: async (
+        productId: string,
+        variantId: string,
+        payload: ProductVariantFormValues,
+    ): Promise<ProductVariantResponse> => {
+        const res = await axiosInstance.put<ApiResponse<ProductVariantResponse>>(
+            PRODUCT_ENDPOINTS.ADMIN_UPDATE_VARIANT(productId, variantId),
+            toProductVariantApiPayload(payload),
+        )
+        return res.data.data
+    },
+
+    deleteVariant: async (productId: string, variantId: string): Promise<boolean> => {
+        const res = await axiosInstance.delete<ApiResponse<boolean>>(
+            PRODUCT_ENDPOINTS.ADMIN_DELETE_VARIANT(productId, variantId),
+        )
+        return res.data.data
+    },
+
+    uploadImage: async (productId: string, image: File): Promise<ProductImage> => {
+        const formData = new FormData()
+        formData.append('image', image)
+
+        const res = await axiosInstance.post<ApiResponse<ProductImage>>(
+            PRODUCT_ENDPOINTS.ADMIN_UPLOAD_IMAGE(productId),
+            formData,
+            { headers: { 'Content-Type': 'multipart/form-data' } },
+        )
+        return res.data.data
+    },
+
+    deleteImage: async (productId: string, imageId: string): Promise<boolean> => {
+        const res = await axiosInstance.delete<ApiResponse<boolean>>(
+            PRODUCT_ENDPOINTS.ADMIN_DELETE_IMAGE(productId, imageId),
         )
         return res.data.data
     },

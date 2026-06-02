@@ -5,7 +5,7 @@ export function formatDate(dateStr: string): string {
 }
 
 export function formatDateTime(dateStr: string): string {
-    return new Intl.DateTimeFormat('vi-VN', {
+    return new Intl.DateTimeFormat('en-US', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -18,9 +18,9 @@ export function formatRelativeTime(dateStr: string): string {
     const diffDays = Math.floor(
         (Date.now() - new Date(dateStr).getTime()) / 86_400_000,
     )
-    if (diffDays === 0) return 'Hôm nay'
-    if (diffDays === 1) return 'Hôm qua'
-    if (diffDays < 7) return `${diffDays} ngày trước`
+    if (diffDays === 0) return 'Today'
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
     return formatDate(dateStr)
 }
 
