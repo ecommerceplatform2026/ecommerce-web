@@ -27,9 +27,7 @@ const MAX_NAME_LENGTH = 100
 
 type CategoryModalMode = "create" | "edit"
 
-interface CategoryFormState {
-    name: string
-}
+type CategoryFormState = CategoryFormValues
 
 interface CategoryApiError {
     message?: string
@@ -110,8 +108,8 @@ export function CategoryManagement() {
     const paginatedCategories = filteredCategories.slice(startIndex, startIndex + PAGE_SIZE)
 
     const invalidateCategories = () => {
-        queryClient.invalidateQueries({ queryKey: categoryKeys.adminAll })
-        queryClient.invalidateQueries({ queryKey: categoryKeys.all })
+        queryClient.invalidateQueries({ queryKey: categoryKeys.adminAll, exact: true })
+        queryClient.invalidateQueries({ queryKey: categoryKeys.all, exact: true })
     }
 
     const createMutation = useMutation({
@@ -326,7 +324,7 @@ export function CategoryManagement() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                                    onClick={() => setCurrentPage(page => Math.max(1, Math.min(page, totalPages) - 1))}
                                     disabled={safeCurrentPage === 1}
                                 >
                                     Previous
@@ -347,7 +345,7 @@ export function CategoryManagement() {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                                    onClick={() => setCurrentPage(page => Math.min(totalPages, Math.min(page, totalPages) + 1))}
                                     disabled={safeCurrentPage === totalPages}
                                 >
                                     Next
