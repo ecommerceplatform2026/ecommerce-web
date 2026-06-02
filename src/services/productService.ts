@@ -1,11 +1,12 @@
 import axiosInstance from '@/lib/axios'
 import { PRODUCT_ENDPOINTS } from '@/constants/api'
-import type { ApiError, ApiResponse } from '@/types/api'
+import type { ApiError, ApiResponse, PaginatedResponse } from '@/types/api'
 import type {
     Product,
     ProductDetail,
     ProductFormValues,
     ProductImage,
+    ProductSearchParams,
     ProductVariantFormValues,
     ProductVariantResponse,
 } from '@/types/product'
@@ -17,6 +18,16 @@ type ProductVariantApiPayload = {
     Stock: number
     LowStockThreshold: number
     Price: number
+}
+
+function cleanParams(params: ProductSearchParams): Record<string, string | number> {
+    return Object.fromEntries(
+        Object.entries(params).filter(([, value]) =>
+            value !== undefined &&
+            value !== null &&
+            value !== '',
+        ),
+    ) as Record<string, string | number>
 }
 
 function isNotFoundError(error: unknown): boolean {
@@ -35,18 +46,27 @@ function toProductVariantApiPayload(payload: ProductVariantFormValues): ProductV
 }
 
 function toProductDetailFallback(product: Product, images: ProductImage[]): ProductDetail {
+    const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
     const variantPrices = product.variants.map(variant => variant.price)
     const prices = variantPrices.length > 0 ? variantPrices : [product.basePrice]
-    const totalStock = product.variants.reduce((sum, variant) => sum + variant.stock, 0)
 
     return {
         ...product,
         price: Math.min(...prices),
-        minPrice: product.minPrice ?? Math.min(...prices),
-        maxPrice: product.maxPrice ?? Math.max(...prices),
-        totalStock: product.totalStock ?? totalStock,
-        stockStatus: product.stockStatus ?? (totalStock > 0 ? 'InStock' : 'OutOfStock'),
+        minPrice: Math.min(...prices),
+        maxPrice: Math.max(...prices),
+        totalStock,
+        stockStatus: totalStock > 0 ? 'InStock' : 'OutOfStock',
         images,
+        variants: product.variants.map(variant => ({
+            id: variant.id,
+            sku: variant.sku,
+            color: variant.color,
+            size: variant.size,
+            stock: variant.stock,
+            stockStatus: variant.isOutOfStock ? 'OutOfStock' : 'InStock',
+            price: variant.price,
+        })),
     }
 }
 
@@ -54,6 +74,14 @@ export const productService = {
     getAll: async (): Promise<Product[]> => {
         const res = await axiosInstance.get<ApiResponse<Product[]>>(
             PRODUCT_ENDPOINTS.GET_ALL,
+        )
+        return res.data.data
+    },
+
+    search: async (params: ProductSearchParams): Promise<PaginatedResponse<Product>['data']> => {
+        const res = await axiosInstance.get<PaginatedResponse<Product>>(
+            PRODUCT_ENDPOINTS.SEARCH,
+            { params: cleanParams(params) },
         )
         return res.data.data
     },
