@@ -41,12 +41,19 @@ export function ProductFilter({
             ? priceDraft.max
             : filterMaxText
 
+    function normalizePriceInput(value: string) {
+        return value.replace('-', '')
+    }
+
     function handleApplyPrice() {
         const minCandidate = localMin !== '' ? Number(localMin) : null
         const maxCandidate = localMax !== '' ? Number(localMax) : null
         const parsedMin = minCandidate !== null && Number.isFinite(minCandidate) ? minCandidate : null
         const parsedMax = maxCandidate !== null && Number.isFinite(maxCandidate) ? maxCandidate : null
-        onUpdate({ minPrice: parsedMin, maxPrice: parsedMax })
+        onUpdate({
+            minPrice: parsedMin !== null ? Math.max(0, parsedMin) : null,
+            maxPrice: parsedMax !== null ? Math.max(0, parsedMax) : null,
+        })
     }
 
     return (
@@ -58,21 +65,26 @@ export function ProductFilter({
                 <div className="flex gap-2 items-center mb-2">
                     <input
                         type="number"
+                        min={0}
                         placeholder="From"
                         value={localMin}
                         onChange={e =>
                             setPriceDraft({
                                 sourceMin: filterMinText,
                                 sourceMax: filterMaxText,
-                                min: e.target.value,
+                                min: normalizePriceInput(e.target.value),
                                 max: localMax,
                             })
                         }
+                        onKeyDown={e => {
+                            if (e.key === '-') e.preventDefault()
+                        }}
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
-                    <span className="text-muted-foreground shrink-0">—</span>
+                    <span className="text-muted-foreground shrink-0">-</span>
                     <input
                         type="number"
+                        min={0}
                         placeholder="To"
                         value={localMax}
                         onChange={e =>
@@ -80,9 +92,12 @@ export function ProductFilter({
                                 sourceMin: filterMinText,
                                 sourceMax: filterMaxText,
                                 min: localMin,
-                                max: e.target.value,
+                                max: normalizePriceInput(e.target.value),
                             })
                         }
+                        onKeyDown={e => {
+                            if (e.key === '-') e.preventDefault()
+                        }}
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                 </div>
@@ -97,16 +112,17 @@ export function ProductFilter({
                         Material
                     </h3>
                     <div className="space-y-2">
-                        {materials.map(mat => (
-                            <label key={mat} className="flex items-center gap-2 cursor-pointer text-sm">
+                        {materials.map(material => (
+                            <label key={material} className="flex items-center gap-2 cursor-pointer text-sm">
                                 <input
-                                    type="checkbox"
-                                    checked={filters.material === mat}
+                                    type="radio"
+                                    name="material-filter"
+                                    checked={filters.material === material}
                                     onChange={() =>
-                                        onUpdate({ material: filters.material === mat ? '' : mat })
+                                        onUpdate({ material: filters.material === material ? '' : material })
                                     }
                                 />
-                                {mat}
+                                {material}
                             </label>
                         ))}
                     </div>
@@ -119,16 +135,17 @@ export function ProductFilter({
                         Color
                     </h3>
                     <div className="space-y-2">
-                        {colors.map(col => (
-                            <label key={col} className="flex items-center gap-2 cursor-pointer text-sm">
+                        {colors.map(color => (
+                            <label key={color} className="flex items-center gap-2 cursor-pointer text-sm">
                                 <input
-                                    type="checkbox"
-                                    checked={filters.color === col}
+                                    type="radio"
+                                    name="color-filter"
+                                    checked={filters.color === color}
                                     onChange={() =>
-                                        onUpdate({ color: filters.color === col ? '' : col })
+                                        onUpdate({ color: filters.color === color ? '' : color })
                                     }
                                 />
-                                {col}
+                                {color}
                             </label>
                         ))}
                     </div>
@@ -141,17 +158,18 @@ export function ProductFilter({
                         Size
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                        {sizes.map(sz => (
+                        {sizes.map(size => (
                             <button
-                                key={sz}
-                                onClick={() => onUpdate({ size: filters.size === sz ? '' : sz })}
+                                key={size}
+                                type="button"
+                                onClick={() => onUpdate({ size: filters.size === size ? '' : size })}
                                 className={`px-3 py-1 text-sm border transition-colors ${
-                                    filters.size === sz
+                                    filters.size === size
                                         ? 'border-foreground bg-foreground text-background'
                                         : 'border-border hover:border-foreground'
                                 }`}
                             >
-                                {sz}
+                                {size}
                             </button>
                         ))}
                     </div>
