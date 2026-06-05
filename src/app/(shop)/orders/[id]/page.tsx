@@ -2,9 +2,10 @@
 
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { ArrowLeft, CheckCircle2, CreditCard, PackageSearch, ReceiptText } from "lucide-react"
+import { ArrowLeft, CheckCircle2, CreditCard, PackageSearch, ReceiptText, Truck } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import {
+    DeliveryStatusBadge,
     ORDER_STATUS_STEPS,
     OrderStatusBadge,
     formatCurrency,
@@ -150,9 +151,6 @@ export default function OrderDetailPage() {
                                             {sku && <span>SKU: {sku}</span>}
                                             {snapshot.Material && <span>Material: {snapshot.Material}</span>}
                                         </div>
-                                        <p className="mt-3 text-sm text-muted-foreground">
-                                            Variant ID: {item.productVariantId}
-                                        </p>
                                     </div>
                                     <div className="rounded-md bg-secondary p-4 text-left sm:text-right">
                                         <p className="text-sm text-muted-foreground">
@@ -173,10 +171,6 @@ export default function OrderDetailPage() {
                         <h2 className="font-serif text-2xl">Order summary</h2>
                         <div className="space-y-3 text-sm">
                             <div className="flex justify-between gap-4">
-                                <span className="text-muted-foreground">Order ID</span>
-                                <span className="max-w-[180px] truncate font-medium">{order.id}</span>
-                            </div>
-                            <div className="flex justify-between gap-4">
                                 <span className="text-muted-foreground">Order code</span>
                                 <span className="font-medium">{order.orderCode}</span>
                             </div>
@@ -194,6 +188,31 @@ export default function OrderDetailPage() {
                             </div>
                         </div>
                     </section>
+
+                    {order.tracking && (
+                        <section className="space-y-4 rounded-md border border-border p-5">
+                            <div className="flex items-center gap-3">
+                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary">
+                                    <Truck className="h-5 w-5 text-muted-foreground" />
+                                </span>
+                                <h2 className="font-serif text-2xl">Delivery tracking</h2>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-muted-foreground">Tracking code</span>
+                                    <span className="font-medium">{order.tracking.trackingCode}</span>
+                                </div>
+                                <div className="flex justify-between gap-4">
+                                    <span className="text-muted-foreground">Carrier</span>
+                                    <span className="font-medium">{order.tracking.carrierCode}</span>
+                                </div>
+                                <div className="flex items-center justify-between gap-4">
+                                    <span className="text-muted-foreground">Delivery status</span>
+                                    <DeliveryStatusBadge status={order.tracking.status} />
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
                     <section className="space-y-4 rounded-md border border-border p-5">
                         <h2 className="font-serif text-2xl">Status flow</h2>

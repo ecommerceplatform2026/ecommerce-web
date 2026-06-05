@@ -1,4 +1,4 @@
-import type { OrderStatus, PaymentMethod } from '@/constants/enums'
+import type { DeliveryStatus, OrderStatus, PaymentMethod } from '@/constants/enums'
 
 export interface CheckoutFormValues {
     paymentMethod: PaymentMethod
@@ -57,6 +57,12 @@ export interface OrderItem {
     productSnapshot: string
 }
 
+export interface OrderTrackingInfo {
+    trackingCode: string
+    carrierCode: string
+    status: DeliveryStatus
+}
+
 export interface Order {
     id: string
     orderCode: number
@@ -65,6 +71,7 @@ export interface Order {
     paymentMethod: PaymentMethod
     createdAt: string
     items: OrderItem[]
+    tracking?: OrderTrackingInfo | null
 }
 
 export interface OrderListResult {

@@ -30,20 +30,10 @@ export const orderService = {
         return res.data.data
     },
 
-    getById: async (id: string): Promise<Order | null> => {
-        const pageSize = 100
-        let page = 1
-        let totalPages = 1
-
-        do {
-            const result = await orderService.getMyOrders({ page, pageSize })
-            const order = result.items.find(item => item.id === id)
-            if (order) return order
-
-            totalPages = Math.max(1, result.totalPages)
-            page += 1
-        } while (page <= totalPages)
-
-        return null
+    getById: async (id: string): Promise<Order> => {
+        const res = await axiosInstance.get<ApiResponse<Order>>(
+            ORDER_ENDPOINTS.GET_BY_ID(id),
+        )
+        return res.data.data
     },
 }

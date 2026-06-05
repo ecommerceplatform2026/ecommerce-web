@@ -1,8 +1,11 @@
 import { Badge } from '@/components/ui/Badge'
 import {
+    DELIVERY_STATUS_COLOR,
+    DELIVERY_STATUS_LABEL,
     ORDER_STATUS_COLOR,
     ORDER_STATUS_LABEL,
     PAYMENT_METHOD_LABEL,
+    DeliveryStatus,
     OrderStatus,
     type PaymentMethod,
 } from '@/constants/enums'
@@ -14,6 +17,7 @@ export const ORDER_STATUS_STEPS = [
     OrderStatus.Processing,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
+    OrderStatus.Completed,
 ] as const
 
 export function formatCurrency(value: number) {
@@ -53,7 +57,16 @@ export function OrderStatusBadge({ status }: { status: OrderStatus }) {
     )
 }
 
+export function DeliveryStatusBadge({ status }: { status: DeliveryStatus }) {
+    return (
+        <Badge className={`border-transparent ${DELIVERY_STATUS_COLOR[status]}`}>
+            {DELIVERY_STATUS_LABEL[status] ?? `Delivery #${status}`}
+        </Badge>
+    )
+}
+
 export function getOrderStatusTone(status: OrderStatus) {
+    if (status === OrderStatus.Completed) return 'border-emerald-200 bg-emerald-50'
     if (status === OrderStatus.Delivered) return 'border-green-200 bg-green-50'
     if (status === OrderStatus.Cancelled) return 'border-red-200 bg-red-50'
     if (status === OrderStatus.Returned) return 'border-gray-200 bg-gray-50'

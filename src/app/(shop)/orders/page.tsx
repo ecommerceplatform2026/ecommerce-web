@@ -23,6 +23,7 @@ const ORDER_STATUSES = [
     OrderStatus.Processing,
     OrderStatus.Shipping,
     OrderStatus.Delivered,
+    OrderStatus.Completed,
     OrderStatus.Cancelled,
     OrderStatus.Returned,
 ] as const
