@@ -91,15 +91,13 @@ export const PRODUCT_ENDPOINTS = {
 // ============================================================
 // CART  (FR10)
 // ============================================================
-// TODO: backend not implemented yet
 
 export const CART_ENDPOINTS = {
     // Authenticated user cart (server-side)
     GET: '/api/cart',
     ADD_ITEM: '/api/cart/items',
-    UPDATE_ITEM: (itemId: string) => `/api/cart/items/${itemId}`,
-    REMOVE_ITEM: (itemId: string) => `/api/cart/items/${itemId}`,
-    CLEAR: '/api/cart/clear',
+    UPDATE_ITEM: (variantId: string) => `/api/cart/items/${variantId}`,
+    REMOVE_ITEM: (variantId: string) => `/api/cart/items/${variantId}`,
 
     // Merge guest cart into the user cart after sign-in
     MERGE: '/api/cart/merge',

@@ -17,11 +17,13 @@ import {
 } from "@/components/ui/dropdown-menu"
 import toast from 'react-hot-toast'
 import { useAuth } from "@/hooks/useAuth"
+import { useCart } from "@/hooks/useCart"
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [searchValue, setSearchValue] = useState('')
     const { user, logout } = useAuth()
+    const { itemCount } = useCart()
     const router = useRouter()
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -168,6 +170,11 @@ export function Header() {
                         <Link href="/cart">
                             <Button variant="ghost" size="icon" className="relative cursor-pointer">
                                 <ShoppingBag className="h-5 w-5" />
+                                {itemCount > 0 && (
+                                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
+                                        {itemCount > 99 ? '99+' : itemCount}
+                                    </span>
+                                )}
                             </Button>
                         </Link>
                     </div>

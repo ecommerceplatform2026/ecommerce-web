@@ -158,6 +158,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             size: selectedVariant.size ?? "",
             color: selectedVariant.color ?? "",
             quantity: finalQuantity,
+            stock: maxQuantity,
             imageUrl: product.images[0]?.imageUrl ?? null,
         }
 

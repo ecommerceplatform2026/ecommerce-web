@@ -1,119 +1,106 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Minus, Plus, X, ShoppingBag } from "lucide-react"
+import toast from "react-hot-toast"
+import { AlertTriangle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ROUTES } from "@/constants/routes"
-
-// ── Mock cart items ─────────────────────────────────────────────
-interface MockCartItem {
-    variantId: string
-    productId: string
-    name: string
-    price: number
-    size: string
-    color: string
-    quantity: number
-    imageUrl: string
-    stock: number
-}
-
-const INITIAL_ITEMS: MockCartItem[] = [
-    {
-        variantId: "1-M-Charcoal",
-        productId: "1",
-        name: "Cashmere Overcoat",
-        price: 1850,
-        size: "M",
-        color: "Charcoal",
-        quantity: 1,
-        imageUrl: "/luxury-black-cashmere-overcoat-on-model.jpg",
-        stock: 12,
-    },
-    {
-        variantId: "2-L-Grey",
-        productId: "2",
-        name: "Merino Wool Sweater",
-        price: 425,
-        size: "L",
-        color: "Grey",
-        quantity: 2,
-        imageUrl: "/luxury-grey-merino-wool-sweater.jpg",
-        stock: 8,
-    },
-    {
-        variantId: "5-9-Black",
-        productId: "5",
-        name: "Leather Chelsea Boots",
-        price: 725,
-        size: "9",
-        color: "Black",
-        quantity: 1,
-        imageUrl: "/luxury-black-leather-chelsea-boots.jpg",
-        stock: 10,
-    },
-]
+import { useCart } from "@/hooks/useCart"
+import type { CartItem } from "@/types/cart"
 
 const ITEMS_PER_PAGE = 5
-const FREE_SHIPPING_THRESHOLD = 3000
-const SHIPPING_COST = 150
+const FREE_SHIPPING_THRESHOLD = 2_000_000
+const SHIPPING_COST = 30_000
 
-// ── Page ────────────────────────────────────────────────────────
+function formatCurrency(value: number) {
+    return `${value.toLocaleString("vi-VN")} VND`
+}
+
+function itemVariantLabel(item: CartItem) {
+    const parts = [
+        item.size ? `Size: ${item.size}` : null,
+        item.color ? `Color: ${item.color}` : null,
+        item.sku ? `SKU: ${item.sku}` : null,
+    ].filter(Boolean)
+
+    return parts.length > 0 ? parts.join(" / ") : "Selected variant"
+}
+
 export default function CartPage() {
-    const [items, setItems] = useState<MockCartItem[]>(INITIAL_ITEMS)
+    const { items, totalPrice, itemCount, isLoading, error, updateQuantity, removeItem } = useCart()
     const [currentPage, setCurrentPage] = useState(1)
+    const [pendingVariantId, setPendingVariantId] = useState<string | null>(null)
 
-    const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE)
-    const paginatedItems = items.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE,
+    const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE))
+    const safeCurrentPage = Math.min(currentPage, totalPages)
+    const paginatedItems = useMemo(
+        () => items.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE),
+        [items, safeCurrentPage],
     )
 
-    const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
-    const total = subtotal + shipping
+    const shipping = items.length === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
+    const total = totalPrice + shipping
 
-    function handleIncrease(variantId: string) {
-        setItems((prev) =>
-            prev.map((item) => {
-                if (item.variantId !== variantId) return item
-                if (item.quantity >= item.stock) return item
-                return { ...item, quantity: item.quantity + 1 }
-            }),
+    async function handleQuantityChange(item: CartItem, quantity: number) {
+        if (quantity < 1) return
+        if (item.isOutOfStock || item.stock <= 0) {
+            toast.error("This variant is out of stock.")
+            return
+        }
+        if (quantity > item.stock) {
+            toast.error(`Only ${item.stock} item(s) available for this variant.`)
+            return
+        }
+
+        setPendingVariantId(item.variantId)
+        try {
+            await updateQuantity(item.variantId, quantity)
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Unable to update cart item.")
+        } finally {
+            setPendingVariantId(null)
+        }
+    }
+
+    async function handleRemove(item: CartItem) {
+        setPendingVariantId(item.variantId)
+        try {
+            await removeItem(item.variantId)
+            toast.success("Removed from cart.")
+            setCurrentPage(page => {
+                const nextCount = Math.max(0, items.length - 1)
+                const nextPages = Math.max(1, Math.ceil(nextCount / ITEMS_PER_PAGE))
+                return Math.min(page, nextPages)
+            })
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "Unable to remove cart item.")
+        } finally {
+            setPendingVariantId(null)
+        }
+    }
+
+    if (isLoading && items.length === 0) {
+        return (
+            <div className="container mx-auto px-4 py-24 lg:px-8">
+                <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <div key={index} className="h-36 animate-pulse bg-secondary" />
+                    ))}
+                </div>
+            </div>
         )
     }
 
-    function handleDecrease(variantId: string) {
-        setItems((prev) =>
-            prev.map((item) =>
-                item.variantId === variantId && item.quantity > 1
-                    ? { ...item, quantity: item.quantity - 1 }
-                    : item,
-            ),
-        )
-    }
-
-    function handleRemove(variantId: string) {
-        setItems((prev) => prev.filter((item) => item.variantId !== variantId))
-        // Adjust page if last item on current page was removed
-        setCurrentPage((prev) => {
-            const newTotal = items.length - 1
-            const newTotalPages = Math.ceil(newTotal / ITEMS_PER_PAGE)
-            return prev > newTotalPages ? Math.max(1, newTotalPages) : prev
-        })
-    }
-
-    // ── Empty state ──────────────────────────────────────────────
     if (items.length === 0) {
         return (
-            <div className="container mx-auto px-4 lg:px-8 py-24">
-                <div className="max-w-2xl mx-auto text-center space-y-6">
-                    <ShoppingBag className="h-16 w-16 mx-auto text-muted-foreground opacity-40" />
+            <div className="container mx-auto px-4 py-24 lg:px-8">
+                <div className="mx-auto max-w-2xl space-y-6 text-center">
+                    <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground opacity-40" />
                     <h1 className="font-serif text-4xl md:text-5xl">Your cart is empty</h1>
                     <p className="text-lg text-muted-foreground">
-                        Explore our premium fashion collection
+                        Add products to your cart and review them here before checkout.
                     </p>
                     <Button asChild size="lg">
                         <Link href={ROUTES.SHOP.PRODUCTS}>Continue shopping</Link>
@@ -123,138 +110,186 @@ export default function CartPage() {
         )
     }
 
-    // ── Cart ─────────────────────────────────────────────────────
     return (
-        <div className="container mx-auto px-4 lg:px-8 py-16">
-            <h1 className="font-serif text-4xl md:text-5xl mb-12">Cart</h1>
+        <div className="container mx-auto px-4 py-12 lg:px-8 lg:py-16">
+            <div className="mb-10 flex flex-col gap-3 border-b border-border pb-6 md:flex-row md:items-end md:justify-between">
+                <div>
+                    <h1 className="font-serif text-4xl md:text-5xl">Cart</h1>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        {itemCount} item{itemCount === 1 ? "" : "s"} ready for review
+                    </p>
+                </div>
+                {error && (
+                    <p className="text-sm text-destructive">
+                        {error}
+                    </p>
+                )}
+            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+                <div className="space-y-6">
+                    {paginatedItems.map(item => {
+                        const lineTotal = item.price * item.quantity
+                        const isPending = pendingVariantId === item.variantId
+                        const cannotIncrease = !!item.isOutOfStock || item.stock <= 0 || isPending
+                        const isAtStockLimit = item.quantity >= item.stock
 
-                {/* Cart Items */}
-                <div className="lg:col-span-2 space-y-6">
-                    {paginatedItems.map((item) => (
-                        <div
-                            key={item.variantId}
-                            className="flex gap-6 pb-6 border-b border-border"
-                        >
-                            {/* Thumbnail */}
-                            <div className="relative w-32 h-40 flex-shrink-0 bg-secondary">
-                                <Image
-                                    src={item.imageUrl || "/placeholder.svg"}
-                                    alt={item.name}
-                                    fill
-                                    sizes="128px"
-                                    className="object-cover"
-                                />
-                            </div>
+                        return (
+                            <div
+                                key={item.variantId}
+                                className="grid gap-4 border-b border-border pb-6 sm:grid-cols-[112px_minmax(0,1fr)]"
+                            >
+                                <Link
+                                    href={ROUTES.SHOP.PRODUCT_DETAIL(item.productId)}
+                                    className="relative aspect-[3/4] w-28 overflow-hidden bg-secondary"
+                                >
+                                    <Image
+                                        src={item.imageUrl || "/placeholder.svg"}
+                                        alt={item.name}
+                                        fill
+                                        sizes="112px"
+                                        className="object-cover"
+                                    />
+                                </Link>
 
-                            {/* Info */}
-                            <div className="flex-1 space-y-4">
-                                <div className="flex justify-between">
-                                    <div>
-                                        <h3 className="font-serif text-xl mb-1">{item.name}</h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            Size: {item.size} • Color: {item.color}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => handleRemove(item.variantId)}
-                                        className="text-muted-foreground hover:text-foreground transition-colors"
-                                        aria-label={`Remove ${item.name}`}
-                                    >
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                </div>
+                                <div className="min-w-0 space-y-4">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="min-w-0">
+                                            <Link
+                                                href={ROUTES.SHOP.PRODUCT_DETAIL(item.productId)}
+                                                className="font-serif text-xl transition-colors hover:text-muted-foreground"
+                                            >
+                                                {item.name}
+                                            </Link>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                {itemVariantLabel(item)}
+                                            </p>
+                                            {(item.isOutOfStock || item.quantity > item.stock) && (
+                                                <div className="mt-2 flex items-center gap-2 text-sm text-destructive">
+                                                    <AlertTriangle className="h-4 w-4" />
+                                                    <span>
+                                                        {item.isOutOfStock
+                                                            ? "This variant is out of stock."
+                                                            : `Only ${item.stock} item(s) available.`}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
 
-                                <div className="flex items-center justify-between">
-                                    {/* Quantity */}
-                                    <div className="flex items-center gap-4">
-                                        <button
-                                            onClick={() => handleDecrease(item.variantId)}
-                                            disabled={item.quantity <= 1}
-                                            className="p-2 border border-border hover:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleRemove(item)}
+                                            disabled={isPending}
+                                            aria-label={`Remove ${item.name}`}
+                                            className="text-muted-foreground hover:text-destructive"
                                         >
-                                            <Minus className="h-4 w-4" />
-                                        </button>
-                                        <span className="w-8 text-center">{item.quantity}</span>
-                                        <button
-                                            onClick={() => handleIncrease(item.variantId)}
-                                            disabled={item.quantity >= item.stock}
-                                            className="p-2 border border-border hover:border-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                        </button>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
                                     </div>
 
-                                    {/* Line total */}
-                                    <p className="text-lg">
-                                        {(item.price * item.quantity).toLocaleString("vi-VN")}₫
-                                    </p>
+                                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="flex w-fit items-center border border-border">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleQuantityChange(item, item.quantity - 1)}
+                                                disabled={item.quantity <= 1 || isPending}
+                                                className="h-10 w-10 rounded-none"
+                                                aria-label={`Decrease ${item.name} quantity`}
+                                            >
+                                                <Minus className="h-4 w-4" />
+                                            </Button>
+                                            <div className="flex h-10 w-14 items-center justify-center border-x border-border text-sm font-medium">
+                                                {item.quantity}
+                                            </div>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleQuantityChange(item, item.quantity + 1)}
+                                                disabled={cannotIncrease}
+                                                aria-disabled={isAtStockLimit || cannotIncrease}
+                                                className={`h-10 w-10 rounded-none ${
+                                                    isAtStockLimit ? "opacity-50" : ""
+                                                }`}
+                                                aria-label={`Increase ${item.name} quantity`}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+
+                                        <div className="text-left sm:text-right">
+                                            <p className="text-sm text-muted-foreground">
+                                                {formatCurrency(item.price)} each
+                                            </p>
+                                            <p className="text-lg font-medium">
+                                                {formatCurrency(lineTotal)}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        )
+                    })}
 
-                    {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-center gap-4 mt-8 pt-6 border-t border-border">
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                                disabled={currentPage === 1}
-                                className="px-4 py-2 border border-border rounded hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        <div className="flex items-center justify-center gap-3 pt-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
+                                disabled={safeCurrentPage === 1}
                             >
                                 Previous
-                            </button>
+                            </Button>
                             <span className="text-sm text-muted-foreground">
-                                Trang {currentPage} / {totalPages}
+                                Page {safeCurrentPage} / {totalPages}
                             </span>
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                                disabled={currentPage === totalPages}
-                                className="px-4 py-2 border border-border rounded hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
+                                disabled={safeCurrentPage === totalPages}
                             >
-                                Sau
-                            </button>
+                                Next
+                            </Button>
                         </div>
                     )}
                 </div>
 
-                {/* Order Summary */}
-                <div className="lg:col-span-1">
-                    <div className="border border-border p-8 space-y-6 sticky top-24">
+                <aside className="lg:sticky lg:top-24">
+                    <div className="space-y-6 border border-border p-6">
                         <h2 className="font-serif text-2xl">Order Summary</h2>
 
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">
-                                    Subtotal ({items.reduce((n, i) => n + i.quantity, 0)} products)
-                                </span>
-                                <span>{subtotal.toLocaleString("vi-VN")}₫</span>
+                        <div className="space-y-3 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-muted-foreground">Subtotal</span>
+                                <span>{formatCurrency(totalPrice)}</span>
                             </div>
-                            <div className="flex justify-between text-sm">
+                            <div className="flex justify-between">
                                 <span className="text-muted-foreground">Shipping fee</span>
-                                {shipping === 0 ? (
-                                    <span className="text-green-600 font-medium">Free</span>
-                                ) : (
-                                    <span>{shipping.toLocaleString("vi-VN")}₫</span>
-                                )}
+                                <span className={shipping === 0 ? "font-medium text-green-600" : ""}>
+                                    {shipping === 0 ? "Free" : formatCurrency(shipping)}
+                                </span>
                             </div>
                             {shipping > 0 && (
                                 <p className="text-xs text-muted-foreground">
-                                    Free shipping for orders from{" "}
-                                    {FREE_SHIPPING_THRESHOLD.toLocaleString("vi-VN")}₫
+                                    Free shipping for orders from {formatCurrency(FREE_SHIPPING_THRESHOLD)}.
                                 </p>
                             )}
                         </div>
 
-                        <div className="py-6 border-y border-border">
+                        <div className="border-y border-border py-5">
                             <div className="flex justify-between text-lg font-medium">
                                 <span>Total</span>
-                                <span>{total.toLocaleString("vi-VN")}₫</span>
+                                <span>{formatCurrency(total)}</span>
                             </div>
                         </div>
 
-                        <Button asChild size="lg" className="w-full text-base h-14">
+                        <Button asChild size="lg" className="h-14 w-full text-base">
                             <Link href={ROUTES.CHECKOUT.INDEX}>Proceed to checkout</Link>
                         </Button>
 
@@ -262,7 +297,7 @@ export default function CartPage() {
                             <Link href={ROUTES.SHOP.PRODUCTS}>Continue shopping</Link>
                         </Button>
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     )
