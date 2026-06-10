@@ -41,11 +41,36 @@ function mapServerItem(item: ServerCartItem): CartItem {
     }
 }
 
+function buildMergePayload(items: CartItem[]) {
+    const grouped = new Map<string, { productVariantId: string; quantity: number; stock: number }>()
+
+    for (const item of items) {
+        if (!item.variantId || item.quantity <= 0 || item.isOutOfStock || item.stock <= 0) {
+            continue
+        }
+
+        const existing = grouped.get(item.variantId)
+        const nextQuantity = (existing?.quantity ?? 0) + item.quantity
+        grouped.set(item.variantId, {
+            productVariantId: item.variantId,
+            quantity: Math.min(nextQuantity, item.stock),
+            stock: item.stock,
+        })
+    }
+
+    return Array.from(grouped.values()).map(({ productVariantId, quantity }) => ({
+        productVariantId,
+        quantity,
+    }))
+}
+
+async function getCart(): Promise<CartItem[]> {
+    const res = await axiosInstance.get<ApiResponse<ServerCartItem[]>>(CART_ENDPOINTS.GET)
+    return res.data.data.map(mapServerItem)
+}
+
 export const cartService = {
-    getCart: async (): Promise<CartItem[]> => {
-        const res = await axiosInstance.get<ApiResponse<ServerCartItem[]>>(CART_ENDPOINTS.GET)
-        return res.data.data.map(mapServerItem)
-    },
+    getCart,
 
     addItem: async (variantId: string, quantity: number): Promise<CartItem> => {
         const res = await axiosInstance.post<ApiResponse<ServerCartItem>>(
@@ -71,14 +96,14 @@ export const cartService = {
     },
 
     mergeGuestCart: async (items: CartItem[]): Promise<CartItem[]> => {
+        const mergeItems = buildMergePayload(items)
+        if (mergeItems.length === 0) {
+            return getCart()
+        }
+
         const res = await axiosInstance.post<ApiResponse<ServerCartItem[]>>(
             CART_ENDPOINTS.MERGE,
-            {
-                items: items.map(item => ({
-                    productVariantId: item.variantId,
-                    quantity: item.quantity,
-                })),
-            },
+            { items: mergeItems },
         )
         return res.data.data.map(mapServerItem)
     },
