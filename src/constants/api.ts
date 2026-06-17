@@ -152,7 +152,8 @@ export const REVIEW_ENDPOINTS = {
     GET_BY_PRODUCT: (productId: string) => `/api/products/${productId}/reviews`,
 
     // Authenticated user
-    CREATE: (productId: string) => `/api/products/${productId}/reviews`,
+    CREATE: '/api/reviews',
+    CAN_REVIEW: '/api/reviews/eligibility',
 
     // Admin moderation
     ADMIN_GET_ALL: '/api/reviews',
