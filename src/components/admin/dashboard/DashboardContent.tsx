@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import dayjs from 'dayjs'
 import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react'
 import { useDashboardSummary, useRevenueTrend, usePaymentMethods } from '@/hooks/useDashboard'
 import { KpiCard } from '@/components/admin/dashboard/KpiCard'
@@ -8,13 +9,18 @@ import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
 import { TopProductsChart } from '@/components/admin/dashboard/TopProductsChart'
 import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
 import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
+import { DateRangeFilter } from '@/components/admin/dashboard/DateRangeFilter'
 import { DashboardSkeleton } from '@/components/admin/dashboard/DashboardSkeleton'
 import { formatPrice } from '@/utils/formatPrice'
 import type { DashboardRequest } from '@/types/dashboard'
 
 export function DashboardContent() {
-    const [startDate, setStartDate] = useState<string>('')
-    const [endDate, setEndDate] = useState<string>('')
+    const [startDate, setStartDate] = useState<string>(
+        dayjs().startOf('day').toISOString(),
+    )
+    const [endDate, setEndDate] = useState<string>(
+        dayjs().endOf('day').toISOString(),
+    )
 
     const params = useMemo<DashboardRequest>(() => {
         const result: DashboardRequest = {}
@@ -59,6 +65,15 @@ export function DashboardContent() {
                         Overview of your store&apos;s performance
                     </p>
                 </div>
+
+                <DateRangeFilter
+                    startDate={startDate}
+                    endDate={endDate}
+                    onChange={(s, e) => {
+                        setStartDate(s ?? '')
+                        setEndDate(e ?? '')
+                    }}
+                />
 
                 <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <KpiCard
