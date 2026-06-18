@@ -2,8 +2,12 @@
 
 import { useMemo, useState } from 'react'
 import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react'
-import { useDashboardSummary } from '@/hooks/useDashboard'
+import { useDashboardSummary, useRevenueTrend, usePaymentMethods } from '@/hooks/useDashboard'
 import { KpiCard } from '@/components/admin/dashboard/KpiCard'
+import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
+import { TopProductsChart } from '@/components/admin/dashboard/TopProductsChart'
+import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
+import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
 import { DashboardSkeleton } from '@/components/admin/dashboard/DashboardSkeleton'
 import { formatPrice } from '@/utils/formatPrice'
 import type { DashboardRequest } from '@/types/dashboard'
@@ -20,6 +24,8 @@ export function DashboardContent() {
     }, [startDate, endDate])
 
     const { data: summary, isLoading } = useDashboardSummary(params)
+    const { data: revenueTrend, isLoading: isRevenueLoading } = useRevenueTrend(params)
+    const { data: paymentMethods, isLoading: isPaymentLoading } = usePaymentMethods(params)
 
     const kpis = useMemo(() => {
         if (!summary) return null
@@ -78,6 +84,30 @@ export function DashboardContent() {
                         value={kpis?.topProductCount ?? '—'}
                         icon={<Package />}
                         isLoading={isLoading}
+                    />
+                </div>
+
+                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <div className="lg:col-span-2">
+                        <RevenueChart
+                            data={revenueTrend}
+                            isLoading={isRevenueLoading}
+                        />
+                    </div>
+                    <OrderStatusChart
+                        data={summary?.orderStatusSummary}
+                        isLoading={isLoading}
+                    />
+                </div>
+
+                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <TopProductsChart
+                        data={summary?.topSellingProducts}
+                        isLoading={isLoading}
+                    />
+                    <PaymentMethodChart
+                        data={paymentMethods}
+                        isLoading={isPaymentLoading}
                     />
                 </div>
             </div>
