@@ -10,6 +10,8 @@ import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useAuth } from "@/hooks/useAuth"
+import { ROUTES } from "@/constants/routes"
+import { UserRole } from "@/constants/enums"
 import { rejectEdgeWhitespace } from "@/utils/inputValidation"
 import type { ApiError } from "@/types/api"
 
@@ -71,9 +73,13 @@ export function LoginForm({ redirectTo }: Props) {
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     try {
-      await login(data.email, data.password)
+      const user = await login(data.email, data.password)
       toast.success("Welcome back to ATELIER.")
-      router.push(safeRedirect)
+      if (user.role === UserRole.Admin && !redirectTo) {
+        router.push(ROUTES.ADMIN.DASHBOARD)
+      } else {
+        router.push(safeRedirect)
+      }
     } catch (err) {
       toast.error((err as ApiError).message ?? 'Invalid email or password. Please try again.')
     } finally {

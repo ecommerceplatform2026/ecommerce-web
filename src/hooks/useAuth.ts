@@ -22,12 +22,13 @@ export function useAuth() {
         }
     }
 
-    const login = async (email: string, password: string): Promise<void> => {
+    const login = async (email: string, password: string) => {
         dispatch(setAuthLoading(true))
         try {
             const result = await authService.login({ email, password })
             await mergeStoredCartAfterAuth()
             dispatch(setCredentials({ user: result.user }))
+            return result.user
         } catch (err) {
             dispatch(setAuthLoading(false))
             throw err
