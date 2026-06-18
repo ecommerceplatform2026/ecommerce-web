@@ -1,3 +1,5 @@
+import { DashboardContent } from '@/components/admin/dashboard/DashboardContent'
+
 export default function AdminDashboardPage() {
-    return <div>Admin Dashboard</div>
+    return <DashboardContent />
 }

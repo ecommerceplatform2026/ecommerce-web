@@ -175,21 +175,7 @@ export const UPLOAD_ENDPOINTS = {
 // ============================================================
 
 export const DASHBOARD_ENDPOINTS = {
-    // FR15 — Overview KPIs
-    OVERVIEW: '/api/dashboard',
-
-    // FR16 — Sales & Revenue
-    REVENUE: '/api/dashboard/revenue',
-
-    // FR17 — Product Performance
-    PRODUCT_PERFORMANCE: '/api/dashboard/products',
-
-    // FR18 — Customer Analytics
-    CUSTOMER_ANALYTICS: '/api/dashboard/customers',
-
-    // FR19 — Order & Inventory Insights
-    ORDER_INSIGHTS: '/api/dashboard/orders',
-
-    // FR20 — Charts data
-    CHARTS: '/api/dashboard/charts',
+    SUMMARY: '/api/admin/dashboard/summary',
+    REVENUE_TREND: '/api/admin/dashboard/revenue-trend',
+    PAYMENT_METHODS: '/api/admin/dashboard/payment-methods',
 } as const
