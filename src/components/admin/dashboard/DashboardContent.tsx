@@ -1,7 +1,86 @@
 'use client'
 
+import { useMemo, useState } from 'react'
+import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react'
+import { useDashboardSummary } from '@/hooks/useDashboard'
+import { KpiCard } from '@/components/admin/dashboard/KpiCard'
 import { DashboardSkeleton } from '@/components/admin/dashboard/DashboardSkeleton'
+import { formatPrice } from '@/utils/formatPrice'
+import type { DashboardRequest } from '@/types/dashboard'
 
 export function DashboardContent() {
-    return <DashboardSkeleton />
+    const [startDate, setStartDate] = useState<string>('')
+    const [endDate, setEndDate] = useState<string>('')
+
+    const params = useMemo<DashboardRequest>(() => {
+        const result: DashboardRequest = {}
+        if (startDate) result.startDate = startDate
+        if (endDate) result.endDate = endDate
+        return result
+    }, [startDate, endDate])
+
+    const { data: summary, isLoading } = useDashboardSummary(params)
+
+    const kpis = useMemo(() => {
+        if (!summary) return null
+
+        const totalOrders = summary.totalOrders
+        const totalRevenue = summary.totalRevenue
+        const aov = totalOrders > 0 ? formatPrice(totalRevenue / totalOrders) : '—'
+        const topProductCount = summary.topSellingProducts.length
+
+        return {
+            totalOrders: totalOrders.toLocaleString(),
+            totalRevenue: formatPrice(totalRevenue),
+            aov,
+            topProductCount: topProductCount.toString(),
+        }
+    }, [summary])
+
+    if (isLoading) return <DashboardSkeleton />
+
+    return (
+        <main className="min-h-screen bg-background px-4 py-10 lg:px-8">
+            <div className="container mx-auto max-w-7xl">
+                <div className="mb-8">
+                    <p className="font-body text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Admin
+                    </p>
+                    <h1 className="mt-1 font-heading text-4xl tracking-tight text-foreground">
+                        Dashboard
+                    </h1>
+                    <p className="mt-1 font-body text-sm text-muted-foreground">
+                        Overview of your store&apos;s performance
+                    </p>
+                </div>
+
+                <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    <KpiCard
+                        title="Total Orders"
+                        value={kpis?.totalOrders ?? '—'}
+                        icon={<ShoppingCart />}
+                        isLoading={isLoading}
+                    />
+                    <KpiCard
+                        title="Total Revenue"
+                        value={kpis?.totalRevenue ?? '—'}
+                        icon={<DollarSign />}
+                        isLoading={isLoading}
+                    />
+                    <KpiCard
+                        title="Average Order Value"
+                        value={kpis?.aov ?? '—'}
+                        icon={<TrendingUp />}
+                        isLoading={isLoading}
+                    />
+                    <KpiCard
+                        title="Top Products"
+                        value={kpis?.topProductCount ?? '—'}
+                        icon={<Package />}
+                        isLoading={isLoading}
+                    />
+                </div>
+            </div>
+        </main>
+    )
 }
