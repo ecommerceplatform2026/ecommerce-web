@@ -10,6 +10,8 @@ import { TopProductsChart } from '@/components/admin/dashboard/TopProductsChart'
 import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
 import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
 import { DateRangeFilter } from '@/components/admin/dashboard/DateRangeFilter'
+import { TopProductsList } from '@/components/admin/dashboard/TopProductsList'
+import { LowStockAlerts } from '@/components/admin/dashboard/LowStockAlerts'
 import { DashboardSkeleton } from '@/components/admin/dashboard/DashboardSkeleton'
 import { formatPrice } from '@/utils/formatPrice'
 import type { DashboardRequest } from '@/types/dashboard'
@@ -123,6 +125,17 @@ export function DashboardContent() {
                     <PaymentMethodChart
                         data={paymentMethods}
                         isLoading={isPaymentLoading}
+                    />
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                    <TopProductsList
+                        data={summary?.topSellingProducts}
+                        isLoading={isLoading}
+                    />
+                    <LowStockAlerts
+                        data={summary?.lowStockVariants}
+                        isLoading={isLoading}
                     />
                 </div>
             </div>
