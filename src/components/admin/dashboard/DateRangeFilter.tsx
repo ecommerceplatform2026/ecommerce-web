@@ -26,28 +26,28 @@ function computePreset(preset: Preset): { startDate: string; endDate: string } {
     switch (preset) {
         case 'today':
             return {
-                startDate: now.startOf('day').toISOString(),
-                endDate: now.endOf('day').toISOString(),
+                startDate: now.startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+                endDate: now.endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
             }
         case 'last7':
             return {
-                startDate: now.subtract(7, 'day').startOf('day').toISOString(),
-                endDate: now.endOf('day').toISOString(),
+                startDate: now.subtract(7, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+                endDate: now.endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
             }
         case 'last30':
             return {
-                startDate: now.subtract(30, 'day').startOf('day').toISOString(),
-                endDate: now.endOf('day').toISOString(),
+                startDate: now.subtract(30, 'day').startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
+                endDate: now.endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
             }
         case 'thisMonth':
             return {
-                startDate: now.startOf('month').toISOString(),
-                endDate: now.endOf('day').toISOString(),
+                startDate: now.startOf('month').format('YYYY-MM-DDTHH:mm:ss'),
+                endDate: now.endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
             }
         case 'thisYear':
             return {
-                startDate: now.startOf('year').toISOString(),
-                endDate: now.endOf('day').toISOString(),
+                startDate: now.startOf('year').format('YYYY-MM-DDTHH:mm:ss'),
+                endDate: now.endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
             }
         default:
             return {
@@ -84,8 +84,8 @@ export function DateRangeFilter({ startDate, endDate, onChange }: DateRangeFilte
 
     const handleApplyCustom = useCallback(() => {
         if (!customStart || !customEnd) return
-        const s = dayjs(customStart).startOf('day').toISOString()
-        const e = dayjs(customEnd).endOf('day').toISOString()
+        const s = dayjs(customStart).startOf('day').format('YYYY-MM-DDTHH:mm:ss')
+        const e = dayjs(customEnd).endOf('day').format('YYYY-MM-DDTHH:mm:ss')
         onChange(s, e)
     }, [customStart, customEnd, onChange])
 

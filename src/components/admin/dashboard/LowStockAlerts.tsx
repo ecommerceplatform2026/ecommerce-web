@@ -29,13 +29,13 @@ function StockBadge({ current, threshold }: { current: number; threshold: number
     const isCritical = current <= Math.max(Math.floor(threshold / 2), 0)
     return (
         <span
-            title={`Minimum threshold: ${threshold}`}
+            title={`Low stock: only ${current} unit left / minimum stock alert threshold of ${threshold}`}
             className={cn(
                 'shrink-0 text-xs font-semibold',
                 isCritical ? 'text-destructive' : 'text-amber-600',
             )}
         >
-            {current}
+            {current} unit left
         </span>
     )
 }

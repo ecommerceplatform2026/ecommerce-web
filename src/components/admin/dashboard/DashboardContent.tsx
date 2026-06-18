@@ -18,10 +18,10 @@ import type { DashboardRequest } from '@/types/dashboard'
 
 export function DashboardContent() {
     const [startDate, setStartDate] = useState<string>(
-        dayjs().startOf('day').toISOString(),
+        dayjs().startOf('day').format('YYYY-MM-DDTHH:mm:ss'),
     )
     const [endDate, setEndDate] = useState<string>(
-        dayjs().endOf('day').toISOString(),
+        dayjs().endOf('day').format('YYYY-MM-DDTHH:mm:ss'),
     )
 
     const params = useMemo<DashboardRequest>(() => {
