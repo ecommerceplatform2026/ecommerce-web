@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PieChart as PieIcon } from 'lucide-react'
 import { OrderStatus, ORDER_STATUS_LABEL } from '@/constants/enums'
+import { ChartLegend } from '@/components/admin/dashboard/ChartLegend'
 
 interface OrderStatusChartProps {
     data: Record<string, number> | undefined
@@ -103,6 +104,12 @@ export function OrderStatusChart({ data, isLoading }: OrderStatusChartProps) {
                     <Tooltip content={<CustomTooltip />} />
                 </PieChart>
             </ResponsiveContainer>
+            <ChartLegend
+                data={chartData.map((item, index) => ({
+                    ...item,
+                    color: CHART_COLORS[index % CHART_COLORS.length],
+                }))}
+            />
         </div>
     )
 }

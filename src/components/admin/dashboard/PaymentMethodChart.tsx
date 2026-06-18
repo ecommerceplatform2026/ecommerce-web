@@ -12,6 +12,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { CreditCard } from 'lucide-react'
 import { PaymentMethod, PAYMENT_METHOD_LABEL } from '@/constants/enums'
 import { formatPrice } from '@/utils/formatPrice'
+import { ChartLegend } from '@/components/admin/dashboard/ChartLegend'
 import type { PaymentMethodSummary } from '@/types/dashboard'
 
 interface PaymentMethodChartProps {
@@ -99,6 +100,13 @@ export function PaymentMethodChart({ data, isLoading }: PaymentMethodChartProps)
                     <Tooltip content={<CustomTooltip />} />
                 </PieChart>
             </ResponsiveContainer>
+            <ChartLegend
+                data={data.map((item, index) => ({
+                    name: methodLabel(item.method),
+                    value: item.count,
+                    color: CHART_COLORS[index % CHART_COLORS.length],
+                }))}
+            />
         </div>
     )
 }
