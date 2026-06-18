@@ -29,12 +29,13 @@ function StockBadge({ current, threshold }: { current: number; threshold: number
     const isCritical = current <= Math.max(Math.floor(threshold / 2), 0)
     return (
         <span
+            title={`Minimum threshold: ${threshold}`}
             className={cn(
                 'shrink-0 text-xs font-semibold',
                 isCritical ? 'text-destructive' : 'text-amber-600',
             )}
         >
-            {current} / {threshold}
+            {current}
         </span>
     )
 }
@@ -84,7 +85,7 @@ export function LowStockAlerts({ data, isLoading }: LowStockAlertsProps) {
                 {data.map((variant) => (
                     <Link
                         key={variant.variantId}
-                        href={ROUTES.ADMIN.PRODUCTS.EDIT(variant.variantId)}
+                        href={`${ROUTES.ADMIN.PRODUCTS.INDEX}?search=${encodeURIComponent(variant.productName)}`}
                         className="flex items-center justify-between gap-3 py-3 transition-colors hover:bg-muted/50 first:pt-0 last:pb-0"
                     >
                         <div className="min-w-0 flex-1">

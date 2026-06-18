@@ -2,7 +2,7 @@ import { Skeleton } from '@/components/ui/Skeleton'
 
 export function DashboardSkeleton() {
     return (
-        <main className="min-h-screen bg-background px-4 py-10 lg:px-8">
+        <div className="px-4 py-10 lg:px-8">
             <div className="container mx-auto max-w-7xl">
                 <div className="mb-8 space-y-2">
                     <Skeleton className="h-4 w-16" />
@@ -35,6 +35,6 @@ export function DashboardSkeleton() {
                     <Skeleton className="h-64 rounded-none" />
                 </div>
             </div>
-        </main>
+        </div>
     )
 }

@@ -42,8 +42,8 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: { name
     return (
         <div className="rounded-none border border-border bg-card px-3 py-2 text-sm shadow-none">
             <p className="font-medium text-foreground">{methodLabel(item.method)}</p>
-            <p className="text-muted-foreground">Orders: {item.count}</p>
-            <p className="text-muted-foreground">Revenue: {formatPrice(item.revenue)}</p>
+            <p className="text-muted-foreground">Order count: {item.count}</p>
+            <p className="text-muted-foreground">Total revenue: {formatPrice(item.revenue)}</p>
         </div>
     )
 }

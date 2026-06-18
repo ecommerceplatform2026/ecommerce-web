@@ -54,7 +54,7 @@ export function DashboardContent() {
     if (isLoading) return <DashboardSkeleton />
 
     return (
-        <main className="min-h-screen bg-background px-4 py-10 lg:px-8">
+        <div className="px-4 py-10 lg:px-8">
             <div className="container mx-auto max-w-7xl">
                 <div className="mb-8">
                     <p className="font-body text-xs font-semibold uppercase tracking-widest text-muted-foreground">
@@ -139,6 +139,6 @@ export function DashboardContent() {
                     />
                 </div>
             </div>
-        </main>
+        </div>
     )
 }

@@ -73,7 +73,7 @@ export function TopProductsList({ data, isLoading }: TopProductsListProps) {
                 {data.map((product, index) => (
                     <Link
                         key={product.productId}
-                        href={ROUTES.ADMIN.PRODUCTS.EDIT(product.productId)}
+                        href={`${ROUTES.ADMIN.PRODUCTS.INDEX}?search=${encodeURIComponent(product.productName)}`}
                         className="flex items-center gap-3 py-3 transition-colors hover:bg-muted/50 first:pt-0 last:pb-0"
                     >
                         <RankBadge rank={index} />
