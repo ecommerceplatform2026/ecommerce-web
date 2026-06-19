@@ -54,7 +54,7 @@ function statusConfig(status: UserStatus) {
         case UserStatus.Active:
             return { label: "Active", className: "bg-green-500 hover:bg-green-600" }
         case UserStatus.Inactive:
-            return { label: "Inactive", className: "bg-gray-400 hover:bg-gray-500" }
+            return { label: "Inactive", className: "bg-muted hover:bg-muted" }
         case UserStatus.Banned:
             return { label: "Banned", className: "bg-destructive hover:bg-destructive/90" }
     }

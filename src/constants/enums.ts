@@ -238,7 +238,7 @@ export const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
     [OrderStatus.Delivered]: 'bg-green-100 text-green-800',
     [OrderStatus.Completed]: 'bg-emerald-100 text-emerald-800',
     [OrderStatus.Cancelled]: 'bg-red-100 text-red-800',
-    [OrderStatus.Returned]: 'bg-gray-100 text-gray-800',
+    [OrderStatus.Returned]: 'bg-muted text-foreground',
 }
 
 export const DELIVERY_STATUS_COLOR: Record<DeliveryStatus, string> = {
@@ -249,7 +249,7 @@ export const DELIVERY_STATUS_COLOR: Record<DeliveryStatus, string> = {
     [DeliveryStatus.OutForDelivery]: 'bg-purple-100 text-purple-800',
     [DeliveryStatus.Delivered]: 'bg-green-100 text-green-800',
     [DeliveryStatus.Failed]: 'bg-red-100 text-red-800',
-    [DeliveryStatus.Cancelled]: 'bg-gray-100 text-gray-800',
+    [DeliveryStatus.Cancelled]: 'bg-muted text-foreground',
     [DeliveryStatus.Returned]: 'bg-slate-100 text-slate-800',
     [DeliveryStatus.Exception]: 'bg-orange-100 text-orange-800',
 }
@@ -258,6 +258,6 @@ export const PAYMENT_STATUS_COLOR: Record<PaymentStatus, string> = {
     [PaymentStatus.Pending]: 'bg-yellow-100 text-yellow-800',
     [PaymentStatus.Paid]: 'bg-green-100 text-green-800',
     [PaymentStatus.Failed]: 'bg-red-100 text-red-800',
-    [PaymentStatus.Cancelled]: 'bg-gray-100 text-gray-800',
+    [PaymentStatus.Cancelled]: 'bg-muted text-foreground',
     [PaymentStatus.Refunded]: 'bg-blue-100 text-blue-800',
 }

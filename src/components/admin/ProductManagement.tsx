@@ -849,7 +849,7 @@ export function ProductManagement() {
                                             <td className="px-5 py-4">
                                                 <span className={product.status === ProductStatus.Active
                                                     ? "rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-800"
-                                                    : "rounded bg-gray-100 px-2 py-1 text-xs font-medium text-gray-800"}
+                                                    : "rounded bg-muted px-2 py-1 text-xs font-medium text-foreground"}
                                                 >
                                                     {product.status === ProductStatus.Active ? "Active" : "Inactive"}
                                                 </span>
