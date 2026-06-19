@@ -53,7 +53,7 @@ export function FeaturedProducts() {
                 <div className="flex justify-center mt-12 md:hidden">
                     <Link
                         href={ROUTES.SHOP.PRODUCTS}
-                        className="flex items-center gap-2 text-sm tracking-wide border border-foreground px-8 py-3 hover:bg-foreground hover:text-background transition-colors"
+                        className="flex items-center gap-2 text-sm tracking-wide border border-foreground px-8 py-3 min-h-[44px] hover:bg-foreground hover:text-background transition-colors"
                     >
                         View all products
                         <ArrowRight className="h-4 w-4" />

@@ -127,7 +127,7 @@ export default function CartPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
-                <div className="space-y-6">
+                <div className="space-y-6 pb-28 lg:pb-0">
                     {paginatedItems.map(item => {
                         const lineTotal = item.price * item.quantity
                         const isPending = pendingVariantId === item.variantId
@@ -137,17 +137,17 @@ export default function CartPage() {
                         return (
                             <div
                                 key={item.variantId}
-                                className="grid gap-4 border-b border-border pb-6 sm:grid-cols-[112px_minmax(0,1fr)]"
+                                className="flex flex-col sm:grid sm:grid-cols-[112px_minmax(0,1fr)] gap-4 border-b border-border pb-6"
                             >
                                 <Link
                                     href={ROUTES.SHOP.PRODUCT_DETAIL(item.productId)}
-                                    className="relative aspect-[3/4] w-28 overflow-hidden bg-secondary"
+                                    className="relative aspect-[3/4] w-full sm:w-28 overflow-hidden bg-secondary"
                                 >
                                     <Image
                                         src={item.imageUrl || "/placeholder.svg"}
                                         alt={item.name}
                                         fill
-                                        sizes="112px"
+                                        sizes="(max-width: 640px) 100vw, 112px"
                                         className="object-cover"
                                     />
                                 </Link>
@@ -197,12 +197,12 @@ export default function CartPage() {
                                                 size="icon"
                                                 onClick={() => handleQuantityChange(item, item.quantity - 1)}
                                                 disabled={item.quantity <= 1 || isPending}
-                                                className="h-10 w-10 rounded-none"
+                                                className="min-h-[44px] min-w-[44px] rounded-none"
                                                 aria-label={`Decrease ${item.name} quantity`}
                                             >
                                                 <Minus className="h-4 w-4" />
                                             </Button>
-                                            <div className="flex h-10 w-14 items-center justify-center border-x border-border text-sm font-medium">
+                                            <div className="flex h-[44px] w-14 items-center justify-center border-x border-border text-sm font-medium">
                                                 {item.quantity}
                                             </div>
                                             <Button
@@ -212,7 +212,7 @@ export default function CartPage() {
                                                 onClick={() => handleQuantityChange(item, item.quantity + 1)}
                                                 disabled={cannotIncrease}
                                                 aria-disabled={isAtStockLimit || cannotIncrease}
-                                                className={`h-10 w-10 rounded-none ${
+                                                className={`min-h-[44px] min-w-[44px] rounded-none ${
                                                     isAtStockLimit ? "opacity-50" : ""
                                                 }`}
                                                 aria-label={`Increase ${item.name} quantity`}
@@ -298,6 +298,19 @@ export default function CartPage() {
                         </Button>
                     </div>
                 </aside>
+            </div>
+
+            {/* Mobile sticky checkout bar */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background p-4 lg:hidden">
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground">{itemCount} item(s)</p>
+                        <p className="text-lg font-medium">{formatCurrency(total)}</p>
+                    </div>
+                    <Button asChild size="lg" className="h-14 shrink-0 text-base">
+                        <Link href={ROUTES.CHECKOUT.INDEX}>Proceed to checkout</Link>
+                    </Button>
+                </div>
             </div>
         </div>
     )

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import { ImageIcon } from "lucide-react"
 import type { ProductImage } from "@/types/product"
@@ -40,25 +40,75 @@ function EmptyImageState() {
     )
 }
 
+function CrossfadeLayer({
+    url,
+    alt,
+    active,
+    priority,
+    onFadeOutComplete,
+}: {
+    url: string
+    alt: string
+    active: boolean
+    priority?: boolean
+    onFadeOutComplete?: () => void
+}) {
+    const [loaded, setLoaded] = useState(false)
+
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => setLoaded(true))
+        return () => cancelAnimationFrame(frame)
+    }, [])
+
+    return (
+        <div
+            className={`absolute inset-0 transition-opacity duration-600 ${active ? (loaded ? 'opacity-100' : 'opacity-0') : 'opacity-0'}`}
+            onTransitionEnd={() => { if (!active) onFadeOutComplete?.() }}
+        >
+            <ProductImageFrame src={url} alt={alt} priority={priority} />
+        </div>
+    )
+}
+
 export function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
     const validImages = images.filter(image => image.imageUrl?.trim())
     const [activeIndex, setActiveIndex] = useState(0)
+
     const safeActiveIndex = validImages.length > 0
         ? Math.min(activeIndex, validImages.length - 1)
         : 0
-    const activeImage = validImages[safeActiveIndex]
+
+    const [displayUrls, setDisplayUrls] = useState<string[]>(() =>
+        validImages.length > 0 ? [validImages[0].imageUrl] : []
+    )
+
+    const handleThumbnailClick = useCallback((index: number) => {
+        if (index === safeActiveIndex) return
+        setActiveIndex(index)
+        const newUrl = validImages[index].imageUrl
+        setDisplayUrls(prev => [newUrl, prev[0]])
+    }, [safeActiveIndex, validImages])
+
+    const handleFadeOut = useCallback((url: string) => {
+        setDisplayUrls(prev => prev.filter(u => u !== url))
+    }, [])
 
     return (
         <div className="space-y-4">
             <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
-                {activeImage ? (
-                    <ProductImageFrame
-                        src={activeImage.imageUrl}
-                        alt={productName}
-                        priority
-                    />
-                ) : (
+                {validImages.length === 0 ? (
                     <EmptyImageState />
+                ) : (
+                    displayUrls.map((url, i) => (
+                        <CrossfadeLayer
+                            key={url}
+                            url={url}
+                            alt={productName}
+                            active={i === 0}
+                            priority={i === 0}
+                            onFadeOutComplete={() => handleFadeOut(url)}
+                        />
+                    ))
                 )}
             </div>
 
@@ -68,8 +118,8 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                         <button
                             key={image.id}
                             type="button"
-                            onClick={() => setActiveIndex(index)}
-                            className={`relative aspect-[3/4] overflow-hidden border bg-secondary transition-colors ${
+                            onClick={() => handleThumbnailClick(index)}
+                            className={`relative aspect-[3/4] overflow-hidden border bg-secondary transition-colors min-h-[44px] ${
                                 safeActiveIndex === index
                                     ? "border-foreground"
                                     : "border-border hover:border-muted-foreground"

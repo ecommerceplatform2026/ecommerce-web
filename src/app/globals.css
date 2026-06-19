@@ -141,4 +141,9 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  .recharts-surface,
+  .recharts-surface * {
+    outline: none !important;
+  }
 }

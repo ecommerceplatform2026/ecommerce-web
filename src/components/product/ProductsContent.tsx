@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { useProducts } from '@/hooks/useProducts'
 import { useCategories } from '@/hooks/useCategories'
 import { useProductFilters, PAGE_SIZE } from '@/hooks/useProductFilters'
@@ -11,11 +11,23 @@ import { ProductGrid } from './ProductGrid'
 import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SlidersHorizontal, X } from 'lucide-react'
 
 export function ProductsContent() {
     const { data: products = [], isLoading, error } = useProducts()
     const { data: categories = [] } = useCategories()
     const { filters, updateFilter, updateFilters, resetFilters, hasActiveFilters } = useProductFilters()
+    const [mobileFilterOpen, setMobileFilterOpen] = useState(false)
+
+    // Lock body scroll when mobile filter panel is open to prevent background scrolling
+    useEffect(() => {
+        if (mobileFilterOpen) {
+            document.body.style.overflow = 'hidden'
+        } else {
+            document.body.style.overflow = ''
+        }
+        return () => { document.body.style.overflow = '' }
+    }, [mobileFilterOpen])
 
     const filtered = useMemo(() => applyProductFilters(products, filters), [products, filters])
     const { items: currentProducts, totalPages, currentPage } = useMemo(
@@ -26,6 +38,15 @@ export function ProductsContent() {
     const materials = useMemo(() => getUniqueMaterials(products), [products])
     const colors = useMemo(() => getUniqueColors(products), [products])
     const sizes = useMemo(() => getUniqueSizes(products), [products])
+
+    const activeFilterCount = useMemo(() => {
+        let count = 0
+        if (filters.material) count++
+        if (filters.color) count++
+        if (filters.size) count++
+        if (filters.minPrice !== null || filters.maxPrice !== null) count++
+        return count
+    }, [filters])
 
     return (
         <main className="min-h-screen">
@@ -42,8 +63,23 @@ export function ProductsContent() {
             {/* Toolbar */}
             <section className="py-4 px-4 lg:px-8 border-b border-border">
                 <div className="container mx-auto flex items-center justify-between gap-4">
-                    {/* Category tabs */}
+                    {/* Left side: mobile filter + categories */}
                     <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+                        {/* Mobile filter toggle */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="lg:hidden shrink-0 gap-2"
+                            onClick={() => setMobileFilterOpen(true)}
+                        >
+                            <SlidersHorizontal className="h-4 w-4" />
+                            Filters
+                            {activeFilterCount > 0 && (
+                                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-[11px] font-medium text-background">
+                                    {activeFilterCount}
+                                </span>
+                            )}
+                        </Button>
                         <button
                             onClick={() => updateFilter('categoryId', '')}
                             className={`shrink-0 px-4 py-1.5 text-sm transition-colors border ${
@@ -177,6 +213,48 @@ export function ProductsContent() {
                     </div>
                 </div>
             </section>
+
+            {/* Mobile filter panel */}
+            {mobileFilterOpen && (
+                <div className="fixed inset-0 z-50 lg:hidden">
+                    <div
+                        className="fixed inset-0 bg-foreground/60 backdrop-blur-sm"
+                        onClick={() => setMobileFilterOpen(false)}
+                    />
+                    <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-background shadow-xl flex flex-col">
+                        <div className="flex items-center justify-between px-4 h-16 border-b border-border shrink-0">
+                            <h2 className="font-serif text-xl">Filters</h2>
+                            <button
+                                onClick={() => setMobileFilterOpen(false)}
+                                className="min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                aria-label="Close filters"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <ProductFilter
+                                filters={filters}
+                                materials={materials}
+                                colors={colors}
+                                sizes={sizes}
+                                onUpdate={updateFilters}
+                                onReset={resetFilters}
+                                hasActiveFilters={hasActiveFilters}
+                            />
+                        </div>
+                        <div className="shrink-0 border-t border-border p-4">
+                            <Button
+                                size="lg"
+                                className="w-full h-14 text-base"
+                                onClick={() => setMobileFilterOpen(false)}
+                            >
+                                Apply filters
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </main>
     )
 }

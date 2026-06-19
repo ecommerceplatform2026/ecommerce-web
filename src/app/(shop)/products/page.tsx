@@ -16,7 +16,7 @@ function ProductsPageFallback() {
             <div className="py-16 px-4 lg:px-8 border-b border-border">
                 <div className="container mx-auto space-y-4">
                     <Skeleton className="h-14 w-64" />
-                    <Skeleton className="h-5 w-96" />
+                    <Skeleton className="h-5 w-full max-w-96" />
                 </div>
             </div>
             <div className="container mx-auto px-4 lg:px-8 py-8">

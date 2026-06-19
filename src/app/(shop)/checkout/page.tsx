@@ -230,28 +230,55 @@ export default function CheckoutPage() {
                             </div>
                         </div>
 
+                        {/* Desktop: inline buttons */}
+                        <div className="hidden lg:block space-y-3">
+                            <Button
+                                type="submit"
+                                size="lg"
+                                className="h-13 w-full text-base"
+                                disabled={isSubmitting || hasInvalidItems}
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Placing order...
+                                    </>
+                                ) : (
+                                    "Place order"
+                                )}
+                            </Button>
+
+                            <Button asChild variant="outline" className="w-full bg-transparent">
+                                <Link href={ROUTES.CART}>Back to cart</Link>
+                            </Button>
+                        </div>
+                    </div>
+                </aside>
+            </form>
+
+            {/* Mobile: sticky bottom action bar */}
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background px-4 py-3 lg:hidden">
+                <div className="mx-auto flex max-w-lg items-center justify-between gap-4">
+                    <div>
+                        <p className="text-xs text-muted-foreground">Total</p>
+                        <p className="font-medium">{formatCurrency(totalPrice)}</p>
+                    </div>
+                    <div className="flex gap-2">
                         <Button
                             type="submit"
-                            size="lg"
-                            className="h-13 w-full text-base"
+                            className="min-h-[44px] text-base"
                             disabled={isSubmitting || hasInvalidItems}
+                            onClick={() => handleSubmit(onSubmit)()}
                         >
                             {isSubmitting ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                    Placing order...
-                                </>
+                                <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                                 "Place order"
                             )}
                         </Button>
-
-                        <Button asChild variant="outline" className="w-full bg-transparent">
-                            <Link href={ROUTES.CART}>Back to cart</Link>
-                        </Button>
                     </div>
-                </aside>
-            </form>
+                </div>
+            </div>
         </main>
     )
 }

@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ShoppingBag, Heart } from "lucide-react"
@@ -16,7 +15,6 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-    const [isHovered, setIsHovered] = useState(false)
     const { toggleItem, isInWishlist } = useWishlist()
     const { addItem } = useCart()
     const inWishlist = isInWishlist(product.id)
@@ -64,8 +62,6 @@ export function ProductCard({ product }: ProductCardProps) {
         <Link
             href={ROUTES.SHOP.PRODUCT_DETAIL(product.id)}
             className="group block"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
             <div className="relative aspect-[3/4] mb-4 overflow-hidden bg-secondary">
                 <Image
@@ -73,26 +69,22 @@ export function ProductCard({ product }: ProductCardProps) {
                     alt={product.name}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className={`object-cover transition-opacity duration-500 ${isHovered ? "opacity-0" : "opacity-100"}`}
+                    className="object-cover"
                 />
 
-                <div
-                    className={`absolute bottom-4 left-4 right-4 flex gap-2 transition-all duration-300 ${
-                        isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                    }`}
-                >
+                <div className="absolute bottom-4 left-4 right-4 flex gap-2">
                     <Button
                         onClick={handleQuickAdd}
                         disabled={!firstVariant || firstVariant.isOutOfStock}
-                        className="flex-1 h-12 bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50"
+                        className="flex-1 min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm"
                     >
-                        <ShoppingBag className="h-4 w-4" />
-                        Add to cart
+                        <ShoppingBag className="h-4 w-4 shrink-0" />
+                        <span>Add to cart</span>
                     </Button>
                     <Button
                         onClick={handleWishlist}
                         size="icon"
-                        className={`h-12 w-12 border border-border rounded-none ${
+                        className={`min-h-[44px] min-w-[44px] border border-border rounded-none ${
                             inWishlist
                                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
                                 : "bg-background text-foreground hover:bg-background/90"
@@ -107,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <p className="text-xs tracking-widest text-muted-foreground uppercase">
                     {product.categoryName ?? ""}
                 </p>
-                <h3 className="font-serif text-xl group-hover:text-muted-foreground transition-colors">
+                <h3 className="font-serif text-xl truncate group-hover:text-muted-foreground transition-colors">
                     {product.name}
                 </h3>
                 <p className="text-lg">

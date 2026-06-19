@@ -52,19 +52,19 @@ export function Footer() {
           {/* Shop */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium tracking-wide">SHOP</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-1">
               <li>
-                <Link href="/products" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/products" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   All products
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=clothing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/products?category=clothing" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Apparel
                 </Link>
               </li>
               <li>
-                <Link href="/products?category=accessories" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/products?category=accessories" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Accessories
                 </Link>
               </li>
@@ -74,19 +74,19 @@ export function Footer() {
           {/* Company */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium tracking-wide">COMPANY</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-1">
               <li>
-                <Link href="/about" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/about" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   About us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/contact" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/stores" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/stores" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Store locator
                 </Link>
               </li>
@@ -96,19 +96,19 @@ export function Footer() {
           {/* Support */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium tracking-wide">SUPPORT</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-1">
               <li>
-                <Link href="/shipping" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/shipping" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Shipping & Returns
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/faq" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link href="/care" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/care" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Care guide
                 </Link>
               </li>
@@ -122,7 +122,7 @@ export function Footer() {
               {["VISA", "PP", "MOMO", "ZALO"].map((method) => (
                 <span
                   key={method}
-                  className="inline-flex items-center justify-center w-10 h-10 bg-muted rounded text-xs font-semibold"
+                  className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] bg-muted text-xs font-semibold"
                 >
                   {method}
                 </span>
@@ -141,7 +141,7 @@ export function Footer() {
                   key={href}
                   href={href}
                   aria-label={ariaLabel}
-                  className="inline-flex items-center justify-center w-8 h-8 rounded-full border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
+                  className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary transition-colors"
                 >
                   {label}
                 </a>
@@ -153,10 +153,10 @@ export function Footer() {
         <div className="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-muted-foreground">© 2025 ATELIER. All rights reserved.</p>
           <div className="flex gap-6">
-            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/privacy" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy
             </Link>
-            <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Link href="/terms" className="flex min-h-[44px] items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
               Terms of Service
             </Link>
           </div>
