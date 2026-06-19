@@ -40,6 +40,10 @@ export default function CartPage() {
         [items, safeCurrentPage],
     )
 
+    const hasInvalidItems = useMemo(
+        () => items.some(item => item.isOutOfStock || item.quantity > item.stock),
+        [items],
+    )
     const shipping = items.length === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
     const total = totalPrice + shipping
 
@@ -289,8 +293,15 @@ export default function CartPage() {
                             </div>
                         </div>
 
-                        <Button asChild size="lg" className="h-14 w-full text-base">
-                            <Link href={ROUTES.CHECKOUT.INDEX}>Proceed to checkout</Link>
+                        <Button
+                            asChild
+                            size="lg"
+                            className="h-14 w-full text-base"
+                            disabled={hasInvalidItems}
+                        >
+                            <Link href={hasInvalidItems ? '#' : ROUTES.CHECKOUT.INDEX}>
+                                {hasInvalidItems ? 'Resolve stock issues' : 'Proceed to checkout'}
+                            </Link>
                         </Button>
 
                         <Button asChild variant="outline" size="lg" className="w-full bg-transparent">
@@ -307,8 +318,10 @@ export default function CartPage() {
                         <p className="text-sm text-muted-foreground">{itemCount} item(s)</p>
                         <p className="text-lg font-medium">{formatCurrency(total)}</p>
                     </div>
-                    <Button asChild size="lg" className="h-14 shrink-0 text-base">
-                        <Link href={ROUTES.CHECKOUT.INDEX}>Proceed to checkout</Link>
+                    <Button asChild size="lg" className="h-14 shrink-0 text-base" disabled={hasInvalidItems}>
+                        <Link href={hasInvalidItems ? '#' : ROUTES.CHECKOUT.INDEX}>
+                            {hasInvalidItems ? 'Resolve stock issues' : 'Proceed to checkout'}
+                        </Link>
                     </Button>
                 </div>
             </div>
