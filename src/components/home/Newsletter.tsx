@@ -18,7 +18,7 @@ export function Newsletter() {
     }
 
     return (
-        <section className="py-24 px-4 lg:px-8 bg-foreground text-background">
+        <section className="py-16 lg:py-20 px-4 lg:px-8 bg-foreground text-background">
             <div className="container mx-auto max-w-2xl text-center">
                 <p className="text-xs tracking-[0.3em] uppercase opacity-60 mb-4">
                     Don&apos;t miss out

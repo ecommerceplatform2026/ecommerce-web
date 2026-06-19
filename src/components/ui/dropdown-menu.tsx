@@ -60,7 +60,7 @@ function DropdownMenuContent({
           // Background & text
           'bg-popover text-popover-foreground',
           // Radius, border, shadow
-          'min-w-[8rem] rounded-lg border border-border shadow-md',
+          'min-w-[8rem] border border-border shadow-md',
           // Content padding
           'p-1',
           // z-index
@@ -150,7 +150,7 @@ function DropdownMenuItem({
       className={cn(
         // Layout
         'relative flex cursor-default select-none items-center gap-2',
-        'rounded-md px-2 py-1.5 text-sm outline-hidden',
+        'px-2 py-1.5 text-sm outline-hidden',
         // Transition
         'transition-colors',
         // Focus / hover
@@ -225,7 +225,7 @@ function DropdownMenuCheckboxItem({
       data-slot="dropdown-menu-checkbox-item"
       className={cn(
         'relative flex cursor-default select-none items-center gap-2',
-        'rounded-md py-1.5 pl-8 pr-2 text-sm outline-hidden',
+        'py-1.5 pl-8 pr-2 text-sm outline-hidden',
         'transition-colors',
         'focus:bg-accent focus:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
@@ -272,7 +272,7 @@ function DropdownMenuRadioItem({
       data-slot="dropdown-menu-radio-item"
       className={cn(
         'relative flex cursor-default select-none items-center gap-2',
-        'rounded-md py-1.5 pl-8 pr-2 text-sm outline-hidden',
+        'py-1.5 pl-8 pr-2 text-sm outline-hidden',
         'transition-colors',
         'focus:bg-accent focus:text-accent-foreground',
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
@@ -318,7 +318,7 @@ function DropdownMenuSubTrigger({
       data-inset={inset}
       className={cn(
         'flex cursor-default select-none items-center gap-2',
-        'rounded-md px-2 py-1.5 text-sm outline-hidden',
+        'px-2 py-1.5 text-sm outline-hidden',
         'transition-colors',
         'focus:bg-accent focus:text-accent-foreground',
         'data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
@@ -348,7 +348,7 @@ function DropdownMenuSubContent({
       data-slot="dropdown-menu-sub-content"
       className={cn(
         'bg-popover text-popover-foreground',
-        'min-w-[8rem] rounded-lg border border-border shadow-lg',
+        'min-w-[8rem] border border-border shadow-lg',
         'p-1 z-50',
         'origin-(--radix-dropdown-menu-content-transform-origin)',
         'overflow-hidden',

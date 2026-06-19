@@ -70,7 +70,7 @@ export function ShopByCategory() {
     const isReady = !isLoading && len > 0
 
     return (
-        <section className="py-24 px-4 lg:px-8 bg-background">
+        <section className="py-16 lg:py-20 px-4 lg:px-8 bg-background">
             <div className="container mx-auto">
                 <div className="text-center mb-16">
                     <h2 className="font-serif text-4xl md:text-5xl mb-4">Shop by Category</h2>

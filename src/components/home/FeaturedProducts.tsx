@@ -16,7 +16,7 @@ export function FeaturedProducts() {
         .slice(0, 4)
 
     return (
-        <section className="py-24 px-4 lg:px-8">
+        <section className="py-16 lg:py-20 px-4 lg:px-8">
             <div className="container mx-auto">
                 <div className="flex items-end justify-between mb-16">
                     <div>

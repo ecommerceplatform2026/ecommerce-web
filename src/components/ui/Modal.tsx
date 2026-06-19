@@ -103,7 +103,7 @@ function DialogContent({
         role="dialog"
         aria-modal="true"
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-lg border border-border bg-background p-6 shadow-lg",
+          "relative z-50 w-full max-w-lg border border-border bg-background p-6 shadow-lg",
           "animate-in fade-in-0 zoom-in-95 duration-200",
           className,
         )}
@@ -112,7 +112,7 @@ function DialogContent({
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring"
+          className="absolute right-4 top-4 opacity-70 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Close"
         >
           <X className="h-4 w-4" />

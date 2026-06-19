@@ -53,7 +53,7 @@ export function ProductsContent() {
             {/* Page Header */}
             <section className="py-16 px-4 lg:px-8 border-b border-border">
                 <div className="container mx-auto">
-                    <h1 className="font-serif text-5xl md:text-6xl mb-4 text-balance">All Products</h1>
+                    <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl mb-4 text-balance">All Products</h1>
                     <p className="text-lg text-muted-foreground max-w-2xl text-pretty">
                         Explore premium fashion collections for modern women
                     </p>

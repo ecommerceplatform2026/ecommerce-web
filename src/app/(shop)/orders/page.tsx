@@ -84,7 +84,7 @@ export default function OrdersPage() {
                         <ReceiptText className="h-3.5 w-3.5" />
                         Order history
                     </div>
-                    <h1 className="font-serif text-5xl md:text-6xl">Orders</h1>
+                    <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl">Orders</h1>
                     <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground">
                         Review your orders, payment methods, totals, and current status.
                     </p>
