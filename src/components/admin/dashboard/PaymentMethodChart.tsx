@@ -38,17 +38,24 @@ function methodLabel(method: string): string {
     return method
 }
 
-function CustomTooltip({ active, payload }: { active?: boolean; payload?: { name: string; payload: PaymentMethodSummary }[] }) {
-    if (!active || !payload?.length) return null
-    const item = payload[0].payload
+interface PaymentMethodTooltipProps {
+    active?: boolean;
+    payload?: { name: string; payload: PaymentMethodSummary }[];
+    activeIndex: number | null;
+}
+
+const PaymentMethodTooltip = ({ active, payload, activeIndex }: PaymentMethodTooltipProps) => {
+    if (!active || !payload?.length || activeIndex !== null) return null;
+    const item = payload[0].payload;
     return (
         <div className="rounded-none border border-border bg-card px-3 py-2 text-sm shadow-none">
             <p className="font-medium text-foreground">{methodLabel(item.method)}</p>
             <p className="text-muted-foreground">Order count: {item.count}</p>
             <p className="text-muted-foreground">Total revenue: {formatPrice(item.revenue)}</p>
         </div>
-    )
-}
+    );
+};
+
 
 export function PaymentMethodChart({ data, isLoading }: PaymentMethodChartProps) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -103,7 +110,7 @@ export function PaymentMethodChart({ data, isLoading }: PaymentMethodChartProps)
                             />
                         ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<PaymentMethodTooltip activeIndex={activeIndex} />} />
                     <Legend
                         verticalAlign="bottom"
                         iconType="circle"

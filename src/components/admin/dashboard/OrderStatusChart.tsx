@@ -36,18 +36,27 @@ function statusLabel(key: string): string {
     return key
 }
 
-function CustomTooltip({ active, payload }: { active?: boolean; payload?: { name: string; value: number }[] }) {
-    if (!active || !payload?.length) return null
+interface OrderStatusTooltipProps {
+    active?: boolean;
+    payload?: { name: string; value: number }[];
+    activeIndex: number | null;
+}
+
+const OrderStatusTooltip = ({ active, payload, activeIndex }: OrderStatusTooltipProps) => {
+    if (!active || !payload?.length || activeIndex !== null) return null;
     return (
         <div className="rounded-none border border-border bg-card px-3 py-2 text-sm shadow-none">
             <p className="font-medium text-foreground">{payload[0].name}</p>
             <p className="text-muted-foreground">Orders: {payload[0].value}</p>
         </div>
-    )
-}
+    );
+};
+
 
 export function OrderStatusChart({ data, isLoading }: OrderStatusChartProps) {
     const [activeIndex, setActiveIndex] = useState<number | null>(null)
+
+
     const chartData = useMemo(() => {
         if (!data) return []
         return Object.entries(data).map(([key, value]) => ({
@@ -106,7 +115,7 @@ export function OrderStatusChart({ data, isLoading }: OrderStatusChartProps) {
                             />
                         ))}
                     </Pie>
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<OrderStatusTooltip activeIndex={activeIndex} />} />
                     <Legend
                         verticalAlign="bottom"
                         iconType="circle"
