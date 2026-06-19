@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus } from "lucide-react"
+import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus, Heart } from "lucide-react"
 import toast from "react-hot-toast"
 import Link from "next/link"
 import { Button } from "@/components/ui/Button"
@@ -10,6 +10,7 @@ import { ROUTES } from "@/constants/routes"
 import { ProductStatus } from "@/constants/enums"
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
+import { useWishlist } from "@/hooks/useWishlist"
 import { cartService } from "@/services/cartService"
 import { formatPrice } from "@/utils/formatPrice"
 import { ProductImageGallery } from "./ProductImageGallery"
@@ -99,7 +100,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     const [added, setAdded] = useState(false)
     const [isAdding, setIsAdding] = useState(false)
     const { items, addItem, removeItem, updateQuantity } = useCart()
+    const { toggleItem, isInWishlist } = useWishlist()
     const { isAuthenticated } = useAuth()
+
+    const inWishlist = isInWishlist(product.id)
 
     const selectedVariant = useMemo(
         () => findVariant(variants, selectedSize, selectedColor, hasSizes, hasColors),
@@ -204,17 +208,27 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     return (
         <div className="container mx-auto px-4 py-12 lg:px-8 lg:py-16">
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-                <ProductImageGallery images={product.images} productName={product.name} />
+                    <div className="relative">
+                        <ProductImageGallery images={product.images} productName={product.name} />
+                        <Button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleItem(product); toast.success(inWishlist ? "Removed from wishlist" : "Added to wishlist"); }}
+                            size="icon"
+                            className={`absolute top-5 right-5 min-h-[44px] min-w-[44px] border border-border rounded-none ${inWishlist ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground hover:bg-background/90"}`}
+                        >
+                            <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
+                        </Button>
+                    </div>
 
                 <section className="space-y-8">
                     <div>
                         <Breadcrumbs
-                        items={[
-                            { label: "Home", href: ROUTES.HOME },
-                            { label: "Products", href: ROUTES.SHOP.PRODUCTS },
-                            { label: product.name },
-                        ]}
-                    />
+                            items={[
+                                { label: "Home", href: ROUTES.HOME },
+                                { label: "Products", href: ROUTES.SHOP.PRODUCTS },
+                                { label: product.name },
+                            ]}
+                        />
+
                     <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
                             {product.categoryName ?? "Product"}
                         </p>

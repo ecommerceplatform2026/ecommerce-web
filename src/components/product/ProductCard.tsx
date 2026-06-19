@@ -80,25 +80,21 @@ export function ProductCard({ product }: ProductCardProps) {
                     className="object-cover"
                 />
 
-                <div className="absolute bottom-4 left-4 right-4 flex gap-2">
+                <Button
+                    onClick={handleWishlist}
+                    size="icon"
+                    className={`absolute top-3 right-3 min-h-[44px] min-w-[44px] border border-border rounded-none ${inWishlist ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground hover:bg-background/90"}`}
+                >
+                    <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
+                </Button>
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                     <Button
                         onClick={handleQuickAdd}
                         disabled={!firstVariant || firstVariant.isOutOfStock}
-                        className="flex-1 min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm"
+                        className="min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm flex items-center gap-2"
                     >
                         <ShoppingBag className="h-4 w-4 shrink-0" />
                         <span>Add to cart</span>
-                    </Button>
-                    <Button
-                        onClick={handleWishlist}
-                        size="icon"
-                        className={`min-h-[44px] min-w-[44px] border border-border rounded-none ${
-                            inWishlist
-                                ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                : "bg-background text-foreground hover:bg-background/90"
-                        }`}
-                    >
-                        <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
                     </Button>
                 </div>
             </div>
