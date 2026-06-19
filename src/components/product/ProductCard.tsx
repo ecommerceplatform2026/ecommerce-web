@@ -45,7 +45,15 @@ export function ProductCard({ product }: ProductCardProps) {
                 isOutOfStock: firstVariant.isOutOfStock,
                 imageUrl: product.imageUrl ?? null,
             })
-            toast.success('Added to cart')
+            toast.success(
+                <div className="flex items-center gap-2">
+                    <span>Added {product.name}</span>
+                    <Link href={ROUTES.CART} className="ml-2 underline font-medium whitespace-nowrap">
+                        View Cart
+                    </Link>
+                </div>,
+                { duration: 4000 },
+            )
         } catch (error) {
             toast.error(typeof error === 'string' ? error : 'Unable to add product to cart.')
         }

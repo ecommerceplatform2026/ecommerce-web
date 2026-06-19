@@ -3,17 +3,22 @@
 import { useMemo, useState } from "react"
 import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus } from "lucide-react"
 import toast from "react-hot-toast"
+import Link from "next/link"
 import { Button } from "@/components/ui/Button"
+import { Spinner } from "@/components/ui/Spinner"
+import { ROUTES } from "@/constants/routes"
 import { ProductStatus } from "@/constants/enums"
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import { cartService } from "@/services/cartService"
 import { formatPrice } from "@/utils/formatPrice"
-import type { ApiError } from "@/types/api"
-import type { CartItem } from "@/types/cart"
-import type { ProductDetail, ProductDetailVariant } from "@/types/product"
 import { ProductImageGallery } from "./ProductImageGallery"
 import { ReviewSection } from "@/components/review/ReviewSection"
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs"
+import type { CartItem } from "@/types/cart"
+import type { ProductDetail, ProductDetailVariant } from "@/types/product"
+import type { ApiError } from "@/types/api"
+
 
 interface ProductDetailsProps {
     product: ProductDetail
@@ -171,7 +176,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 await cartService.addItem(selectedVariant.id, finalQuantity)
             }
 
-            toast.success(`Added ${finalQuantity} x ${product.name} to cart`)
+            toast.success(
+                <div className="flex items-center gap-2">
+                    <span>Added {finalQuantity} x {product.name}</span>
+                    <Link href={ROUTES.CART} className="ml-2 underline font-medium whitespace-nowrap">
+                        View Cart
+                    </Link>
+                </div>,
+                { duration: 4000 },
+            )
             setAdded(true)
             setTimeout(() => setAdded(false), 1500)
         } catch (error) {
@@ -195,7 +208,14 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
                 <section className="space-y-8">
                     <div>
-                        <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
+                        <Breadcrumbs
+                        items={[
+                            { label: "Home", href: ROUTES.HOME },
+                            { label: "Products", href: ROUTES.SHOP.PRODUCTS },
+                            { label: product.name },
+                        ]}
+                    />
+                    <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
                             {product.categoryName ?? "Product"}
                         </p>
                         <h1 className="mb-4 text-balance font-serif text-4xl md:text-5xl">
@@ -385,7 +405,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                                 Added to cart
                             </>
                         ) : isAdding ? (
-                            "Adding..."
+                            <>
+                                <Spinner size="sm" />
+                                Adding...
+                            </>
                         ) : needsVariantSelection ? (
                             "Select variant"
                         ) : isOutOfStock ? (
