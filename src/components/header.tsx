@@ -86,6 +86,18 @@ export function Header() {
     const [showResults, setShowResults] = useState(false)
     const { user, logout } = useAuth()
     const { itemCount } = useCart()
+    const [badgePulse, setBadgePulse] = useState(false)
+
+    const prevItemCount = useRef(itemCount)
+    // Pulse cart badge only when itemCount increases
+    useEffect(() => {
+        if (itemCount > prevItemCount.current) {
+            setBadgePulse(true)
+            const id = setTimeout(() => setBadgePulse(false), 400)
+            return () => clearTimeout(id)
+        }
+        prevItemCount.current = itemCount
+    }, [itemCount])
     const router = useRouter()
     const pathname = usePathname()
     const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -336,7 +348,7 @@ export function Header() {
                                 <Button variant="ghost" size="icon" className="relative cursor-pointer min-h-[44px] min-w-[44px]">
                                     <ShoppingBag className="h-5 w-5" />
                                     {itemCount > 0 && (
-                                        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
+                                            <span className={`absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background ${badgePulse ? 'animate-pulse' : ''}`}>
                                             {itemCount > 99 ? '99+' : itemCount}
                                         </span>
                                     )}
