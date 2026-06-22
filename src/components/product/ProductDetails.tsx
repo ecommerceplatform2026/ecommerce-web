@@ -206,7 +206,15 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 lg:px-8 lg:py-16">
+        <div className="container mx-auto px-4 py-6 lg:px-8 lg:py-16">
+            <Breadcrumbs
+                items={[
+                    { label: "Home", href: ROUTES.HOME },
+                    { label: "Products", href: ROUTES.SHOP.PRODUCTS },
+                    { label: product.name },
+                ]}
+                className="mb-6 lg:hidden"
+            />
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
                     <div className="relative">
                         <ProductImageGallery images={product.images} productName={product.name} />
@@ -227,6 +235,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                                 { label: "Products", href: ROUTES.SHOP.PRODUCTS },
                                 { label: product.name },
                             ]}
+                            className="hidden lg:flex"
                         />
 
                     <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
