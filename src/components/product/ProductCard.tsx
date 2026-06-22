@@ -87,11 +87,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 >
                     <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
                 </Button>
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center">
+                <div className="absolute bottom-4 left-0 right-0 flex px-6">
                     <Button
                         onClick={handleQuickAdd}
                         disabled={!firstVariant || firstVariant.isOutOfStock}
-                        className="min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm flex items-center gap-2"
+                        className="w-full min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm flex items-center gap-2"
                     >
                         <ShoppingBag className="h-4 w-4 shrink-0" />
                         <span>Add to cart</span>
