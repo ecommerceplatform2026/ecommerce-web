@@ -3,7 +3,6 @@
 import { Star, MessageSquare } from "lucide-react"
 import { ReviewCard } from "@/components/review/ReviewCard"
 import { useProductReviews } from "@/hooks/useReviews"
-import type { ReviewListResult } from "@/types/review"
 
 interface ReviewListProps {
     productId: string

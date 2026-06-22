@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell } from "lucide-react"
+import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useState, useRef, useCallback, useEffect } from "react"
@@ -18,6 +18,7 @@ import {
 import toast from 'react-hot-toast'
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
+import { UserRole } from "@/constants/enums"
 
 export function Header() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -137,6 +138,17 @@ export function Header() {
                                             My Orders
                                         </Link>
                                     </DropdownMenuItem>
+                                    {user.role === UserRole.Admin && (
+                                        <>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem asChild>
+                                                <Link href={ROUTES.ADMIN.DASHBOARD} className="cursor-pointer">
+                                                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                    Admin Dashboard
+                                                </Link>
+                                            </DropdownMenuItem>
+                                        </>
+                                    )}
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         onClick={handleLogout}

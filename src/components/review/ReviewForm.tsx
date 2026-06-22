@@ -27,7 +27,7 @@ interface ReviewFormProps {
     onSubmit: (data: ReviewFormData) => Promise<void>
 }
 
-export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
+export function ReviewForm({ onSubmit }: ReviewFormProps) {
     const [isLoading, setIsLoading] = useState(false)
 
     const {

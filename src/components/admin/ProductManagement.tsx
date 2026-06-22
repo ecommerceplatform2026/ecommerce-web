@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useMemo, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
     AlertTriangle,
@@ -358,7 +359,9 @@ export function ProductManagement() {
     const { data: products = [], isLoading, error } = useAdminProducts()
     const { data: categories = [] } = useAdminCategories()
 
-    const [searchTerm, setSearchTerm] = useState("")
+    const searchParams = useSearchParams()
+    const [searchTerm, setSearchTerm] = useState(() => searchParams.get("search") ?? "")
+
     const [currentPage, setCurrentPage] = useState(1)
     const [sortState, setSortState] = useState<ProductSortState>({
         column: "name",
