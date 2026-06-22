@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button"
 import { ROUTES } from "@/constants/routes"
 import { useWishlist } from "@/hooks/useWishlist"
 import { useCart } from "@/hooks/useCart"
+import { getProductImage, useImageErrorFallback } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import type { Product } from "@/types/product"
 
@@ -18,6 +19,7 @@ export function ProductCard({ product }: ProductCardProps) {
     const { toggleItem, isInWishlist } = useWishlist()
     const { addItem } = useCart()
     const inWishlist = isInWishlist(product.id)
+    const [imgSrc, onImgError] = useImageErrorFallback(getProductImage(product.imageUrl))
 
     const firstVariant = product.variants?.[0]
 
@@ -71,13 +73,15 @@ export function ProductCard({ product }: ProductCardProps) {
             href={ROUTES.SHOP.PRODUCT_DETAIL(product.id)}
             className="group block"
         >
-            <div className="relative aspect-[3/4] mb-4 overflow-hidden bg-secondary">
+            <div className="relative aspect-[3/4] mb-4 overflow-hidden bg-muted">
                 <Image
-                    src="/placeholder.svg"
+                    src={imgSrc}
                     alt={product.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    loading="lazy"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                     className="object-cover"
+                    onError={onImgError}
                 />
 
                 <Button

@@ -1,8 +1,7 @@
 "use client"
 
-/* eslint-disable @next/next/no-img-element */
-
 import { useMemo, useState } from "react"
+import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
@@ -35,6 +34,7 @@ import { categoryKeys, useAdminCategories } from "@/hooks/useCategories"
 import { productKeys, useAdminProducts } from "@/hooks/useProducts"
 import { productService } from "@/services/productService"
 import { formatPrice } from "@/utils/formatPrice"
+import { getProductImage, useImageErrorFallback } from "@/utils/imageHelpers"
 import { hasEdgeWhitespace, preventInvalidNumberInput, toNonNegativeNumberDraft } from "@/utils/inputValidation"
 import type {
     Product,
@@ -299,10 +299,6 @@ function validateVariantRows(rows: VariantRow[]): string[] {
     return errors
 }
 
-function getProductImage(product: Product): string | null {
-    return product.imageUrl ?? null
-}
-
 function getProductPrice(product: Product): string {
     const min = product.minPrice ?? product.basePrice
     const max = product.maxPrice ?? product.basePrice
@@ -350,6 +346,30 @@ function ProductTableSkeleton() {
                     <Skeleton className="h-14" />
                 </div>
             ))}
+        </div>
+    )
+}
+
+function ProductTableImage({ product }: { product: Product }) {
+    const [imgSrc, onError] = useImageErrorFallback(getProductImage(product.imageUrl))
+    return (
+        <div className="relative h-14 w-14 overflow-hidden rounded-md bg-muted">
+            {product.imageUrl ? (
+                <Image src={imgSrc} alt={product.name} fill unoptimized className="object-cover" onError={onError} />
+            ) : (
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                    <ImagePlus className="h-5 w-5" />
+                </div>
+            )}
+        </div>
+    )
+}
+
+function ExistingProductImage({ image }: { image: ProductImage }) {
+    const [imgSrc, onError] = useImageErrorFallback(image.imageUrl)
+    return (
+        <div className="relative aspect-[4/3] bg-muted">
+            <Image src={imgSrc} alt="Product" fill unoptimized className="object-cover" onError={onError} />
         </div>
     )
 }
@@ -817,19 +837,7 @@ export function ProductManagement() {
                                     {paginatedProducts.map(product => (
                                         <tr key={product.id} className="border-b border-border last:border-0 hover:bg-secondary/40">
                                             <td className="px-5 py-4">
-                                                <div className="h-14 w-14 overflow-hidden rounded-md bg-muted">
-                                                    {getProductImage(product) ? (
-                                                        <img
-                                                            src={getProductImage(product) ?? ""}
-                                                            alt={product.name}
-                                                            className="h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                                                            <ImagePlus className="h-5 w-5" />
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <ProductTableImage product={product} />
                                             </td>
                                             <td className="px-5 py-4">
                                                 <p className="truncate font-medium">{product.name}</p>
@@ -1180,9 +1188,7 @@ export function ProductManagement() {
                                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                     {existingImages.map(image => (
                                         <div key={image.id} className="overflow-hidden rounded-md border border-border">
-                                            <div className="aspect-[4/3] bg-muted">
-                                                <img src={image.imageUrl} alt="Product" className="h-full w-full object-cover" />
-                                            </div>
+                                            <ExistingProductImage image={image} />
                                             <div className="flex items-center justify-between gap-3 p-3">
                                                 <p className="truncate text-xs text-muted-foreground">{image.id}</p>
                                                 <Button
@@ -1208,6 +1214,7 @@ export function ProductManagement() {
                                                 <img
                                                     src={URL.createObjectURL(image)}
                                                     alt={image.name}
+                                                    loading="lazy"
                                                     className="h-full w-full object-cover"
                                                 />
                                             </div>

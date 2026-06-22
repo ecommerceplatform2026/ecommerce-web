@@ -1,7 +1,6 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useForm, useWatch } from "react-hook-form"
@@ -10,12 +9,15 @@ import { z } from "zod"
 import toast from "react-hot-toast"
 import { AlertTriangle, Banknote, CreditCard, Loader2, PackageCheck, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { CheckoutItemImage } from "@/components/checkout/CheckoutItemImage"
 import { PaymentMethod } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCart } from "@/hooks/useCart"
 import { orderService } from "@/services/orderService"
+import { getProductImage } from "@/utils/imageHelpers"
 import type { ApiError } from "@/types/api"
 import type { CheckoutFormValues } from "@/types/order"
+import type { CartItem } from "@/types/cart"
 
 const checkoutSchema = z.object({
     paymentMethod: z.nativeEnum(PaymentMethod),
@@ -186,15 +188,7 @@ export default function CheckoutPage() {
                         <div className="max-h-[360px] space-y-4 overflow-y-auto pr-1">
                             {orderItems.map(item => (
                                 <div key={item.variantId} className="grid grid-cols-[64px_minmax(0,1fr)] gap-3">
-                                    <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
-                                        <Image
-                                            src={item.imageUrl || "/placeholder.svg"}
-                                            alt={item.name}
-                                            fill
-                                            sizes="64px"
-                                            className="object-cover"
-                                        />
-                                    </div>
+                                    <CheckoutItemImage item={item} />
                                     <div className="min-w-0">
                                         <p className="truncate font-medium">{item.name}</p>
                                         <p className="mt-1 text-xs text-muted-foreground">

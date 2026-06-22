@@ -97,13 +97,14 @@ export function ShopByCategory() {
                                     <Link
                                         key={`${category.id}-${idx}`}
                                         href={`${ROUTES.SHOP.PRODUCTS}?categoryId=${category.id}`}
-                                        className="group flex-shrink-0 w-72 relative overflow-hidden bg-secondary h-96"
+                                        className="group flex-shrink-0 w-72 relative overflow-hidden bg-muted h-96"
                                     >
                                         <Image
                                             src="/placeholder.svg"
                                             alt={category.name}
                                             fill
-                                            sizes="288px"
+                                            loading="lazy"
+                                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
                                             className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:brightness-110"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent group-hover:from-foreground/50 transition-colors duration-500" />

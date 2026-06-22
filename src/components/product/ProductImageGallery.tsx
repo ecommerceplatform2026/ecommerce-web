@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import Image from "next/image"
 import { ImageIcon } from "lucide-react"
+import { useImageErrorFallback } from "@/utils/imageHelpers"
 import type { ProductImage } from "@/types/product"
 
 interface ProductImageGalleryProps {
@@ -19,22 +20,24 @@ function ProductImageFrame({
     alt: string
     priority?: boolean
 }) {
+    const [imgSrc, onImgError] = useImageErrorFallback(src)
     return (
         <Image
-            src={src}
+            src={imgSrc}
             alt={alt}
             fill
             sizes="(min-width: 1024px) 50vw, 100vw"
             className="object-cover"
             priority={priority}
             loading={priority ? "eager" : undefined}
+            onError={onImgError}
         />
     )
 }
 
 function EmptyImageState() {
     return (
-        <div className="flex h-full w-full items-center justify-center bg-secondary text-muted-foreground">
+        <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
             <ImageIcon className="h-12 w-12" aria-hidden="true" />
         </div>
     )
@@ -95,7 +98,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
 
     return (
         <div className="space-y-4">
-            <div className="relative aspect-[3/4] overflow-hidden bg-secondary">
+            <div className="relative aspect-[3/4] overflow-hidden bg-muted">
                 {validImages.length === 0 ? (
                     <EmptyImageState />
                 ) : (
@@ -119,7 +122,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
                             key={image.id}
                             type="button"
                             onClick={() => handleThumbnailClick(index)}
-                            className={`relative aspect-[3/4] overflow-hidden border bg-secondary transition-colors min-h-[44px] ${
+                            className={`relative aspect-[3/4] overflow-hidden border bg-muted transition-colors min-h-[44px] ${
                                 safeActiveIndex === index
                                     ? "border-foreground"
                                     : "border-border hover:border-muted-foreground"

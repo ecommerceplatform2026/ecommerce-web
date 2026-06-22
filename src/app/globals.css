@@ -146,4 +146,9 @@
   .recharts-surface * {
     outline: none !important;
   }
+
+  img,
+  .image-placeholder {
+    @apply bg-muted;
+  }
 }

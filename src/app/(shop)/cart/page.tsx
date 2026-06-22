@@ -1,13 +1,14 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import { AlertTriangle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { CartItemImage } from "@/components/cart/CartItemImage"
 import { ROUTES } from "@/constants/routes"
 import { useCart } from "@/hooks/useCart"
+import { getProductImage } from "@/utils/imageHelpers"
 import type { CartItem } from "@/types/cart"
 
 const ITEMS_PER_PAGE = 5
@@ -143,18 +144,7 @@ export default function CartPage() {
                                 key={item.variantId}
                                 className="flex flex-col sm:grid sm:grid-cols-[112px_minmax(0,1fr)] gap-4 border-b border-border pb-6"
                             >
-                                <Link
-                                    href={ROUTES.SHOP.PRODUCT_DETAIL(item.productId)}
-                                    className="relative aspect-[3/4] w-full sm:w-28 overflow-hidden bg-secondary"
-                                >
-                                    <Image
-                                        src={item.imageUrl || "/placeholder.svg"}
-                                        alt={item.name}
-                                        fill
-                                        sizes="(max-width: 640px) 100vw, 112px"
-                                        className="object-cover"
-                                    />
-                                </Link>
+                                <CartItemImage item={item} />
 
                                 <div className="min-w-0 space-y-4">
                                     <div className="flex items-start justify-between gap-4">
