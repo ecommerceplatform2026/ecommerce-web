@@ -13,6 +13,7 @@ import type { ApiError } from "@/types/api"
 import type { CartItem } from "@/types/cart"
 import type { ProductDetail, ProductDetailVariant } from "@/types/product"
 import { ProductImageGallery } from "./ProductImageGallery"
+import { ReviewSection } from "@/components/review/ReviewSection"
 
 interface ProductDetailsProps {
     product: ProductDetail
@@ -395,6 +396,12 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     </Button>
                 </section>
             </div>
+
+            <ReviewSection
+                productId={product.id}
+                averageRating={product.averageRating ?? 0}
+                reviewCount={product.reviewCount ?? 0}
+            />
         </div>
     )
 }
