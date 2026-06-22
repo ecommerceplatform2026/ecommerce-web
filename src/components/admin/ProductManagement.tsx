@@ -34,6 +34,7 @@ import { categoryKeys, useAdminCategories } from "@/hooks/useCategories"
 import { productKeys, useAdminProducts } from "@/hooks/useProducts"
 import { productService } from "@/services/productService"
 import { formatPrice } from "@/utils/formatPrice"
+import { hasEdgeWhitespace, preventInvalidNumberInput, toNonNegativeNumberDraft } from "@/utils/inputValidation"
 import type {
     Product,
     ProductFormValues,
@@ -237,8 +238,17 @@ function validateProductForm(form: ProductFormState): string[] {
 
     if (!form.categoryId) errors.push("Category is required.")
     if (!form.name.trim()) errors.push("Product name is required.")
+    if (form.name && hasEdgeWhitespace(form.name)) {
+        errors.push("Product name must not start or end with spaces.")
+    }
     if (form.name.trim().length > MAX_NAME_LENGTH) {
         errors.push(`Product name must not exceed ${MAX_NAME_LENGTH} characters.`)
+    }
+    if (form.material && hasEdgeWhitespace(form.material)) {
+        errors.push("Material must not start or end with spaces.")
+    }
+    if (form.description && hasEdgeWhitespace(form.description)) {
+        errors.push("Description must not start or end with spaces.")
     }
     if (form.material.trim().length > MAX_MATERIAL_LENGTH) {
         errors.push(`Material must not exceed ${MAX_MATERIAL_LENGTH} characters.`)
@@ -265,11 +275,14 @@ function validateVariantRows(rows: VariantRow[]): string[] {
         const price = toNumber(row.price)
 
         if (!sku) errors.push(`${rowLabel}: SKU is required.`)
+        if (row.sku && hasEdgeWhitespace(row.sku)) errors.push(`${rowLabel}: SKU must not start or end with spaces.`)
         if (sku.length > MAX_SKU_LENGTH) errors.push(`${rowLabel}: SKU must not exceed ${MAX_SKU_LENGTH} characters.`)
         if (sku && seenSkus.has(sku)) errors.push(`${rowLabel}: SKU must be unique in this form.`)
         if (sku) seenSkus.add(sku)
         if (!color) errors.push(`${rowLabel}: color is required.`)
+        if (row.color && hasEdgeWhitespace(row.color)) errors.push(`${rowLabel}: color must not start or end with spaces.`)
         if (!size) errors.push(`${rowLabel}: size is required.`)
+        if (row.size && hasEdgeWhitespace(row.size)) errors.push(`${rowLabel}: size must not start or end with spaces.`)
         if (color && size) {
             const optionKey = `${size}:${color}`
             if (seenOptions.has(optionKey)) errors.push(`${rowLabel}: size and color combination must be unique.`)
@@ -982,7 +995,11 @@ export function ProductManagement() {
                                     type="number"
                                     min="0"
                                     value={formState.basePrice}
-                                    onChange={event => setFormState({ ...formState, basePrice: event.target.value })}
+                                    onKeyDown={preventInvalidNumberInput}
+                                    onChange={event => setFormState({
+                                        ...formState,
+                                        basePrice: toNonNegativeNumberDraft(event.target.value),
+                                    })}
                                     placeholder="0"
                                 />
                             </label>
@@ -1074,13 +1091,37 @@ export function ProductManagement() {
                                                         <Input value={row.size} onChange={event => updateVariantRow(row.localId, { size: event.target.value })} />
                                                     </td>
                                                     <td className="p-2">
-                                                        <Input type="number" min="0" value={row.stock} onChange={event => updateVariantRow(row.localId, { stock: event.target.value })} />
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            value={row.stock}
+                                                            onKeyDown={preventInvalidNumberInput}
+                                                            onChange={event => updateVariantRow(row.localId, {
+                                                                stock: toNonNegativeNumberDraft(event.target.value),
+                                                            })}
+                                                        />
                                                     </td>
                                                     <td className="p-2">
-                                                        <Input type="number" min="0" value={row.lowStockThreshold} onChange={event => updateVariantRow(row.localId, { lowStockThreshold: event.target.value })} />
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            value={row.lowStockThreshold}
+                                                            onKeyDown={preventInvalidNumberInput}
+                                                            onChange={event => updateVariantRow(row.localId, {
+                                                                lowStockThreshold: toNonNegativeNumberDraft(event.target.value),
+                                                            })}
+                                                        />
                                                     </td>
                                                     <td className="p-2">
-                                                        <Input type="number" min="0" value={row.price} onChange={event => updateVariantRow(row.localId, { price: event.target.value })} />
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            value={row.price}
+                                                            onKeyDown={preventInvalidNumberInput}
+                                                            onChange={event => updateVariantRow(row.localId, {
+                                                                price: toNonNegativeNumberDraft(event.target.value),
+                                                            })}
+                                                        />
                                                     </td>
                                                     <td className="p-2 text-right">
                                                         <Button

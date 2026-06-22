@@ -19,6 +19,7 @@ import {
 import { categoryKeys, useAdminCategories } from "@/hooks/useCategories"
 import { categoryService } from "@/services/categoryService"
 import { formatDate } from "@/utils/formatDate"
+import { hasEdgeWhitespace } from "@/utils/inputValidation"
 import type { Category, CategoryFormValues } from "@/types/category"
 
 const PAGE_SIZE = 8
@@ -60,6 +61,8 @@ function validateCategoryForm(values: CategoryFormState): Partial<Record<keyof C
 
     if (!name) {
         errors.name = "Category name is required."
+    } else if (hasEdgeWhitespace(values.name)) {
+        errors.name = "Category name must not start or end with spaces."
     } else if (name.length > MAX_NAME_LENGTH) {
         errors.name = `Category name must not exceed ${MAX_NAME_LENGTH} characters.`
     }
