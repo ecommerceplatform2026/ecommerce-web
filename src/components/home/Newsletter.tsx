@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { Check } from "lucide-react"
-import toast from "react-hot-toast"
+import { Toast } from '@/components/ui/Toast'
 
 export function Newsletter() {
     const [email, setEmail] = useState("")
@@ -14,7 +14,7 @@ export function Newsletter() {
         e.preventDefault()
         if (!email.trim()) return
         setSubmitted(true)
-        toast.success("Newsletter subscription successful!")
+        Toast("Newsletter subscription successful!")
     }
 
     return (

@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import toast from "react-hot-toast"
+import { Toast } from '@/components/ui/Toast'
 import { AlertTriangle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import type { CartItem } from "@/types/cart"
 import { Button } from "@/components/ui/Button"
 import { CartItemImage } from "@/components/cart/CartItemImage"
 import { ROUTES } from "@/constants/routes"
 import { useCart } from "@/hooks/useCart"
-import { getProductImage } from "@/utils/imageHelpers"
-import type { CartItem } from "@/types/cart"
+
 
 const ITEMS_PER_PAGE = 5
 const FREE_SHIPPING_THRESHOLD = 2_000_000
@@ -51,11 +51,11 @@ export default function CartPage() {
     async function handleQuantityChange(item: CartItem, quantity: number) {
         if (quantity < 1) return
         if (item.isOutOfStock || item.stock <= 0) {
-            toast.error("This variant is out of stock.")
+            Toast("This variant is out of stock.", 'error')
             return
         }
         if (quantity > item.stock) {
-            toast.error(`Only ${item.stock} item(s) available for this variant.`)
+            Toast(`Only ${item.stock} item(s) available for this variant.`, 'error')
             return
         }
 
@@ -63,7 +63,7 @@ export default function CartPage() {
         try {
             await updateQuantity(item.variantId, quantity)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Unable to update cart item.")
+            Toast(err instanceof Error ? err.message : "Unable to update cart item.", 'error')
         } finally {
             setPendingVariantId(null)
         }
@@ -73,14 +73,14 @@ export default function CartPage() {
         setPendingVariantId(item.variantId)
         try {
             await removeItem(item.variantId)
-            toast.success("Removed from cart.")
+            Toast("Removed from cart.")
             setCurrentPage(page => {
                 const nextCount = Math.max(0, items.length - 1)
                 const nextPages = Math.max(1, Math.ceil(nextCount / ITEMS_PER_PAGE))
                 return Math.min(page, nextPages)
             })
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Unable to remove cart item.")
+            Toast(err instanceof Error ? err.message : "Unable to remove cart item.", 'error')
         } finally {
             setPendingVariantId(null)
         }

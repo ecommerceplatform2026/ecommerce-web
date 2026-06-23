@@ -16,7 +16,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import toast from 'react-hot-toast'
+import { Toast } from '@/components/ui/Toast'
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
 import { UserRole } from "@/constants/enums"
@@ -182,7 +182,7 @@ export function Header() {
 
     const handleLogout = () => {
         logout()
-        toast.success("See you again!")
+        Toast("See you again!")
         router.push("/login")
     }
 

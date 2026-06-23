@@ -6,18 +6,16 @@ import { useRouter } from "next/navigation"
 import { useForm, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import toast from "react-hot-toast"
 import { AlertTriangle, Banknote, CreditCard, Loader2, PackageCheck, ShieldCheck } from "lucide-react"
+import { Toast } from '@/components/ui/Toast'
 import { Button } from "@/components/ui/Button"
 import { CheckoutItemImage } from "@/components/checkout/CheckoutItemImage"
 import { PaymentMethod } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCart } from "@/hooks/useCart"
 import { orderService } from "@/services/orderService"
-import { getProductImage } from "@/utils/imageHelpers"
 import type { ApiError } from "@/types/api"
 import type { CheckoutFormValues } from "@/types/order"
-import type { CartItem } from "@/types/cart"
 
 const checkoutSchema = z.object({
     paymentMethod: z.nativeEnum(PaymentMethod),
@@ -61,7 +59,7 @@ export default function CheckoutPage() {
         }
 
         if (hasInvalidItems) {
-            toast.error("Review your cart before checkout. Some items are unavailable or exceed stock.")
+            Toast("Review your cart before checkout. Some items are unavailable or exceed stock.", 'error')
             return
         }
 

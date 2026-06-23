@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus, Heart } from "lucide-react"
-import toast from "react-hot-toast"
-import Link from "next/link"
+import { Toast } from '@/components/ui/Toast'
 import { Button } from "@/components/ui/Button"
 import { Spinner } from "@/components/ui/Spinner"
 import { ROUTES } from "@/constants/routes"
@@ -144,17 +143,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
     async function handleAddToCart() {
         if (needsVariantSelection) {
-            toast.error("Please select size and color")
+            Toast("Please select size and color", 'error')
             return
         }
 
         if (!selectedVariant) {
-            toast.error("This product has no available variant")
+            Toast("This product has no available variant", 'error')
             return
         }
 
         if (isInactive || isOutOfStock) {
-            toast.error("This product is not available")
+            Toast("This product is not available", 'error')
             return
         }
 
@@ -180,15 +179,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 await cartService.addItem(selectedVariant.id, finalQuantity)
             }
 
-            toast.success(
-                <div className="flex items-center gap-2">
-                    <span>Added {finalQuantity} x {product.name}</span>
-                    <Link href={ROUTES.CART} className="ml-2 underline font-medium whitespace-nowrap">
-                        View Cart
-                    </Link>
-                </div>,
-                { duration: 4000 },
-            )
+            Toast(`Added ${finalQuantity} x ${product.name}`)
             setAdded(true)
             setTimeout(() => setAdded(false), 1500)
         } catch (error) {
@@ -199,7 +190,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             }
 
             const apiError = error as ApiError
-            toast.error(apiError.message ?? "Could not add product to cart")
+            Toast(apiError.message ?? "Could not add product to cart", 'error')
         } finally {
             setIsAdding(false)
         }
@@ -219,7 +210,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                     <div className="relative">
                         <ProductImageGallery images={product.images} productName={product.name} />
                         <Button
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleItem(product); toast.success(inWishlist ? "Removed from wishlist" : "Added to wishlist"); }}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleItem(product); Toast(inWishlist ? "Removed from wishlist" : "Added to wishlist"); }}
                             size="icon"
                             className={`absolute top-5 right-5 min-h-[44px] min-w-[44px] border border-border rounded-none ${inWishlist ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground hover:bg-background/90"}`}
                         >

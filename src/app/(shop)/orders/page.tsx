@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, ChevronRight, CreditCard, PackageSearch, ReceiptText, WalletCards } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -42,7 +43,7 @@ function getStatusParam(value: string | null): OrderStatus | undefined {
         : undefined
 }
 
-export default function OrdersPage() {
+function OrdersContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const currentPage = getPageParam(searchParams.get("page"))
@@ -229,5 +230,13 @@ export default function OrdersPage() {
                 </div>
             )}
         </main>
+    )
+}
+
+export default function OrdersPage() {
+    return (
+        <Suspense fallback={null}>
+            <OrdersContent />
+        </Suspense>
     )
 }

@@ -1,12 +1,13 @@
 "use client"
 
 import Link from "next/link"
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { AlertCircle, ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/Button"
 import { ROUTES } from "@/constants/routes"
 
-export default function CheckoutFailedPage() {
+function CheckoutFailedContent() {
     const searchParams = useSearchParams()
     const reason = searchParams.get("reason")
 
@@ -34,5 +35,13 @@ export default function CheckoutFailedPage() {
                 </div>
             </div>
         </main>
+    )
+}
+
+export default function CheckoutFailedPage() {
+    return (
+        <Suspense fallback={null}>
+            <CheckoutFailedContent />
+        </Suspense>
     )
 }

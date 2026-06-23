@@ -17,7 +17,7 @@ import {
     Upload,
     X,
 } from "lucide-react"
-import toast from "react-hot-toast"
+import { Toast } from '@/components/ui/Toast'
 import { ProductStatus } from "@/constants/enums"
 import { Button } from "@/components/ui/Button"
 import { EmptyState } from "@/components/ui/EmptyState"
@@ -462,10 +462,10 @@ export function ProductManagement() {
         mutationFn: (id: string) => productService.delete(id),
         onSuccess: () => {
             invalidateProducts()
-            toast.success("Product deleted successfully.")
+            Toast("Product deleted successfully.")
             setDeleteTarget(null)
         },
-        onError: error => toast.error(getApiErrorMessage(error)),
+        onError: error => Toast(getApiErrorMessage(error), 'error'),
     })
 
     const deleteVariantMutation = useMutation({
@@ -474,9 +474,9 @@ export function ProductManagement() {
         onSuccess: (_, variables) => {
             setVariantRows(rows => rows.filter(row => row.id !== variables.variantId))
             invalidateProducts()
-            toast.success("Variant deleted successfully.")
+            Toast("Variant deleted successfully.")
         },
-        onError: error => toast.error(getApiErrorMessage(error)),
+        onError: error => Toast(getApiErrorMessage(error), 'error'),
     })
 
     const deleteImageMutation = useMutation({
@@ -485,9 +485,9 @@ export function ProductManagement() {
         onSuccess: (_, variables) => {
             setExistingImages(images => images.filter(image => image.id !== variables.imageId))
             invalidateProducts()
-            toast.success("Image deleted successfully.")
+            Toast("Image deleted successfully.")
         },
-        onError: error => toast.error(getApiErrorMessage(error)),
+        onError: error => Toast(getApiErrorMessage(error), 'error'),
     })
 
     function resetForm() {
@@ -542,7 +542,7 @@ export function ProductManagement() {
                 setVariantRows(rows)
                 setInitialVariantSnapshot(createVariantSnapshot(rows))
             } else {
-                toast.error(getApiErrorMessage(variantsResult.reason))
+                Toast(getApiErrorMessage(variantsResult.reason), 'error')
             }
 
             if (imagesResult.status === "fulfilled") {
@@ -555,7 +555,7 @@ export function ProductManagement() {
                 )
             }
         } catch (error) {
-            toast.error(getApiErrorMessage(error))
+            Toast(getApiErrorMessage(error), 'error')
         } finally {
             setIsLoadingDetail(false)
         }
@@ -576,7 +576,7 @@ export function ProductManagement() {
     function handleImageInput(files: FileList | null) {
         if (!files) return
         const { accepted, errors } = validateImageFiles(Array.from(files))
-        errors.forEach(errorMessage => toast.error(errorMessage))
+        errors.forEach(errorMessage => Toast(errorMessage, 'error'))
         if (accepted.length === 0) return
         setPendingImages(images => [...images, ...accepted])
     }
@@ -647,12 +647,12 @@ export function ProductManagement() {
                     await productService.delete(product.id).catch(() => false)
                     throw error
                 }
-                toast.success("Product created successfully.")
+                Toast("Product created successfully.")
             } else if (selectedProduct) {
                 await productService.update(selectedProduct.id, payload)
                 await persistVariants(selectedProduct.id)
                 await persistImages(selectedProduct.id)
-                toast.success("Product updated successfully.")
+                Toast("Product updated successfully.")
             }
 
             invalidateProducts()
@@ -663,7 +663,7 @@ export function ProductManagement() {
             const message = isProductSubmitError(error) ? error.message : getApiErrorMessage(error)
             setActiveTab(tab)
             setFormErrors([{ tab, message }])
-            toast.error(message)
+            Toast(message, 'error')
         } finally {
             setIsSaving(false)
         }
@@ -1211,6 +1211,7 @@ export function ProductManagement() {
                                     {pendingImages.map((image, index) => (
                                         <div key={`${image.name}-${index}`} className="overflow-hidden rounded-md border border-border">
                                             <div className="aspect-[4/3] bg-muted">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
                                                     src={URL.createObjectURL(image)}
                                                     alt={image.name}

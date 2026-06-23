@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { CheckCircle2, ExternalLink, PackageSearch, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -11,7 +12,7 @@ function formatCurrency(value: number) {
     return `${value.toLocaleString("vi-VN")} VND`
 }
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
     const searchParams = useSearchParams()
     const orderId = searchParams.get("orderId")
     const orderCode = searchParams.get("orderCode")
@@ -85,5 +86,13 @@ export default function CheckoutSuccessPage() {
                 </div>
             </div>
         </main>
+    )
+}
+
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={null}>
+            <CheckoutSuccessContent />
+        </Suspense>
     )
 }

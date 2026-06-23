@@ -33,7 +33,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/Modal"
 import Image from "next/image"
-import toast from 'react-hot-toast'
+import { Toast } from '@/components/ui/Toast'
 import { useProfile } from "@/hooks/useProfile"
 import { formatDate } from "@/utils/formatDate"
 import { hasEdgeWhitespace } from "@/utils/inputValidation"
@@ -94,19 +94,19 @@ export function ProfileContent() {
     const handleEditProfileSubmit = async (e: React.SyntheticEvent) => {
         e.preventDefault()
         if (!editFormData.fullName.trim()) {
-            toast.error("Please enter your full name.")
+            Toast("Please enter your full name.", 'error')
             return
         }
         if (hasEdgeWhitespace(editFormData.fullName)) {
-            toast.error("Full name must not start or end with spaces.")
+            Toast("Full name must not start or end with spaces.", 'error')
             return
         }
         if (editFormData.username && hasEdgeWhitespace(editFormData.username)) {
-            toast.error("Username must not start or end with spaces.")
+            Toast("Username must not start or end with spaces.", 'error')
             return
         }
         if (editFormData.phoneNumber && hasEdgeWhitespace(editFormData.phoneNumber)) {
-            toast.error("Phone number must not start or end with spaces.")
+            Toast("Phone number must not start or end with spaces.", 'error')
             return
         }
         try {
@@ -116,18 +116,18 @@ export function ProfileContent() {
                 phoneNumber: editFormData.phoneNumber.trim() || undefined,
                 dateOfBirth: editFormData.dateOfBirth || undefined,
             })
-            toast.success("Your profile has been updated.")
+            Toast("Your profile has been updated.")
             setIsEditDialogOpen(false)
         } catch (err) {
             const apiError = err as ApiError
-            toast.error(apiError.message ?? "Something went wrong. Please try again.")
+            Toast(apiError.message ?? "Something went wrong. Please try again.", 'error')
         }
     }
 
     const handleChangePasswordSubmit = (e: React.SyntheticEvent) => {
         e.preventDefault()
         if (!passwordFormData.currentPassword || !passwordFormData.newPassword || !passwordFormData.confirmPassword) {
-            toast.error("Please fill in all password fields.")
+            Toast("Please fill in all password fields.", 'error')
             return
         }
         if (
@@ -135,15 +135,15 @@ export function ProfileContent() {
             hasEdgeWhitespace(passwordFormData.newPassword) ||
             hasEdgeWhitespace(passwordFormData.confirmPassword)
         ) {
-            toast.error("Password fields must not start or end with spaces.")
+            Toast("Password fields must not start or end with spaces.", 'error')
             return
         }
         if (passwordFormData.newPassword !== passwordFormData.confirmPassword) {
-            toast.error("Password confirmation does not match.")
+            Toast("Password confirmation does not match.", 'error')
             return
         }
         // TODO: connect change-password API when the backend supports this endpoint
-        toast.success("Your password has been updated.")
+        Toast("Your password has been updated.")
         setPasswordFormData({ currentPassword: "", newPassword: "", confirmPassword: "" })
         setIsPasswordDialogOpen(false)
     }
@@ -152,19 +152,19 @@ export function ProfileContent() {
         const file = e.target.files?.[0]
         if (!file) return
         if (!file.type.startsWith("image/")) {
-            toast.error("Please select an image file.")
+            Toast("Please select an image file.", 'error')
             return
         }
         if (file.size > 5 * 1024 * 1024) {
-            toast.error("Image size must be 5 MB or less.")
+            Toast("Image size must be 5 MB or less.", 'error')
             return
         }
         try {
             await uploadAvatar(file)
-            toast.success("Avatar updated successfully")
+            Toast("Avatar updated successfully")
         } catch (err) {
             const apiError = err as ApiError
-            toast.error(apiError.message ?? "Something went wrong. Please try again.")
+            Toast(apiError.message ?? "Something went wrong. Please try again.", 'error')
         }
         e.target.value = ""
     }

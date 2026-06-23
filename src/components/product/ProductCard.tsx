@@ -8,7 +8,7 @@ import { ROUTES } from "@/constants/routes"
 import { useWishlist } from "@/hooks/useWishlist"
 import { useCart } from "@/hooks/useCart"
 import { getProductImage, useImageErrorFallback } from "@/utils/imageHelpers"
-import toast from "react-hot-toast"
+import { Toast } from '@/components/ui/Toast'
 import type { Product } from "@/types/product"
 
 interface ProductCardProps {
@@ -28,7 +28,7 @@ export function ProductCard({ product }: ProductCardProps) {
         e.stopPropagation()
         if (!firstVariant) return
         if (firstVariant.isOutOfStock || firstVariant.stock <= 0) {
-            toast.error("Product is out of stock")
+            Toast("Product is out of stock", 'error')
             return
         }
 
@@ -47,17 +47,9 @@ export function ProductCard({ product }: ProductCardProps) {
                 isOutOfStock: firstVariant.isOutOfStock,
                 imageUrl: product.imageUrl ?? null,
             })
-            toast.success(
-                <div className="flex items-center gap-2">
-                    <span>Added {product.name}</span>
-                    <Link href={ROUTES.CART} className="ml-2 underline font-medium whitespace-nowrap">
-                        View Cart
-                    </Link>
-                </div>,
-                { duration: 4000 },
-            )
+            Toast(`Added ${product.name}`)
         } catch (error) {
-            toast.error(typeof error === 'string' ? error : 'Unable to add product to cart.')
+            Toast(typeof error === 'string' ? error : 'Unable to add product to cart.', 'error')
         }
     }
 
@@ -65,7 +57,7 @@ export function ProductCard({ product }: ProductCardProps) {
         e.preventDefault()
         e.stopPropagation()
         toggleItem(product)
-        toast.success(inWishlist ? "Removed from wishlist" : "Added to wishlist")
+        Toast(inWishlist ? "Removed from wishlist" : "Added to wishlist")
     }
 
     return (
