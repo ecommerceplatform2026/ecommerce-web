@@ -30,7 +30,7 @@ const ORDER_STATUSES = [
     OrderStatus.Returned,
 ] as const
 
-function getPageParam(value: string | null) {
+function getPageParam(value: string | null): number {
     const page = Number(value)
     return Number.isInteger(page) && page > 0 ? page : 1
 }
@@ -186,6 +186,7 @@ function OrderHistoryContent() {
 
                     return (
                         <div key={order.id} className="border border-border p-6 bg-card space-y-4">
+                            {/* Card Header */}
                             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-border pb-4">
                                 <div>
                                     <span className="text-xs text-muted-foreground uppercase tracking-widest">Order Code</span>
@@ -198,6 +199,7 @@ function OrderHistoryContent() {
                                 </div>
                             </div>
 
+                            {/* Info Rows */}
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-muted-foreground py-2">
                                 <div className="flex items-center gap-2">
                                     <Calendar className="h-4 w-4 shrink-0" />
@@ -215,10 +217,12 @@ function OrderHistoryContent() {
                                 </div>
                             </div>
 
+                            {/* Items Preview */}
                             <div className="text-xs border-t border-border pt-4 text-muted-foreground">
                                 {order.items.length} item{order.items.length === 1 ? "" : "s"} in this order.
                             </div>
 
+                            {/* Card Actions */}
                             <div className="flex justify-end gap-3 pt-2">
                                 {isPendingOrConfirmed && (
                                     <Button
@@ -250,6 +254,7 @@ function OrderHistoryContent() {
                 })}
             </div>
 
+            {/* Pagination */}
             {totalPages > 1 && (
                 <div className="flex justify-center items-center gap-2 mt-10">
                     <Button

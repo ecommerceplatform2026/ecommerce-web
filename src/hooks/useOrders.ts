@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orderService } from '@/services/orderService'
 import { useCart } from '@/hooks/useCart'
 import type { CheckoutRequest } from '@/types/order'
-import type { OrderQueryParams } from '@/types/order'
 
 export const orderKeys = {
     all: ['orders'] as const,
@@ -51,21 +50,5 @@ export function useCancelOrder() {
             queryClient.invalidateQueries({ queryKey: orderKeys.all })
             queryClient.invalidateQueries({ queryKey: orderKeys.detail(id) })
         },
-    })
-}
-
-// Original hooks — kept for backward compatibility
-export function useOrders(params: OrderQueryParams) {
-    return useQuery({
-        queryKey: ['orders', 'list', params],
-        queryFn: () => orderService.getMyOrders(params),
-    })
-}
-
-export function useOrder(id: string) {
-    return useQuery({
-        queryKey: ['orders', 'detail', id],
-        queryFn: () => orderService.getById(id),
-        enabled: !!id,
     })
 }

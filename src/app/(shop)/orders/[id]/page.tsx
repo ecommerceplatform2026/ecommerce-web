@@ -108,6 +108,7 @@ export default function OrderDetailPage() {
 
     return (
         <div className="container mx-auto px-4 py-12 lg:px-8 max-w-4xl space-y-8">
+            {/* Back Navigation */}
             <div>
                 <Link
                     href={ROUTES.ORDERS.INDEX}
@@ -118,6 +119,7 @@ export default function OrderDetailPage() {
                 </Link>
             </div>
 
+            {/* Order Title Header */}
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-border pb-6">
                 <div>
                     <h1 className="font-serif text-3xl md:text-4xl tracking-tight">Order #{order.orderCode}</h1>
@@ -132,7 +134,9 @@ export default function OrderDetailPage() {
                 </div>
             </div>
 
+            {/* Quick Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Payment Info */}
                 <div className="border border-border p-5 bg-card space-y-2">
                     <h3 className="font-medium text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <CreditCard className="h-4 w-4" />
@@ -148,6 +152,7 @@ export default function OrderDetailPage() {
                     </div>
                 </div>
 
+                {/* Delivery Tracking */}
                 <div className="border border-border p-5 bg-card space-y-2">
                     <h3 className="font-medium text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                         <Package className="h-4 w-4" />
@@ -170,6 +175,7 @@ export default function OrderDetailPage() {
                 </div>
             </div>
 
+            {/* Order Items */}
             <div className="border border-border bg-card">
                 <div className="p-5 border-b border-border">
                     <h2 className="font-serif text-xl">Order Items</h2>
@@ -210,6 +216,7 @@ export default function OrderDetailPage() {
                 </div>
             </div>
 
+            {/* Price breakdown and Cancel CTA */}
             <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-t border-border pt-6">
                 <div>
                     {isPendingOrConfirmed && (
