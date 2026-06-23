@@ -91,7 +91,7 @@ function CheckoutSuccessContent() {
 
 export default function CheckoutSuccessPage() {
     return (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="flex min-h-[70vh] items-center justify-center">Loading...</div>}>
             <CheckoutSuccessContent />
         </Suspense>
     )

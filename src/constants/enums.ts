@@ -51,8 +51,8 @@ export enum ProductSize {
 // ============================================================
 
 // Orders table - Status column
-// SRS: 0=Pending, 1=Confirmed, 2=Processing, 3=Shipping,
-//      4=Delivered, 5=Completed, 6=Cancelled, 7=Returned
+// Backend: 0=Pending, 1=Confirmed, 2=Processing, 3=Shipping,
+//          4=Delivered, 5=Completed, 6=Cancelled, 7=Returned
 export enum OrderStatus {
     Pending = 0,
     Confirmed = 1,
@@ -64,25 +64,12 @@ export enum OrderStatus {
     Returned = 7,
 }
 
-export enum DeliveryStatus {
-    Pending = 0,
-    Created = 1,
-    PickedUp = 2,
-    InTransit = 3,
-    OutForDelivery = 4,
-    Delivered = 5,
-    Failed = 6,
-    Cancelled = 7,
-    Returned = 8,
-    Exception = 9,
-}
-
 // ============================================================
 // PAYMENT
 // ============================================================
 
 // Orders table - PaymentMethod column
-// SRS: 0 = COD, 1 = MoMo, 2 = ZaloPay, 3 = PayOS
+// Backend: 0 = COD, 1 = MoMo, 2 = ZaloPay, 3 = PayOS, 4 = VNPay
 export enum PaymentMethod {
     COD = 0,
     MoMo = 1,
@@ -119,6 +106,20 @@ export enum ReviewStatus {
     Pending = 0,
     Approved = 1,
     Rejected = 2,
+}
+
+// Delivery tracking status — matches backend Domain.Enums.DeliveryStatus
+export enum DeliveryStatus {
+    Pending = 0,
+    Created = 1,
+    PickedUp = 2,
+    InTransit = 3,
+    OutForDelivery = 4,
+    Delivered = 5,
+    Failed = 6,
+    Cancelled = 7,
+    Returned = 8,
+    Exception = 9,
 }
 
 // ============================================================

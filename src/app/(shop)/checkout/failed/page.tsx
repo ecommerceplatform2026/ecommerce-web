@@ -40,7 +40,7 @@ function CheckoutFailedContent() {
 
 export default function CheckoutFailedPage() {
     return (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div className="flex min-h-[70vh] items-center justify-center">Loading...</div>}>
             <CheckoutFailedContent />
         </Suspense>
     )
