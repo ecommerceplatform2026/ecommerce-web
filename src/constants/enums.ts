@@ -51,8 +51,8 @@ export enum ProductSize {
 // ============================================================
 
 // Orders table - Status column
-// SRS: 0=Pending, 1=Confirmed, 2=Processing, 3=Shipping,
-//      4=Delivered, 5=Completed, 6=Cancelled, 7=Returned
+// Backend: 0=Pending, 1=Confirmed, 2=Processing, 3=Shipping,
+//          4=Delivered, 5=Completed, 6=Cancelled, 7=Returned
 export enum OrderStatus {
     Pending = 0,
     Confirmed = 1,
@@ -64,25 +64,12 @@ export enum OrderStatus {
     Returned = 7,
 }
 
-export enum DeliveryStatus {
-    Pending = 0,
-    Created = 1,
-    PickedUp = 2,
-    InTransit = 3,
-    OutForDelivery = 4,
-    Delivered = 5,
-    Failed = 6,
-    Cancelled = 7,
-    Returned = 8,
-    Exception = 9,
-}
-
 // ============================================================
 // PAYMENT
 // ============================================================
 
 // Orders table - PaymentMethod column
-// SRS: 0 = COD, 1 = MoMo, 2 = ZaloPay, 3 = PayOS
+// Backend: 0 = COD, 1 = MoMo, 2 = ZaloPay, 3 = PayOS, 4 = VNPay
 export enum PaymentMethod {
     COD = 0,
     MoMo = 1,
@@ -119,6 +106,20 @@ export enum ReviewStatus {
     Pending = 0,
     Approved = 1,
     Rejected = 2,
+}
+
+// Delivery tracking status — matches backend Domain.Enums.DeliveryStatus
+export enum DeliveryStatus {
+    Pending = 0,
+    Created = 1,
+    PickedUp = 2,
+    InTransit = 3,
+    OutForDelivery = 4,
+    Delivered = 5,
+    Failed = 6,
+    Cancelled = 7,
+    Returned = 8,
+    Exception = 9,
 }
 
 // ============================================================
@@ -165,19 +166,6 @@ export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
     [OrderStatus.Completed]: 'Completed',
     [OrderStatus.Cancelled]: 'Cancelled',
     [OrderStatus.Returned]: 'Returned',
-}
-
-export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
-    [DeliveryStatus.Pending]: 'Pending',
-    [DeliveryStatus.Created]: 'Created',
-    [DeliveryStatus.PickedUp]: 'Picked up',
-    [DeliveryStatus.InTransit]: 'In transit',
-    [DeliveryStatus.OutForDelivery]: 'Out for delivery',
-    [DeliveryStatus.Delivered]: 'Delivered',
-    [DeliveryStatus.Failed]: 'Failed',
-    [DeliveryStatus.Cancelled]: 'Cancelled',
-    [DeliveryStatus.Returned]: 'Returned',
-    [DeliveryStatus.Exception]: 'Exception',
 }
 
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
@@ -241,18 +229,32 @@ export const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
     [OrderStatus.Returned]: 'bg-gray-100 text-gray-800',
 }
 
+export const DELIVERY_STATUS_LABEL: Record<DeliveryStatus, string> = {
+    [DeliveryStatus.Pending]: 'Pending',
+    [DeliveryStatus.Created]: 'Created',
+    [DeliveryStatus.PickedUp]: 'Picked up',
+    [DeliveryStatus.InTransit]: 'In transit',
+    [DeliveryStatus.OutForDelivery]: 'Out for delivery',
+    [DeliveryStatus.Delivered]: 'Delivered',
+    [DeliveryStatus.Failed]: 'Failed',
+    [DeliveryStatus.Cancelled]: 'Cancelled',
+    [DeliveryStatus.Returned]: 'Returned',
+    [DeliveryStatus.Exception]: 'Exception',
+}
+
 export const DELIVERY_STATUS_COLOR: Record<DeliveryStatus, string> = {
     [DeliveryStatus.Pending]: 'bg-yellow-100 text-yellow-800',
     [DeliveryStatus.Created]: 'bg-blue-100 text-blue-800',
     [DeliveryStatus.PickedUp]: 'bg-cyan-100 text-cyan-800',
     [DeliveryStatus.InTransit]: 'bg-indigo-100 text-indigo-800',
-    [DeliveryStatus.OutForDelivery]: 'bg-purple-100 text-purple-800',
+    [DeliveryStatus.OutForDelivery]: 'bg-violet-100 text-violet-800',
     [DeliveryStatus.Delivered]: 'bg-green-100 text-green-800',
     [DeliveryStatus.Failed]: 'bg-red-100 text-red-800',
     [DeliveryStatus.Cancelled]: 'bg-gray-100 text-gray-800',
-    [DeliveryStatus.Returned]: 'bg-slate-100 text-slate-800',
-    [DeliveryStatus.Exception]: 'bg-orange-100 text-orange-800',
+    [DeliveryStatus.Returned]: 'bg-orange-100 text-orange-800',
+    [DeliveryStatus.Exception]: 'bg-rose-100 text-rose-800',
 }
+
 
 export const PAYMENT_STATUS_COLOR: Record<PaymentStatus, string> = {
     [PaymentStatus.Pending]: 'bg-yellow-100 text-yellow-800',

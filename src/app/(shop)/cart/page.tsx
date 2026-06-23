@@ -6,6 +6,8 @@ import Link from "next/link"
 import toast from "react-hot-toast"
 import { AlertTriangle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/Button"
+import { EmptyState } from "@/components/ui/EmptyState"
+import { Skeleton } from "@/components/ui/Skeleton"
 import { ROUTES } from "@/constants/routes"
 import { useCart } from "@/hooks/useCart"
 import type { CartItem } from "@/types/cart"
@@ -84,9 +86,20 @@ export default function CartPage() {
     if (isLoading && items.length === 0) {
         return (
             <div className="container mx-auto px-4 py-24 lg:px-8">
+                <div className="mb-10">
+                    <Skeleton className="h-12 w-48 rounded-none mb-2" />
+                    <Skeleton className="h-4 w-32 rounded-none" />
+                </div>
                 <div className="space-y-4">
                     {Array.from({ length: 3 }).map((_, index) => (
-                        <div key={index} className="h-36 animate-pulse bg-secondary" />
+                        <div key={index} className="flex gap-4 border-b border-border pb-6">
+                            <Skeleton className="aspect-[3/4] w-28 rounded-none" />
+                            <div className="flex-1 space-y-3">
+                                <Skeleton className="h-6 w-1/3 rounded-none" />
+                                <Skeleton className="h-4 w-1/4 rounded-none" />
+                                <Skeleton className="h-10 w-24 rounded-none" />
+                            </div>
+                        </div>
                     ))}
                 </div>
             </div>
@@ -96,16 +109,16 @@ export default function CartPage() {
     if (items.length === 0) {
         return (
             <div className="container mx-auto px-4 py-24 lg:px-8">
-                <div className="mx-auto max-w-2xl space-y-6 text-center">
-                    <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground opacity-40" />
-                    <h1 className="font-serif text-4xl md:text-5xl">Your cart is empty</h1>
-                    <p className="text-lg text-muted-foreground">
-                        Add products to your cart and review them here before checkout.
-                    </p>
-                    <Button asChild size="lg">
-                        <Link href={ROUTES.SHOP.PRODUCTS}>Continue shopping</Link>
-                    </Button>
-                </div>
+                <EmptyState
+                    icon={<ShoppingBag className="h-10 w-10 text-muted-foreground opacity-40" />}
+                    title="Your cart is empty"
+                    description="Add products to your cart and review them here before checkout."
+                    action={
+                        <Button asChild size="lg" className="rounded-none">
+                            <Link href={ROUTES.SHOP.PRODUCTS}>Continue shopping</Link>
+                        </Button>
+                    }
+                />
             </div>
         )
     }
@@ -242,6 +255,7 @@ export default function CartPage() {
                                 variant="outline"
                                 onClick={() => setCurrentPage(page => Math.max(1, page - 1))}
                                 disabled={safeCurrentPage === 1}
+                                className="rounded-none"
                             >
                                 Previous
                             </Button>
@@ -253,6 +267,7 @@ export default function CartPage() {
                                 variant="outline"
                                 onClick={() => setCurrentPage(page => Math.min(totalPages, page + 1))}
                                 disabled={safeCurrentPage === totalPages}
+                                className="rounded-none"
                             >
                                 Next
                             </Button>

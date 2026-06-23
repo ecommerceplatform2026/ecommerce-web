@@ -104,18 +104,22 @@ export const CART_ENDPOINTS = {
 } as const
 
 // ============================================================
-// ORDERS  (FR11, FR13, FR14)
+// CHECKOUT (FR11, FR12)
 // ============================================================
-// TODO: backend not implemented yet
 
 export const CHECKOUT_ENDPOINTS = {
-    CREATE: '/api/checkout',
+    PROCESS: '/api/checkout',                          // POST — checkout
 } as const
+
+// ============================================================
+// ORDERS  (FR13, FR14)
+// ============================================================
 
 export const ORDER_ENDPOINTS = {
     // User
     GET_ALL: '/api/orders',                           // GET - order history
     GET_BY_ID: (id: string) => `/api/orders/${id}`,     // GET - order detail
+    CANCEL: (id: string) => `/api/orders/${id}/cancel`, // POST - cancel order
 
     // Admin
     ADMIN_GET_ALL: '/api/orders',
