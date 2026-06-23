@@ -1,24 +1,56 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orderService } from '@/services/orderService'
-import type { OrderQueryParams } from '@/types/order'
+import { useCart } from '@/hooks/useCart'
+import type { CheckoutRequest, CheckoutResponse, OrderResponse } from '@/types/order'
 
 export const orderKeys = {
     all: ['orders'] as const,
-    list: (params: OrderQueryParams) => ['orders', 'list', params] as const,
-    detail: (id: string) => ['orders', 'detail', id] as const,
+    lists: () => [...orderKeys.all, 'list'] as const,
+    list: (params: Record<string, unknown>) => [...orderKeys.lists(), params] as const,
+    details: () => [...orderKeys.all, 'detail'] as const,
+    detail: (id: string) => [...orderKeys.details(), id] as const,
 }
 
-export function useOrders(params: OrderQueryParams) {
-    return useQuery({
-        queryKey: orderKeys.list(params),
-        queryFn: () => orderService.getMyOrders(params),
+export function useCheckout() {
+    const queryClient = useQueryClient()
+    const { clearCart } = useCart()
+
+    return useMutation({
+        mutationFn: (payload: CheckoutRequest) => orderService.checkout(payload),
+        onSuccess: (data) => {
+            // Invalidate orders and cart
+            queryClient.invalidateQueries({ queryKey: orderKeys.all })
+            queryClient.invalidateQueries({ queryKey: ['cart'] })
+            // Clear local cart state
+            clearCart()
+        },
     })
 }
 
-export function useOrder(id: string) {
+export function useOrdersList(params?: { page?: number; pageSize?: number; status?: number }) {
+    const safeParams = params ?? { page: 1, pageSize: 10 }
+    return useQuery({
+        queryKey: orderKeys.list(safeParams),
+        queryFn: () => orderService.getOrders(safeParams),
+    })
+}
+
+export function useOrderDetail(id: string) {
     return useQuery({
         queryKey: orderKeys.detail(id),
-        queryFn: () => orderService.getById(id),
+        queryFn: () => orderService.getOrderById(id),
         enabled: !!id,
+    })
+}
+
+export function useCancelOrder() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (id: string) => orderService.cancelOrder(id),
+        onSuccess: (_, id) => {
+            queryClient.invalidateQueries({ queryKey: orderKeys.all })
+            queryClient.invalidateQueries({ queryKey: orderKeys.detail(id) })
+        },
     })
 }
