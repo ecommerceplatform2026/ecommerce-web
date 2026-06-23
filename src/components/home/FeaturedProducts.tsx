@@ -16,7 +16,7 @@ export function FeaturedProducts() {
         .slice(0, 4)
 
     return (
-        <section className="py-24 px-4 lg:px-8">
+        <section className="py-16 lg:py-20 px-4 lg:px-8">
             <div className="container mx-auto">
                 <div className="flex items-end justify-between mb-16">
                     <div>
@@ -53,7 +53,7 @@ export function FeaturedProducts() {
                 <div className="flex justify-center mt-12 md:hidden">
                     <Link
                         href={ROUTES.SHOP.PRODUCTS}
-                        className="flex items-center gap-2 text-sm tracking-wide border border-foreground px-8 py-3 hover:bg-foreground hover:text-background transition-colors"
+                        className="flex items-center gap-2 text-sm tracking-wide border border-foreground px-8 py-3 min-h-[44px] hover:bg-foreground hover:text-background transition-colors"
                     >
                         View all products
                         <ArrowRight className="h-4 w-4" />

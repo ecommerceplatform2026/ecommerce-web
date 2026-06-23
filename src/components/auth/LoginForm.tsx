@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import toast from 'react-hot-toast'
+import { Toast } from '@/components/ui/Toast'
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -58,7 +58,7 @@ export function LoginForm({ redirectTo }: Props) {
   useEffect(() => {
     if (isPageReady && redirectTo && !toastShownRef.current) {
       toastShownRef.current = true
-      toast.error("Please sign in to continue.")
+      Toast("Please sign in to continue.", 'error')
     }
   }, [isPageReady, redirectTo])
 
@@ -74,14 +74,14 @@ export function LoginForm({ redirectTo }: Props) {
     setIsLoading(true)
     try {
       const user = await login(data.email, data.password)
-      toast.success("Welcome back to ATELIER.")
+      Toast("Welcome back to ATELIER.")
       if (user.role === UserRole.Admin && !redirectTo) {
         router.push(ROUTES.ADMIN.DASHBOARD)
       } else {
         router.push(safeRedirect)
       }
     } catch (err) {
-      toast.error((err as ApiError).message ?? 'Invalid email or password. Please try again.')
+      Toast((err as ApiError).message ?? 'Invalid email or password. Please try again.', 'error')
     } finally {
       setIsLoading(false)
     }

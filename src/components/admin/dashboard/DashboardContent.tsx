@@ -6,7 +6,6 @@ import { DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react'
 import { useDashboardSummary, useRevenueTrend, usePaymentMethods } from '@/hooks/useDashboard'
 import { KpiCard } from '@/components/admin/dashboard/KpiCard'
 import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
-import { TopProductsChart } from '@/components/admin/dashboard/TopProductsChart'
 import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
 import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
 import { DateRangeFilter } from '@/components/admin/dashboard/DateRangeFilter'
@@ -104,22 +103,16 @@ export function DashboardContent() {
                     />
                 </div>
 
-                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-2">
-                        <RevenueChart
-                            data={revenueTrend}
-                            isLoading={isRevenueLoading}
-                        />
-                    </div>
-                    <OrderStatusChart
-                        data={summary?.orderStatusSummary}
-                        isLoading={isLoading}
+                <div className="mb-8">
+                    <RevenueChart
+                        data={revenueTrend}
+                        isLoading={isRevenueLoading}
                     />
                 </div>
 
                 <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <TopProductsChart
-                        data={summary?.topSellingProducts}
+                    <OrderStatusChart
+                        data={summary?.orderStatusSummary}
                         isLoading={isLoading}
                     />
                     <PaymentMethodChart

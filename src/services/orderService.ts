@@ -1,16 +1,12 @@
 import axiosInstance from '@/lib/axios'
 import { CHECKOUT_ENDPOINTS, ORDER_ENDPOINTS } from '@/constants/api'
 import type { ApiResponse, PaginatedResponse } from '@/types/api'
-import type {
-    CheckoutRequest,
-    CheckoutResponse,
-    OrderResponse,
-} from '@/types/order'
+import type { CheckoutRequest, CheckoutResponse, OrderResponse } from '@/types/order'
 
 export const orderService = {
     checkout: async (payload: CheckoutRequest): Promise<CheckoutResponse> => {
         const res = await axiosInstance.post<ApiResponse<CheckoutResponse>>(
-            CHECKOUT_ENDPOINTS.PROCESS,
+            CHECKOUT_ENDPOINTS.CREATE,
             payload,
         )
         return res.data.data

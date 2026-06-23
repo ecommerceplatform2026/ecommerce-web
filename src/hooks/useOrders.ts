@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orderService } from '@/services/orderService'
 import { useCart } from '@/hooks/useCart'
-import type { CheckoutRequest, CheckoutResponse, OrderResponse } from '@/types/order'
+import type { CheckoutRequest } from '@/types/order'
 
 export const orderKeys = {
     all: ['orders'] as const,
@@ -17,11 +17,9 @@ export function useCheckout() {
 
     return useMutation({
         mutationFn: (payload: CheckoutRequest) => orderService.checkout(payload),
-        onSuccess: (data) => {
-            // Invalidate orders and cart
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: orderKeys.all })
             queryClient.invalidateQueries({ queryKey: ['cart'] })
-            // Clear local cart state
             clearCart()
         },
     })
@@ -30,7 +28,7 @@ export function useCheckout() {
 export function useOrdersList(params?: { page?: number; pageSize?: number; status?: number }) {
     const safeParams = params ?? { page: 1, pageSize: 10 }
     return useQuery({
-        queryKey: orderKeys.list(safeParams),
+        queryKey: orderKeys.list(safeParams as Record<string, unknown>),
         queryFn: () => orderService.getOrders(safeParams),
     })
 }

@@ -1,16 +1,17 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
-import toast from "react-hot-toast"
+import { Toast } from '@/components/ui/Toast'
 import { AlertTriangle, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import type { CartItem } from "@/types/cart"
 import { Button } from "@/components/ui/Button"
+import { CartItemImage } from "@/components/cart/CartItemImage"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { ROUTES } from "@/constants/routes"
 import { useCart } from "@/hooks/useCart"
-import type { CartItem } from "@/types/cart"
+
 
 const ITEMS_PER_PAGE = 5
 const FREE_SHIPPING_THRESHOLD = 2_000_000
@@ -42,17 +43,21 @@ export default function CartPage() {
         [items, safeCurrentPage],
     )
 
+    const hasInvalidItems = useMemo(
+        () => items.some(item => item.isOutOfStock || item.quantity > item.stock),
+        [items],
+    )
     const shipping = items.length === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
     const total = totalPrice + shipping
 
     async function handleQuantityChange(item: CartItem, quantity: number) {
         if (quantity < 1) return
         if (item.isOutOfStock || item.stock <= 0) {
-            toast.error("This variant is out of stock.")
+            Toast("This variant is out of stock.", 'error')
             return
         }
         if (quantity > item.stock) {
-            toast.error(`Only ${item.stock} item(s) available for this variant.`)
+            Toast(`Only ${item.stock} item(s) available for this variant.`, 'error')
             return
         }
 
@@ -60,7 +65,7 @@ export default function CartPage() {
         try {
             await updateQuantity(item.variantId, quantity)
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Unable to update cart item.")
+            Toast(err instanceof Error ? err.message : "Unable to update cart item.", 'error')
         } finally {
             setPendingVariantId(null)
         }
@@ -70,14 +75,14 @@ export default function CartPage() {
         setPendingVariantId(item.variantId)
         try {
             await removeItem(item.variantId)
-            toast.success("Removed from cart.")
+            Toast("Removed from cart.")
             setCurrentPage(page => {
                 const nextCount = Math.max(0, items.length - 1)
                 const nextPages = Math.max(1, Math.ceil(nextCount / ITEMS_PER_PAGE))
                 return Math.min(page, nextPages)
             })
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : "Unable to remove cart item.")
+            Toast(err instanceof Error ? err.message : "Unable to remove cart item.", 'error')
         } finally {
             setPendingVariantId(null)
         }
@@ -140,7 +145,7 @@ export default function CartPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
-                <div className="space-y-6">
+                <div className="space-y-6 pb-28 lg:pb-0">
                     {paginatedItems.map(item => {
                         const lineTotal = item.price * item.quantity
                         const isPending = pendingVariantId === item.variantId
@@ -150,20 +155,9 @@ export default function CartPage() {
                         return (
                             <div
                                 key={item.variantId}
-                                className="grid gap-4 border-b border-border pb-6 sm:grid-cols-[112px_minmax(0,1fr)]"
+                                className="flex flex-col sm:grid sm:grid-cols-[112px_minmax(0,1fr)] gap-4 border-b border-border pb-6"
                             >
-                                <Link
-                                    href={ROUTES.SHOP.PRODUCT_DETAIL(item.productId)}
-                                    className="relative aspect-[3/4] w-28 overflow-hidden bg-secondary"
-                                >
-                                    <Image
-                                        src={item.imageUrl || "/placeholder.svg"}
-                                        alt={item.name}
-                                        fill
-                                        sizes="112px"
-                                        className="object-cover"
-                                    />
-                                </Link>
+                                <CartItemImage item={item} />
 
                                 <div className="min-w-0 space-y-4">
                                     <div className="flex items-start justify-between gap-4">
@@ -210,12 +204,12 @@ export default function CartPage() {
                                                 size="icon"
                                                 onClick={() => handleQuantityChange(item, item.quantity - 1)}
                                                 disabled={item.quantity <= 1 || isPending}
-                                                className="h-10 w-10 rounded-none"
+                                                className="min-h-[44px] min-w-[44px] rounded-none"
                                                 aria-label={`Decrease ${item.name} quantity`}
                                             >
                                                 <Minus className="h-4 w-4" />
                                             </Button>
-                                            <div className="flex h-10 w-14 items-center justify-center border-x border-border text-sm font-medium">
+                                            <div className="flex h-[44px] w-14 items-center justify-center border-x border-border text-sm font-medium">
                                                 {item.quantity}
                                             </div>
                                             <Button
@@ -225,7 +219,7 @@ export default function CartPage() {
                                                 onClick={() => handleQuantityChange(item, item.quantity + 1)}
                                                 disabled={cannotIncrease}
                                                 aria-disabled={isAtStockLimit || cannotIncrease}
-                                                className={`h-10 w-10 rounded-none ${
+                                                className={`min-h-[44px] min-w-[44px] rounded-none ${
                                                     isAtStockLimit ? "opacity-50" : ""
                                                 }`}
                                                 aria-label={`Increase ${item.name} quantity`}
@@ -304,8 +298,15 @@ export default function CartPage() {
                             </div>
                         </div>
 
-                        <Button asChild size="lg" className="h-14 w-full text-base">
-                            <Link href={ROUTES.CHECKOUT.INDEX}>Proceed to checkout</Link>
+                        <Button
+                            asChild
+                            size="lg"
+                            className="h-14 w-full text-base"
+                            disabled={hasInvalidItems}
+                        >
+                            <Link href={hasInvalidItems ? '#' : ROUTES.CHECKOUT.INDEX}>
+                                {hasInvalidItems ? 'Resolve stock issues' : 'Proceed to checkout'}
+                            </Link>
                         </Button>
 
                         <Button asChild variant="outline" size="lg" className="w-full bg-transparent">
@@ -313,6 +314,21 @@ export default function CartPage() {
                         </Button>
                     </div>
                 </aside>
+            </div>
+
+            {/* Mobile sticky checkout bar */}
+            <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-background p-4 lg:hidden">
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <p className="text-sm text-muted-foreground">{itemCount} item(s)</p>
+                        <p className="text-lg font-medium">{formatCurrency(total)}</p>
+                    </div>
+                    <Button asChild size="lg" className="h-14 shrink-0 text-base" disabled={hasInvalidItems}>
+                        <Link href={hasInvalidItems ? '#' : ROUTES.CHECKOUT.INDEX}>
+                            {hasInvalidItems ? 'Resolve stock issues' : 'Proceed to checkout'}
+                        </Link>
+                    </Button>
+                </div>
             </div>
         </div>
     )

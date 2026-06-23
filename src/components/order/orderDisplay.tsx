@@ -69,7 +69,7 @@ export function getOrderStatusTone(status: OrderStatus) {
     if (status === OrderStatus.Completed) return 'border-emerald-200 bg-emerald-50'
     if (status === OrderStatus.Delivered) return 'border-green-200 bg-green-50'
     if (status === OrderStatus.Cancelled) return 'border-red-200 bg-red-50'
-    if (status === OrderStatus.Returned) return 'border-gray-200 bg-gray-50'
+    if (status === OrderStatus.Returned) return 'border-border bg-muted'
     if (status === OrderStatus.Shipping) return 'border-indigo-200 bg-indigo-50'
     if (status === OrderStatus.Processing) return 'border-purple-200 bg-purple-50'
     if (status === OrderStatus.Confirmed) return 'border-blue-200 bg-blue-50'

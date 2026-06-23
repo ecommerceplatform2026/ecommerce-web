@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, CheckCircle2, CreditCard, Home, MapPin, Phone, User } from "lucide-react"
+import { AlertCircle, CheckCircle2, MapPin, Phone, User } from "lucide-react"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { useProfile } from "@/hooks/useProfile"
@@ -15,7 +15,7 @@ import type { ApiError } from "@/types/api"
 
 export function CheckoutForm() {
     const router = useRouter()
-    const { address, profile, isLoading: isProfileLoading, error: profileError } = useProfile()
+    const { address, isLoading: isProfileLoading, error: profileError } = useProfile()
     const checkoutMutation = useCheckout()
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
     const [pointsToRedeem, setPointsToRedeem] = useState<number>(0)

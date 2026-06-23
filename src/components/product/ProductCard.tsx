@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { ShoppingBag, Heart } from "lucide-react"
@@ -8,7 +7,8 @@ import { Button } from "@/components/ui/Button"
 import { ROUTES } from "@/constants/routes"
 import { useWishlist } from "@/hooks/useWishlist"
 import { useCart } from "@/hooks/useCart"
-import toast from "react-hot-toast"
+import { getProductImage, useImageErrorFallback } from "@/utils/imageHelpers"
+import { Toast } from '@/components/ui/Toast'
 import type { Product } from "@/types/product"
 
 interface ProductCardProps {
@@ -16,10 +16,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-    const [isHovered, setIsHovered] = useState(false)
     const { toggleItem, isInWishlist } = useWishlist()
     const { addItem } = useCart()
     const inWishlist = isInWishlist(product.id)
+    const [imgSrc, onImgError] = useImageErrorFallback(getProductImage(product.imageUrl))
 
     const firstVariant = product.variants?.[0]
 
@@ -28,7 +28,7 @@ export function ProductCard({ product }: ProductCardProps) {
         e.stopPropagation()
         if (!firstVariant) return
         if (firstVariant.isOutOfStock || firstVariant.stock <= 0) {
-            toast.error("Product is out of stock")
+            Toast("Product is out of stock", 'error')
             return
         }
 
@@ -47,9 +47,9 @@ export function ProductCard({ product }: ProductCardProps) {
                 isOutOfStock: firstVariant.isOutOfStock,
                 imageUrl: product.imageUrl ?? null,
             })
-            toast.success('Added to cart')
+            Toast(`Added ${product.name}`)
         } catch (error) {
-            toast.error(typeof error === 'string' ? error : 'Unable to add product to cart.')
+            Toast(typeof error === 'string' ? error : 'Unable to add product to cart.', 'error')
         }
     }
 
@@ -57,48 +57,40 @@ export function ProductCard({ product }: ProductCardProps) {
         e.preventDefault()
         e.stopPropagation()
         toggleItem(product)
-        toast.success(inWishlist ? "Removed from wishlist" : "Added to wishlist")
+        Toast(inWishlist ? "Removed from wishlist" : "Added to wishlist")
     }
 
     return (
         <Link
             href={ROUTES.SHOP.PRODUCT_DETAIL(product.id)}
             className="group block"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
-            <div className="relative aspect-[3/4] mb-4 overflow-hidden bg-secondary">
+            <div className="relative aspect-[3/4] mb-4 overflow-hidden bg-muted">
                 <Image
-                    src="/placeholder.svg"
+                    src={imgSrc}
                     alt={product.name}
                     fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className={`object-cover transition-opacity duration-500 ${isHovered ? "opacity-0" : "opacity-100"}`}
+                    loading="lazy"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    className="object-cover"
+                    onError={onImgError}
                 />
 
-                <div
-                    className={`absolute bottom-4 left-4 right-4 flex gap-2 transition-all duration-300 ${
-                        isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                    }`}
+                <Button
+                    onClick={handleWishlist}
+                    size="icon"
+                    className={`absolute top-3 right-3 min-h-[44px] min-w-[44px] border border-border rounded-none ${inWishlist ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground hover:bg-background/90"}`}
                 >
+                    <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
+                </Button>
+                <div className="absolute bottom-4 left-0 right-0 flex px-6">
                     <Button
                         onClick={handleQuickAdd}
                         disabled={!firstVariant || firstVariant.isOutOfStock}
-                        className="flex-1 h-12 bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50"
+                        className="w-full min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm flex items-center gap-2"
                     >
-                        <ShoppingBag className="h-4 w-4" />
-                        Add to cart
-                    </Button>
-                    <Button
-                        onClick={handleWishlist}
-                        size="icon"
-                        className={`h-12 w-12 border border-border rounded-none ${
-                            inWishlist
-                                ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                                : "bg-background text-foreground hover:bg-background/90"
-                        }`}
-                    >
-                        <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
+                        <ShoppingBag className="h-4 w-4 shrink-0" />
+                        <span>Add to cart</span>
                     </Button>
                 </div>
             </div>
@@ -107,7 +99,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 <p className="text-xs tracking-widest text-muted-foreground uppercase">
                     {product.categoryName ?? ""}
                 </p>
-                <h3 className="font-serif text-xl group-hover:text-muted-foreground transition-colors">
+                <h3 className="font-serif text-xl truncate group-hover:text-muted-foreground transition-colors">
                     {product.name}
                 </h3>
                 <p className="text-lg">

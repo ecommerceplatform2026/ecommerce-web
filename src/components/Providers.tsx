@@ -18,7 +18,13 @@ export function Providers({ children }: { children: ReactNode }) {
                     <Header />
                     {children}
                     <Footer />
-                    <Toaster />
+                    <Toaster
+                        position="top-right"
+                        toastOptions={{
+                            duration: 3500,
+                            style: { borderRadius: 0, fontSize: "0.875rem" },
+                        }}
+                    />
                 </AuthProvider>
             </QueryClientProvider>
         </Provider>

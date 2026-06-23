@@ -1,19 +1,24 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus } from "lucide-react"
-import toast from "react-hot-toast"
+import { AlertCircle, Check, Minus, PackageCheck, PackageX, Plus, Heart } from "lucide-react"
+import { Toast } from '@/components/ui/Toast'
 import { Button } from "@/components/ui/Button"
+import { Spinner } from "@/components/ui/Spinner"
+import { ROUTES } from "@/constants/routes"
 import { ProductStatus } from "@/constants/enums"
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
+import { useWishlist } from "@/hooks/useWishlist"
 import { cartService } from "@/services/cartService"
 import { formatPrice } from "@/utils/formatPrice"
-import type { ApiError } from "@/types/api"
-import type { CartItem } from "@/types/cart"
-import type { ProductDetail, ProductDetailVariant } from "@/types/product"
 import { ProductImageGallery } from "./ProductImageGallery"
 import { ReviewSection } from "@/components/review/ReviewSection"
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs"
+import type { CartItem } from "@/types/cart"
+import type { ProductDetail, ProductDetailVariant } from "@/types/product"
+import type { ApiError } from "@/types/api"
+
 
 interface ProductDetailsProps {
     product: ProductDetail
@@ -94,7 +99,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
     const [added, setAdded] = useState(false)
     const [isAdding, setIsAdding] = useState(false)
     const { items, addItem, removeItem, updateQuantity } = useCart()
+    const { toggleItem, isInWishlist } = useWishlist()
     const { isAuthenticated } = useAuth()
+
+    const inWishlist = isInWishlist(product.id)
 
     const selectedVariant = useMemo(
         () => findVariant(variants, selectedSize, selectedColor, hasSizes, hasColors),
@@ -135,17 +143,17 @@ export function ProductDetails({ product }: ProductDetailsProps) {
 
     async function handleAddToCart() {
         if (needsVariantSelection) {
-            toast.error("Please select size and color")
+            Toast("Please select size and color", 'error')
             return
         }
 
         if (!selectedVariant) {
-            toast.error("This product has no available variant")
+            Toast("This product has no available variant", 'error')
             return
         }
 
         if (isInactive || isOutOfStock) {
-            toast.error("This product is not available")
+            Toast("This product is not available", 'error')
             return
         }
 
@@ -171,7 +179,7 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 await cartService.addItem(selectedVariant.id, finalQuantity)
             }
 
-            toast.success(`Added ${finalQuantity} x ${product.name} to cart`)
+            Toast(`Added ${finalQuantity} x ${product.name}`)
             setAdded(true)
             setTimeout(() => setAdded(false), 1500)
         } catch (error) {
@@ -182,20 +190,46 @@ export function ProductDetails({ product }: ProductDetailsProps) {
             }
 
             const apiError = error as ApiError
-            toast.error(apiError.message ?? "Could not add product to cart")
+            Toast(apiError.message ?? "Could not add product to cart", 'error')
         } finally {
             setIsAdding(false)
         }
     }
 
     return (
-        <div className="container mx-auto px-4 py-12 lg:px-8 lg:py-16">
+        <div className="container mx-auto px-4 py-6 lg:px-8 lg:py-16">
+            <Breadcrumbs
+                items={[
+                    { label: "Home", href: ROUTES.HOME },
+                    { label: "Products", href: ROUTES.SHOP.PRODUCTS },
+                    { label: product.name },
+                ]}
+                className="mb-6 lg:hidden"
+            />
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-16">
-                <ProductImageGallery images={product.images} productName={product.name} />
+                    <div className="relative">
+                        <ProductImageGallery images={product.images} productName={product.name} />
+                        <Button
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleItem(product); Toast(inWishlist ? "Removed from wishlist" : "Added to wishlist"); }}
+                            size="icon"
+                            className={`absolute top-5 right-5 min-h-[44px] min-w-[44px] border border-border rounded-none ${inWishlist ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-background text-foreground hover:bg-background/90"}`}
+                        >
+                            <Heart className={`h-4 w-4 ${inWishlist ? "fill-current" : ""}`} />
+                        </Button>
+                    </div>
 
                 <section className="space-y-8">
                     <div>
-                        <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
+                        <Breadcrumbs
+                            items={[
+                                { label: "Home", href: ROUTES.HOME },
+                                { label: "Products", href: ROUTES.SHOP.PRODUCTS },
+                                { label: product.name },
+                            ]}
+                            className="hidden lg:flex"
+                        />
+
+                    <p className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">
                             {product.categoryName ?? "Product"}
                         </p>
                         <h1 className="mb-4 text-balance font-serif text-4xl md:text-5xl">
@@ -385,7 +419,10 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                                 Added to cart
                             </>
                         ) : isAdding ? (
-                            "Adding..."
+                            <>
+                                <Spinner size="sm" />
+                                Adding...
+                            </>
                         ) : needsVariantSelection ? (
                             "Select variant"
                         ) : isOutOfStock ? (

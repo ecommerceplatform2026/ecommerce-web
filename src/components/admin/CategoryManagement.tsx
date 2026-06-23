@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { AlertTriangle, Edit2, FolderTree, Plus, Search, Trash2 } from "lucide-react"
-import toast from "react-hot-toast"
+import { Toast } from '@/components/ui/Toast'
 import { Button } from "@/components/ui/Button"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Input } from "@/components/ui/Input"
@@ -116,11 +116,11 @@ export function CategoryManagement() {
         mutationFn: (payload: CategoryFormValues) => categoryService.create(payload),
         onSuccess: () => {
             invalidateCategories()
-            toast.success("Category created successfully.")
+            Toast("Category created successfully.")
             closeFormModal()
         },
         onError: error => {
-            toast.error(getApiErrorMessage(error))
+            Toast(getApiErrorMessage(error), 'error')
         },
     })
 
@@ -129,11 +129,11 @@ export function CategoryManagement() {
             categoryService.update(id, payload),
         onSuccess: () => {
             invalidateCategories()
-            toast.success("Category updated successfully.")
+            Toast("Category updated successfully.")
             closeFormModal()
         },
         onError: error => {
-            toast.error(getApiErrorMessage(error))
+            Toast(getApiErrorMessage(error), 'error')
         },
     })
 
@@ -141,11 +141,11 @@ export function CategoryManagement() {
         mutationFn: (id: string) => categoryService.delete(id),
         onSuccess: () => {
             invalidateCategories()
-            toast.success("Category deleted successfully.")
+            Toast("Category deleted successfully.")
             setDeleteTarget(null)
         },
         onError: error => {
-            toast.error(getApiErrorMessage(error))
+            Toast(getApiErrorMessage(error), 'error')
         },
     })
 

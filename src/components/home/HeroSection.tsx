@@ -16,22 +16,22 @@ export function HeroSection() {
 
             <div className="container mx-auto px-4 lg:px-8 relative z-10">
                 <div className="max-w-3xl">
-                    <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase mb-8">
+                    <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase mb-4 md:mb-8">
                         Fall Winter 2026 Collection
                     </p>
 
-                    <h1 className="font-serif text-6xl md:text-7xl lg:text-8xl xl:text-9xl leading-[0.9] mb-10 text-balance">
+                    <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl xl:text-9xl leading-[0.9] mb-6 md:mb-10 text-balance">
                         Style
                         <br />
                         <span className="italic text-muted-foreground">Is a Language</span>
                     </h1>
 
-                    <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-12">
+                    <p className="text-base md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-8 md:mb-12">
                         Refined in every stitch, elegant in every moment.
                         Explore premium fashion collections made for you.
                     </p>
 
-                    <div className="flex flex-wrap gap-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                         <Button asChild size="lg" className="h-14 px-10 text-base rounded-none">
                             <Link href={ROUTES.SHOP.PRODUCTS}>
                                 Shop Now

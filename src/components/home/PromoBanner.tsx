@@ -25,7 +25,7 @@ const banners = [
 
 export function PromoBanner() {
     return (
-        <section className="py-8 px-4 lg:px-8">
+        <section className="py-16 lg:py-20 px-4 lg:px-8">
             <div className="container mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {banners.map((banner, i) => (

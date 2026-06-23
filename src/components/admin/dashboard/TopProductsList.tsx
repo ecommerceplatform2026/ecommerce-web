@@ -15,7 +15,7 @@ interface TopProductsListProps {
 
 const RANK_BADGES = [
     { className: 'bg-yellow-400 text-black', label: '1' },
-    { className: 'bg-gray-300 text-gray-700', label: '2' },
+    { className: 'bg-muted text-foreground', label: '2' },
     { className: 'bg-amber-600 text-white', label: '3' },
 ]
 

@@ -76,8 +76,10 @@ export function ProductFilter({
                                 max: localMax,
                             })
                         }
+                        onBlur={handleApplyPrice}
                         onKeyDown={e => {
                             if (e.key === '-') e.preventDefault()
+                            if (e.key === 'Enter') handleApplyPrice()
                         }}
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
@@ -95,15 +97,14 @@ export function ProductFilter({
                                 max: normalizePriceInput(e.target.value),
                             })
                         }
+                        onBlur={handleApplyPrice}
                         onKeyDown={e => {
                             if (e.key === '-') e.preventDefault()
+                            if (e.key === 'Enter') handleApplyPrice()
                         }}
                         className="w-full border border-input rounded-md px-3 py-1.5 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-ring"
                     />
                 </div>
-                <Button variant="outline" size="sm" className="w-full" onClick={handleApplyPrice}>
-                    Apply
-                </Button>
             </div>
 
             {materials.length > 0 && (
@@ -111,19 +112,20 @@ export function ProductFilter({
                     <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
                         Material
                     </h3>
-                    <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
                         {materials.map(material => (
-                            <label key={material} className="flex items-center gap-2 cursor-pointer text-sm">
-                                <input
-                                    type="radio"
-                                    name="material-filter"
-                                    checked={filters.material === material}
-                                    onChange={() =>
-                                        onUpdate({ material: filters.material === material ? '' : material })
-                                    }
-                                />
+                            <button
+                                key={material}
+                                type="button"
+                                onClick={() => onUpdate({ material: filters.material === material ? '' : material })}
+                                className={`text-left px-3 py-1 text-sm border transition-colors ${
+                                    filters.material === material
+                                        ? 'border-foreground bg-foreground text-background'
+                                        : 'border-border hover:border-foreground'
+                                }`}
+                            >
                                 {material}
-                            </label>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -134,19 +136,20 @@ export function ProductFilter({
                     <h3 className="text-sm font-semibold mb-3 uppercase tracking-wide text-muted-foreground">
                         Color
                     </h3>
-                    <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
                         {colors.map(color => (
-                            <label key={color} className="flex items-center gap-2 cursor-pointer text-sm">
-                                <input
-                                    type="radio"
-                                    name="color-filter"
-                                    checked={filters.color === color}
-                                    onChange={() =>
-                                        onUpdate({ color: filters.color === color ? '' : color })
-                                    }
-                                />
+                            <button
+                                key={color}
+                                type="button"
+                                onClick={() => onUpdate({ color: filters.color === color ? '' : color })}
+                                className={`text-left px-3 py-1 text-sm border transition-colors ${
+                                    filters.color === color
+                                        ? 'border-foreground bg-foreground text-background'
+                                        : 'border-border hover:border-foreground'
+                                }`}
+                            >
                                 {color}
-                            </label>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -163,7 +166,7 @@ export function ProductFilter({
                                 key={size}
                                 type="button"
                                 onClick={() => onUpdate({ size: filters.size === size ? '' : size })}
-                                className={`px-3 py-1 text-sm border transition-colors ${
+                                className={`text-left px-3 py-1 text-sm border transition-colors ${
                                     filters.size === size
                                         ? 'border-foreground bg-foreground text-background'
                                         : 'border-border hover:border-foreground'

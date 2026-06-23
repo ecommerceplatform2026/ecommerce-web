@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { CheckCircle2, ExternalLink, PackageSearch, ShoppingBag } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -11,7 +12,7 @@ function formatCurrency(value: number) {
     return `${value.toLocaleString("vi-VN")} VND`
 }
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
     const searchParams = useSearchParams()
     const orderId = searchParams.get("orderId")
     const orderCode = searchParams.get("orderCode")
@@ -37,26 +38,26 @@ export default function CheckoutSuccessPage() {
                 <div className="mx-auto max-w-md rounded-md border border-border p-4 text-left text-sm">
                     {orderCode && (
                         <div className="flex justify-between gap-4 py-2">
-                            <span className="text-muted-foreground">Order code</span>
-                            <span className="font-medium">{orderCode}</span>
+                            <span className="shrink-0 text-muted-foreground">Order code</span>
+                            <span className="truncate font-medium">{orderCode}</span>
                         </div>
                     )}
                     {orderId && (
                         <div className="flex justify-between gap-4 py-2">
-                            <span className="text-muted-foreground">Order ID</span>
-                            <span className="max-w-[220px] truncate font-medium">{orderId}</span>
+                            <span className="shrink-0 text-muted-foreground">Order ID</span>
+                            <span className="truncate font-medium">{orderId}</span>
                         </div>
                     )}
                     {paymentMethod && (
                         <div className="flex justify-between gap-4 py-2">
-                            <span className="text-muted-foreground">Payment</span>
-                            <span className="font-medium">{paymentMethod}</span>
+                            <span className="shrink-0 text-muted-foreground">Payment</span>
+                            <span className="truncate font-medium">{paymentMethod}</span>
                         </div>
                     )}
                     {Number.isFinite(totalAmount) && totalAmount > 0 && (
                         <div className="flex justify-between gap-4 py-2">
-                            <span className="text-muted-foreground">Total</span>
-                            <span className="font-medium">{formatCurrency(totalAmount)}</span>
+                            <span className="shrink-0 text-muted-foreground">Total</span>
+                            <span className="truncate font-medium">{formatCurrency(totalAmount)}</span>
                         </div>
                     )}
                 </div>
@@ -85,5 +86,13 @@ export default function CheckoutSuccessPage() {
                 </div>
             </div>
         </main>
+    )
+}
+
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={<div className="flex min-h-[70vh] items-center justify-center">Loading...</div>}>
+            <CheckoutSuccessContent />
+        </Suspense>
     )
 }

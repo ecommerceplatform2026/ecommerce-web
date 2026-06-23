@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { AlertCircle, Calendar, CreditCard, Package, XCircle } from "lucide-react"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
@@ -11,20 +12,45 @@ import { Spinner } from "@/components/ui/Spinner"
 import { Badge } from "@/components/ui/Badge"
 import { useCancelOrder, useOrdersList } from "@/hooks/useOrders"
 import { ROUTES } from "@/constants/routes"
-import {
-    ORDER_STATUS_COLOR,
-    ORDER_STATUS_LABEL,
-    PAYMENT_METHOD_LABEL,
-    OrderStatus,
-} from "@/constants/enums"
+import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus } from "@/constants/enums"
 import type { ApiError } from "@/types/api"
 import { formatPrice } from "@/utils/formatPrice"
 import { formatDate } from "@/utils/formatDate"
 
-export default function OrderHistoryPage() {
-    const [page, setPage] = useState(1)
-    const pageSize = 5
-    const { data, isLoading, error, refetch } = useOrdersList({ page, pageSize })
+const PAGE_SIZE = 5
+
+const ORDER_STATUSES = [
+    OrderStatus.Pending,
+    OrderStatus.Confirmed,
+    OrderStatus.Processing,
+    OrderStatus.Shipping,
+    OrderStatus.Delivered,
+    OrderStatus.Completed,
+    OrderStatus.Cancelled,
+    OrderStatus.Returned,
+] as const
+
+function getPageParam(value: string | null): number {
+    const page = Number(value)
+    return Number.isInteger(page) && page > 0 ? page : 1
+}
+
+function getStatusParam(value: string | null): number | undefined {
+    if (value === null || value === "") return undefined
+    const status = Number(value)
+    return ORDER_STATUSES.includes(status as OrderStatus) ? status : undefined
+}
+
+function OrderHistoryContent() {
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    const currentPage = getPageParam(searchParams.get("page"))
+    const selectedStatus = getStatusParam(searchParams.get("status"))
+    const { data, isLoading, error, refetch } = useOrdersList({
+        page: currentPage,
+        pageSize: PAGE_SIZE,
+        status: selectedStatus,
+    })
     const cancelOrderMutation = useCancelOrder()
     const [cancelingOrderId, setCancelingOrderId] = useState<string | null>(null)
 
@@ -41,6 +67,23 @@ export default function OrderHistoryPage() {
         } finally {
             setCancelingOrderId(null)
         }
+    }
+
+    function updateParams(next: { page?: number; status?: number | null }) {
+        const params = new URLSearchParams(searchParams.toString())
+
+        if (next.page !== undefined) {
+            if (next.page <= 1) params.delete("page")
+            else params.set("page", String(next.page))
+        }
+
+        if (next.status !== undefined) {
+            if (next.status === null) params.delete("status")
+            else params.set("status", String(next.status))
+        }
+
+        const query = params.toString()
+        router.push(query ? `${ROUTES.ORDERS.INDEX}?${query}` : ROUTES.ORDERS.INDEX)
     }
 
     if (isLoading) {
@@ -110,6 +153,29 @@ export default function OrderHistoryPage() {
                 <p className="text-sm text-muted-foreground mt-2">
                     Review your order history, delivery status, and tracking information.
                 </p>
+            </div>
+
+            {/* Status filter */}
+            <div className="mb-6 flex flex-wrap gap-2">
+                <Button
+                    type="button"
+                    variant={selectedStatus === undefined ? "default" : "outline"}
+                    onClick={() => updateParams({ status: null, page: 1 })}
+                    className={selectedStatus !== undefined ? "bg-transparent" : ""}
+                >
+                    All
+                </Button>
+                {ORDER_STATUSES.map(status => (
+                    <Button
+                        key={status}
+                        type="button"
+                        variant={selectedStatus === status ? "default" : "outline"}
+                        onClick={() => updateParams({ status, page: 1 })}
+                        className={selectedStatus !== status ? "bg-transparent" : ""}
+                    >
+                        {ORDER_STATUS_LABEL[status]}
+                    </Button>
+                ))}
             </div>
 
             <div className="space-y-6">
@@ -193,19 +259,19 @@ export default function OrderHistoryPage() {
                 <div className="flex justify-center items-center gap-2 mt-10">
                     <Button
                         variant="outline"
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
+                        onClick={() => updateParams({ page: Math.max(1, currentPage - 1) })}
+                        disabled={currentPage <= 1}
                         className="rounded-none"
                     >
                         Previous
                     </Button>
                     <span className="text-sm text-muted-foreground px-2">
-                        Page {page} of {totalPages}
+                        Page {currentPage} of {totalPages}
                     </span>
                     <Button
                         variant="outline"
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={page === totalPages}
+                        onClick={() => updateParams({ page: Math.min(totalPages, currentPage + 1) })}
+                        disabled={currentPage >= totalPages}
                         className="rounded-none"
                     >
                         Next
@@ -213,5 +279,13 @@ export default function OrderHistoryPage() {
                 </div>
             )}
         </div>
+    )
+}
+
+export default function OrderHistoryPage() {
+    return (
+        <Suspense fallback={<div className="container mx-auto px-4 py-12 lg:px-8 max-w-4xl">Loading...</div>}>
+            <OrderHistoryContent />
+        </Suspense>
     )
 }

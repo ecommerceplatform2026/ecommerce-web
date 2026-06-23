@@ -108,7 +108,7 @@ export const CART_ENDPOINTS = {
 // ============================================================
 
 export const CHECKOUT_ENDPOINTS = {
-    PROCESS: '/api/checkout',                          // POST — checkout
+    CREATE: '/api/checkout',                          // POST — create/checkout
 } as const
 
 // ============================================================

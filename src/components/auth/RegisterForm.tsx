@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import toast from 'react-hot-toast'
+import { Toast } from '@/components/ui/Toast'
 import { useRouter } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/Button"
@@ -68,10 +68,10 @@ export function RegisterForm() {
         email: data.email,
         password: data.password,
       })
-      toast.success("Welcome to ATELIER.")
+      Toast("Welcome to ATELIER.")
       router.push("/")
     } catch (err) {
-      toast.error((err as ApiError).message ?? 'Something went wrong. Please try again.')
+      Toast((err as ApiError).message ?? 'Something went wrong. Please try again.', 'error')
     } finally {
       setIsLoading(false)
     }
