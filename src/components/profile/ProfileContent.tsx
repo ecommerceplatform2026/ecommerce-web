@@ -15,11 +15,7 @@ import {
     Plus,
     Star,
     Home,
-    Coins,
 } from "lucide-react"
-import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
-import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
-import { usePointsBalance } from "@/hooks/usePoints"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Label } from "@/components/ui/Label"
 import { Button } from "@/components/ui/Button"
@@ -67,7 +63,6 @@ function statusConfig(status: UserStatus) {
 export function ProfileContent() {
     const { profile, address, isLoading, isUpdating, isUploadingAvatar, error, updateProfile, uploadAvatar } =
         useProfile()
-    const { data: pointsBalance, isLoading: isPointsLoading, error: pointsError } = usePointsBalance()
 
     const avatarInputRef = useRef<HTMLInputElement>(null)
 
@@ -258,42 +253,15 @@ export function ProfileContent() {
                     </div>
                 </div>
 
-                {/* Loyalty Points */}
                 <div className="mb-6">
-                    <PointsBalanceCard
-                        balance={pointsBalance?.balance ?? 0}
-                        pendingPoints={pointsBalance?.pendingPoints ?? 0}
-                        discountEquivalent={pointsBalance?.discountEquivalent ?? 0}
-                        isLoading={isPointsLoading}
-                        error={pointsError ? "Failed to load points" : null}
-                    />
+                    <a
+                        href="/loyalty"
+                        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <span className="text-yellow-500">★</span>
+                        View loyalty points & history →
+                    </a>
                 </div>
-
-                <PointsTransactionList
-                    transactions={[
-                        {
-                            id: "txn_01",
-                            type: "earned",
-                            points: 5000,
-                            description: "Order #ORD-12345",
-                            orderCode: 12345,
-                            status: "pending",
-                            createdAt: "2026-06-23T10:00:00",
-                        },
-                        {
-                            id: "txn_02",
-                            type: "redeemed",
-                            points: -10000,
-                            description: "Redeemed at checkout",
-                            orderCode: 12346,
-                            status: "completed",
-                            createdAt: "2026-06-22T15:30:00",
-                        },
-                    ]}
-                    totalPages={1}
-                    currentPage={1}
-                    onPageChange={() => {}}
-                />
 
                 <div className="grid gap-6">
                     {/* Personal information */}
