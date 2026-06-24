@@ -15,7 +15,10 @@ import {
     Plus,
     Star,
     Home,
+    Coins,
 } from "lucide-react"
+import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
+import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Label } from "@/components/ui/Label"
 import { Button } from "@/components/ui/Button"
@@ -252,6 +255,41 @@ export function ProfileContent() {
                         )}
                     </div>
                 </div>
+
+                {/* Loyalty Points */}
+                <div className="mb-6">
+                    <PointsBalanceCard
+                        availablePoints={25000}
+                        pendingPoints={5000}
+                        totalEarned={75000}
+                    />
+                </div>
+
+                <PointsTransactionList
+                    transactions={[
+                        {
+                            id: "txn_01",
+                            type: "earned",
+                            points: 5000,
+                            description: "Order #ORD-12345",
+                            orderCode: 12345,
+                            status: "pending",
+                            createdAt: "2026-06-23T10:00:00",
+                        },
+                        {
+                            id: "txn_02",
+                            type: "redeemed",
+                            points: -10000,
+                            description: "Redeemed at checkout",
+                            orderCode: 12346,
+                            status: "completed",
+                            createdAt: "2026-06-22T15:30:00",
+                        },
+                    ]}
+                    totalPages={1}
+                    currentPage={1}
+                    onPageChange={() => {}}
+                />
 
                 <div className="grid gap-6">
                     {/* Personal information */}

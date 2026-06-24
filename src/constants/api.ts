@@ -183,3 +183,12 @@ export const DASHBOARD_ENDPOINTS = {
     REVENUE_TREND: '/api/admin/dashboard/revenue-trend',
     PAYMENT_METHODS: '/api/admin/dashboard/payment-methods',
 } as const
+
+// ============================================================
+// LOYALTY / POINTS  (US 6.1)
+// ============================================================
+
+export const LOYALTY_ENDPOINTS = {
+    BALANCE: '/api/loyalty/balance',
+    TRANSACTIONS: '/api/loyalty/transactions',
+} as const
