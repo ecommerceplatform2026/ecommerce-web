@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
 import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
-import { usePointsBalance } from "@/hooks/usePoints"
+import { usePointsBalance, usePointsTransactions } from "@/hooks/usePoints"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Label } from "@/components/ui/Label"
 import { Button } from "@/components/ui/Button"
@@ -68,6 +68,9 @@ export function ProfileContent() {
     const { profile, address, isLoading, isUpdating, isUploadingAvatar, error, updateProfile, uploadAvatar } =
         useProfile()
     const { data: pointsBalance, isLoading: isPointsLoading, error: pointsError } = usePointsBalance()
+    const [pointsPage, setPointsPage] = useState(1)
+    const { data: pointsTxn, isLoading: isTxnLoading, isError: isTxnError, error: txnError, refetch: refetchTxn } =
+        usePointsTransactions({ page: pointsPage, pageSize: 10 })
 
     const avatarInputRef = useRef<HTMLInputElement>(null)
 
@@ -270,29 +273,14 @@ export function ProfileContent() {
                 </div>
 
                 <PointsTransactionList
-                    transactions={[
-                        {
-                            id: "txn_01",
-                            type: "earned",
-                            points: 5000,
-                            description: "Order #ORD-12345",
-                            orderCode: 12345,
-                            status: "pending",
-                            createdAt: "2026-06-23T10:00:00",
-                        },
-                        {
-                            id: "txn_02",
-                            type: "redeemed",
-                            points: -10000,
-                            description: "Redeemed at checkout",
-                            orderCode: 12346,
-                            status: "completed",
-                            createdAt: "2026-06-22T15:30:00",
-                        },
-                    ]}
-                    totalPages={1}
-                    currentPage={1}
-                    onPageChange={() => {}}
+                    transactions={pointsTxn?.items ?? []}
+                    totalPages={pointsTxn?.totalPages ?? 1}
+                    currentPage={pointsPage}
+                    onPageChange={setPointsPage}
+                    isLoading={isTxnLoading}
+                    isError={isTxnError}
+                    error={(txnError as { message?: string })?.message}
+                    onRetry={() => refetchTxn()}
                 />
 
                 <div className="grid gap-6">

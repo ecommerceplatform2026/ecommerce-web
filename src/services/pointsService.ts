@@ -11,11 +11,11 @@ export const pointsService = {
         return res.data.data
     },
 
-    getTransactions: async (params?: { page?: number; pageSize?: number }): Promise<PaginatedResponse<LoyaltyTransaction>> => {
+    getTransactions: async (params?: { page?: number; pageSize?: number }): Promise<PaginatedResponse<LoyaltyTransaction>['data']> => {
         const res = await axiosInstance.get<PaginatedResponse<LoyaltyTransaction>>(
             LOYALTY_ENDPOINTS.TRANSACTIONS,
             { params },
         )
-        return res.data
+        return res.data.data
     },
 }

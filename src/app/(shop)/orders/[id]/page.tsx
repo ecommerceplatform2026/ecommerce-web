@@ -4,7 +4,9 @@ import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { AlertCircle, ArrowLeft, CreditCard, Package, XCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft, CreditCard, Package, XCircle, Coins } from "lucide-react"
+import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
+import { usePointsBalance } from "@/hooks/usePoints"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
@@ -45,6 +47,7 @@ export default function OrderDetailPage() {
     const { data: order, isLoading, error: orderError, refetch } = useOrderDetail(id)
     const cancelOrderMutation = useCancelOrder()
     const [isCanceling, setIsCanceling] = useState(false)
+    const { data: pointsBalance, isLoading: isPointsLoading } = usePointsBalance()
 
     const handleCancelOrder = async () => {
         if (!order) return
@@ -136,6 +139,13 @@ export default function OrderDetailPage() {
 
             {/* Quick Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Loyalty Points */}
+                <PointsBalanceCard
+                    availablePoints={pointsBalance?.availablePoints ?? 0}
+                    pendingPoints={pointsBalance?.pendingPoints ?? 0}
+                    totalEarned={pointsBalance?.totalEarned}
+                    isLoading={isPointsLoading}
+                />
                 {/* Payment Info */}
                 <div className="border border-border p-5 bg-card space-y-2">
                     <h3 className="font-medium text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
