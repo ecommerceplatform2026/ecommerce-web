@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { AlertCircle, ArrowLeft, Award, CreditCard, Package, XCircle } from "lucide-react"
+import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
@@ -188,7 +189,7 @@ export default function OrderDetailPage() {
                             <div key={item.id} className="p-5 flex gap-4 items-start sm:items-center">
                                 <div className="relative aspect-[3/4] w-16 bg-secondary overflow-hidden shrink-0">
                                     <Image
-                                        src={info.imageUrl || "/placeholder.svg"}
+                                        src={getProductImage(info.imageUrl)}
                                         alt={info.name}
                                         fill
                                         sizes="64px"

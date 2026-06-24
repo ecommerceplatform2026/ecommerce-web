@@ -1,9 +1,9 @@
 "use client"
 
-import Image from "next/image"
 import Link from "next/link"
 import { useCart } from "@/hooks/useCart"
 import { ROUTES } from "@/constants/routes"
+import { CheckoutItemImage } from "@/components/checkout/CheckoutItemImage"
 
 const FREE_SHIPPING_THRESHOLD = 2_000_000
 const SHIPPING_COST = 30_000
@@ -26,14 +26,8 @@ export function OrderSummary() {
             <div className="max-h-80 overflow-y-auto space-y-4 divide-y divide-border pr-2 scrollbar-thin">
                 {items.map((item, idx) => (
                     <div key={item.variantId} className={`flex gap-3 ${idx > 0 ? "pt-4" : ""}`}>
-                        <div className="relative aspect-[3/4] w-16 bg-secondary overflow-hidden shrink-0">
-                            <Image
-                                src={item.imageUrl || "/placeholder.svg"}
-                                alt={item.name}
-                                fill
-                                sizes="64px"
-                                className="object-cover"
-                            />
+                        <div className="w-16 shrink-0">
+                            <CheckoutItemImage item={item} />
                         </div>
                         <div className="flex-1 min-w-0 text-sm">
                             <Link
