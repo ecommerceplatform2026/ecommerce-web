@@ -26,14 +26,15 @@ export default function LoyaltyPage() {
                     <div className="md:col-span-2">
                         <PointsBalanceCard
                             balance={balance?.balance ?? 0}
+                            pendingPoints={balance?.pendingPoints ?? 0}
                             discountEquivalent={balance?.discountEquivalent ?? 0}
                             lastUpdated={balance?.lastUpdated}
                             isLoading={isBalanceLoading}
                             error={balanceError ? "Failed to load points" : null}
                         />
                     </div>
-                    <div>
-                        <Card id="how-points-work">
+                    <div className="flex">
+                        <Card id="how-points-work" className="w-full">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2 text-sm">
                                     <Info className="h-4 w-4" />
