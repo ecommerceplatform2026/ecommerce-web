@@ -5,7 +5,7 @@ import { Gift, ShoppingBag, TrendingUp, ChevronDown, Award } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
-import { usePointsBalance } from "@/hooks/usePoints"
+import { usePointsBalance, usePointsTransactions } from "@/hooks/usePoints"
 
 const faqs = [
     {
@@ -27,36 +27,6 @@ const faqs = [
     {
         question: "Can I return items bought with points?",
         answer: "Yes. If you return an item purchased with points, the points used for that purchase will be refunded back to your account once the return is processed.",
-    },
-]
-
-const mockTransactions = [
-    {
-        id: "txn_01",
-        type: "earned" as const,
-        points: 5000,
-        description: "Order #ORD-12345",
-        orderCode: 12345,
-        status: "pending" as const,
-        createdAt: "2026-06-23T10:00:00",
-    },
-    {
-        id: "txn_02",
-        type: "redeemed" as const,
-        points: -10000,
-        description: "Redeemed at checkout",
-        orderCode: 12346,
-        status: "completed" as const,
-        createdAt: "2026-06-22T15:30:00",
-    },
-    {
-        id: "txn_03",
-        type: "earned" as const,
-        points: 15000,
-        description: "Order #ORD-12340",
-        orderCode: 12340,
-        status: "completed" as const,
-        createdAt: "2026-06-20T09:00:00",
     },
 ]
 
@@ -96,6 +66,9 @@ function AccordionItem({ question, answer, open, onToggle }: {
 export function LoyaltyPageContent() {
     const [openFaq, setOpenFaq] = useState<string | null>(null)
     const { data: balance, isLoading: isBalanceLoading } = usePointsBalance()
+    const [txnPage, setTxnPage] = useState(1)
+    const { data: txnData, isLoading: isTxnLoading, isError: isTxnError, error: txnError, refetch: refetchTxn } =
+        usePointsTransactions({ page: txnPage, pageSize: 10 })
 
     return (
         <main className="flex-1">
@@ -206,10 +179,14 @@ export function LoyaltyPageContent() {
                         Points History
                     </h2>
                     <PointsTransactionList
-                        transactions={mockTransactions}
-                        totalPages={1}
-                        currentPage={1}
-                        onPageChange={() => {}}
+                        transactions={txnData?.items ?? []}
+                        totalPages={txnData?.totalPages ?? 1}
+                        currentPage={txnPage}
+                        onPageChange={setTxnPage}
+                        isLoading={isTxnLoading}
+                        isError={isTxnError}
+                        error={(txnError as { message?: string })?.message}
+                        onRetry={() => refetchTxn()}
                     />
                 </div>
             </section>
