@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell, LayoutDashboard } from "lucide-react"
+import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell, LayoutDashboard, Star } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
@@ -303,6 +303,12 @@ export function Header() {
                                                 My Orders
                                             </Link>
                                         </DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/loyalty" className="cursor-pointer">
+                                                <Star className="mr-2 h-4 w-4" />
+                                                My Points
+                                            </Link>
+                                        </DropdownMenuItem>
                                         {user.role === UserRole.Admin && (
                                             <>
                                                 <DropdownMenuSeparator />
@@ -503,6 +509,14 @@ export function Header() {
                                     >
                                     <Package className="mr-3 h-5 w-5" />
                                             My Orders
+                                        </Link>
+                                        <Link
+                                            href="/loyalty"
+                                            className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            <Star className="mr-3 h-5 w-5" />
+                                            My Points
                                         </Link>
                                         <Link
                                             href="/cart"
