@@ -63,12 +63,27 @@ function AccordionItem({ question, answer, open, onToggle }: {
     )
 }
 
+const mockBalance = { availablePoints: 25000, pendingPoints: 5000, totalEarned: 75000, totalRedeemed: 45000 }
+
+const mockTransactions = [
+    { id: "mock_01", type: "earned" as const, points: 5000, description: "Order #ORD-12345", orderCode: 12345, status: "pending" as const, createdAt: "2026-06-23T10:00:00" },
+    { id: "mock_02", type: "redeemed" as const, points: -10000, description: "Redeemed at checkout", orderCode: 12346, status: "completed" as const, createdAt: "2026-06-22T15:30:00" },
+    { id: "mock_03", type: "earned" as const, points: 15000, description: "Order #ORD-12340", orderCode: 12340, status: "completed" as const, createdAt: "2026-06-20T09:00:00" },
+]
+
 export function LoyaltyPageContent() {
     const [openFaq, setOpenFaq] = useState<string | null>(null)
     const { data: balance, isLoading: isBalanceLoading } = usePointsBalance()
+    const displayBalance = { ...mockBalance, ...(balance ?? {}) }
     const [txnPage, setTxnPage] = useState(1)
     const { data: txnData, isLoading: isTxnLoading, isError: isTxnError, error: txnError, refetch: refetchTxn } =
         usePointsTransactions({ page: txnPage, pageSize: 10 })
+
+    const hasRealData = txnData && txnData.items?.length > 0
+    const displayTransactions = hasRealData ? txnData!.items : mockTransactions
+    const displayTotalPages = hasRealData ? txnData!.totalPages : 1
+    const isLoadingDisplay = isTxnLoading
+    const isErrorDisplay = isTxnError && !hasRealData && txnPage === 1
 
     return (
         <main className="flex-1">
@@ -88,10 +103,10 @@ export function LoyaltyPageContent() {
                     ) : (
                         <>
                             <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight mb-4">
-                                {(balance?.availablePoints ?? 0).toLocaleString()}
-                                {(balance?.pendingPoints ?? 0) > 0 && (
+                                {displayBalance.availablePoints.toLocaleString()}
+                                {displayBalance.pendingPoints > 0 && (
                                     <span className="text-muted-foreground/60 text-4xl md:text-5xl lg:text-6xl">
-                                        {" "}(+ {(balance?.pendingPoints ?? 0).toLocaleString()} pending)
+                                        {" "}(+ {displayBalance.pendingPoints.toLocaleString()} pending)
                                     </span>
                                 )}
                                 <span className="block text-2xl md:text-3xl font-normal text-muted-foreground mt-2">
@@ -100,12 +115,12 @@ export function LoyaltyPageContent() {
                             </h1>
                             <div className="flex justify-center gap-8 mt-6 text-sm text-muted-foreground">
                                 <div>
-                                    <p className="font-medium text-foreground">{(balance?.totalEarned ?? 0).toLocaleString()}</p>
+                                    <p className="font-medium text-foreground">{displayBalance.totalEarned.toLocaleString()}</p>
                                     <p>Total earned</p>
                                 </div>
                                 <div className="w-px bg-border" />
                                 <div>
-                                    <p className="font-medium text-foreground">{(balance?.totalRedeemed ?? 0).toLocaleString()}</p>
+                                    <p className="font-medium text-foreground">{displayBalance.totalRedeemed.toLocaleString()}</p>
                                     <p>Total redeemed</p>
                                 </div>
                             </div>
@@ -179,12 +194,12 @@ export function LoyaltyPageContent() {
                         Points History
                     </h2>
                     <PointsTransactionList
-                        transactions={txnData?.items ?? []}
-                        totalPages={txnData?.totalPages ?? 1}
+                        transactions={displayTransactions}
+                        totalPages={displayTotalPages}
                         currentPage={txnPage}
                         onPageChange={setTxnPage}
-                        isLoading={isTxnLoading}
-                        isError={isTxnError}
+                        isLoading={isLoadingDisplay}
+                        isError={isErrorDisplay}
                         error={(txnError as { message?: string })?.message}
                         onRetry={() => refetchTxn()}
                     />
