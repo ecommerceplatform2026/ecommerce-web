@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Gift, ShoppingBag, TrendingUp, ChevronDown, Award } from "lucide-react"
+import { ChevronDown, Award } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
@@ -87,88 +87,76 @@ export function LoyaltyPageContent() {
 
     return (
         <main className="flex-1">
-            {/* Hero */}
-            <section className="py-20 lg:py-24 px-4 lg:px-8 border-b border-border">
-                <div className="container mx-auto max-w-3xl text-center">
-                    <div className="flex justify-center mb-6">
-                        <div className="w-14 h-14 flex items-center justify-center border border-border rounded-full">
-                            <Award className="h-6 w-6" />
-                        </div>
-                    </div>
-                    {isBalanceLoading ? (
-                        <div className="space-y-3">
-                            <Skeleton className="h-16 w-72 mx-auto" />
-                            <Skeleton className="h-5 w-48 mx-auto" />
-                        </div>
-                    ) : (
-                        <>
-                            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight mb-4">
-                                {displayBalance.availablePoints.toLocaleString()}
-                                {displayBalance.pendingPoints > 0 && (
-                                    <span className="text-muted-foreground/60 text-4xl md:text-5xl lg:text-6xl">
-                                        {" "}(+ {displayBalance.pendingPoints.toLocaleString()} pending)
-                                    </span>
-                                )}
-                                <span className="block text-2xl md:text-3xl font-normal text-muted-foreground mt-2">
-                                    points
-                                </span>
-                            </h1>
-                            <div className="flex justify-center gap-8 mt-6 text-sm text-muted-foreground">
-                                <div>
-                                    <p className="font-medium text-foreground">{displayBalance.totalEarned.toLocaleString()}</p>
-                                    <p>Total earned</p>
-                                </div>
-                                <div className="w-px bg-border" />
-                                <div>
-                                    <p className="font-medium text-foreground">{displayBalance.totalRedeemed.toLocaleString()}</p>
-                                    <p>Total redeemed</p>
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </section>
-
-            {/* How It Works */}
+            {/* Hero + Points History — side by side on desktop */}
             <section className="py-16 lg:py-20 px-4 lg:px-8">
-                <div className="container mx-auto max-w-5xl">
-                    <h2 className="font-serif text-3xl md:text-4xl text-center mb-12 tracking-tight">
-                        How It Works
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        <div className="flex flex-col items-center text-center gap-4">
-                            <div className="w-12 h-12 flex items-center justify-center border border-border rounded-full">
-                                <ShoppingBag className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <h3 className="font-medium text-sm tracking-wide">How to Earn</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                Earn points on every completed order. The more you shop, the more you earn.
-                            </p>
+                <div className="container mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16">
+                        {/* Hero - left side */}
+                        <div>
+                            {isBalanceLoading ? (
+                                <div className="space-y-3">
+                                    <Skeleton className="h-12 w-16 mx-auto md:mx-0" />
+                                    <Skeleton className="h-16 w-64" />
+                                    <Skeleton className="h-5 w-48" />
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="w-10 h-10 flex items-center justify-center border border-border rounded-full">
+                                            <Award className="h-5 w-5" />
+                                        </div>
+                                        <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                                            Loyalty Points
+                                        </p>
+                                    </div>
+                                    <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight mb-4">
+                                        {displayBalance.availablePoints.toLocaleString()}
+                                        {displayBalance.pendingPoints > 0 && (
+                                            <span className="text-muted-foreground/60 text-4xl md:text-5xl lg:text-6xl">
+                                                {" "}(+ {displayBalance.pendingPoints.toLocaleString()} pending)
+                                            </span>
+                                        )}
+                                        <span className="block text-2xl md:text-3xl font-normal text-muted-foreground mt-2">
+                                            points
+                                        </span>
+                                    </h1>
+                                    <div className="flex gap-8 text-sm text-muted-foreground">
+                                        <div>
+                                            <p className="font-medium text-foreground">{displayBalance.totalEarned.toLocaleString()}</p>
+                                            <p>Total earned</p>
+                                        </div>
+                                        <div className="w-px bg-border" />
+                                        <div>
+                                            <p className="font-medium text-foreground">{displayBalance.totalRedeemed.toLocaleString()}</p>
+                                            <p>Total redeemed</p>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
-                        <div className="flex flex-col items-center text-center gap-4">
-                            <div className="w-12 h-12 flex items-center justify-center border border-border rounded-full">
-                                <Gift className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <h3 className="font-medium text-sm tracking-wide">How to Redeem</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                Use your points at checkout for instant discounts on your purchases.
-                            </p>
-                        </div>
-                        <div className="flex flex-col items-center text-center gap-4">
-                            <div className="w-12 h-12 flex items-center justify-center border border-border rounded-full">
-                                <TrendingUp className="h-5 w-5 text-muted-foreground" />
-                            </div>
-                            <h3 className="font-medium text-sm tracking-wide">Points Value</h3>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                                1 point = 1,000 VND. Simple and transparent.
-                            </p>
+
+                        {/* Points History - right side */}
+                        <div>
+                            <h2 className="font-serif text-2xl md:text-3xl mb-6 tracking-tight">
+                                Points History
+                            </h2>
+                            <PointsTransactionList
+                                transactions={displayTransactions}
+                                totalPages={displayTotalPages}
+                                currentPage={txnPage}
+                                onPageChange={setTxnPage}
+                                isLoading={isLoadingDisplay}
+                                isError={isErrorDisplay}
+                                error={(txnError as { message?: string })?.message}
+                                onRetry={() => refetchTxn()}
+                            />
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* FAQ */}
-            <section className="py-16 lg:py-20 px-4 lg:px-8 border-y border-border bg-muted/30">
+            <section className="py-16 lg:py-20 px-4 lg:px-8 border-t border-border bg-muted/30">
                 <div className="container mx-auto max-w-3xl">
                     <h2 className="font-serif text-3xl md:text-4xl text-center mb-10 tracking-tight">
                         Frequently Asked Questions
@@ -184,25 +172,6 @@ export function LoyaltyPageContent() {
                             />
                         ))}
                     </div>
-                </div>
-            </section>
-
-            {/* Points History */}
-            <section className="py-16 lg:py-20 px-4 lg:px-8">
-                <div className="container mx-auto max-w-3xl">
-                    <h2 className="font-serif text-3xl md:text-4xl mb-10 tracking-tight">
-                        Points History
-                    </h2>
-                    <PointsTransactionList
-                        transactions={displayTransactions}
-                        totalPages={displayTotalPages}
-                        currentPage={txnPage}
-                        onPageChange={setTxnPage}
-                        isLoading={isLoadingDisplay}
-                        isError={isErrorDisplay}
-                        error={(txnError as { message?: string })?.message}
-                        onRetry={() => refetchTxn()}
-                    />
                 </div>
             </section>
         </main>
