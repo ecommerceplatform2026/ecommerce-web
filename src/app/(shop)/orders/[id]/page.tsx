@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { AlertCircle, ArrowLeft, CreditCard, Package, XCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft, Award, CreditCard, Package, XCircle } from "lucide-react"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
@@ -105,6 +105,7 @@ export default function OrderDetailPage() {
         order.status === OrderStatus.Pending || order.status === OrderStatus.Confirmed
 
     const itemsSubtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    const earnedPoints = Math.floor(order.totalAmount / 10000)
 
     return (
         <div className="container mx-auto px-4 py-12 lg:px-8 max-w-4xl space-y-8">
@@ -256,6 +257,22 @@ export default function OrderDetailPage() {
                         <span className="font-medium">Order Total</span>
                         <span className="font-serif text-2xl font-bold text-foreground">{formatPrice(order.totalAmount)}</span>
                     </div>
+
+                    {order.status === OrderStatus.Completed && (
+                        <div className="border border-emerald-200 bg-emerald-50 p-4 space-y-1">
+                            <div className="flex items-start gap-3">
+                                <Award className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+                                <div>
+                                    <p className="font-medium text-emerald-800 text-sm">
+                                        You earned {earnedPoints === 0 ? "0" : earnedPoints.toLocaleString()} point{earnedPoints !== 1 ? "s" : ""} from this order!
+                                    </p>
+                                    <p className="text-xs text-emerald-600">
+                                        They've been added to your balance.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
