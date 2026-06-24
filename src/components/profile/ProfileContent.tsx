@@ -16,8 +16,6 @@ import {
     Star,
     Home,
 } from "lucide-react"
-import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
-import { usePointsBalance } from "@/hooks/usePoints"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Label } from "@/components/ui/Label"
 import { Button } from "@/components/ui/Button"
@@ -65,7 +63,6 @@ function statusConfig(status: UserStatus) {
 export function ProfileContent() {
     const { profile, address, isLoading, isUpdating, isUploadingAvatar, error, updateProfile, uploadAvatar } =
         useProfile()
-    const { data: pointsBalance, isLoading: isPointsLoading, error: pointsError } = usePointsBalance()
 
     const avatarInputRef = useRef<HTMLInputElement>(null)
 
@@ -255,13 +252,6 @@ export function ProfileContent() {
                         )}
                     </div>
                 </div>
-
-                <PointsBalanceCard
-                    availablePoints={pointsBalance?.availablePoints ?? 0}
-                    pendingPoints={pointsBalance?.pendingPoints ?? 0}
-                    isLoading={isPointsLoading}
-                    error={pointsError ? "Points unavailable" : null}
-                />
 
                 <div className="grid gap-6">
                     {/* Personal information */}
