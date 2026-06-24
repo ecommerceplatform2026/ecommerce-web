@@ -102,6 +102,7 @@ export const ROUTES = {
 // Routes for signed-in users only
 export const PROTECTED_ROUTES = [
     '/profile',
+    '/loyalty',
     '/checkout',
     '/orders',
 ] as const

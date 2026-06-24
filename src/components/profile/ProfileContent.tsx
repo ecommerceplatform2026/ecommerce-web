@@ -15,11 +15,9 @@ import {
     Plus,
     Star,
     Home,
-    Coins,
 } from "lucide-react"
 import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
-import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
-import { usePointsBalance, usePointsTransactions } from "@/hooks/usePoints"
+import { usePointsBalance } from "@/hooks/usePoints"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Label } from "@/components/ui/Label"
 import { Button } from "@/components/ui/Button"
@@ -68,9 +66,6 @@ export function ProfileContent() {
     const { profile, address, isLoading, isUpdating, isUploadingAvatar, error, updateProfile, uploadAvatar } =
         useProfile()
     const { data: pointsBalance, isLoading: isPointsLoading, error: pointsError } = usePointsBalance()
-    const [pointsPage, setPointsPage] = useState(1)
-    const { data: pointsTxn, isLoading: isTxnLoading, isError: isTxnError, error: txnError, refetch: refetchTxn } =
-        usePointsTransactions({ page: pointsPage, pageSize: 10 })
 
     const avatarInputRef = useRef<HTMLInputElement>(null)
 
@@ -261,26 +256,11 @@ export function ProfileContent() {
                     </div>
                 </div>
 
-                {/* Loyalty Points */}
-                <div className="mb-6">
-                    <PointsBalanceCard
-                        availablePoints={pointsBalance?.availablePoints ?? 0}
-                        pendingPoints={pointsBalance?.pendingPoints ?? 0}
-                        totalEarned={pointsBalance?.totalEarned}
-                        isLoading={isPointsLoading}
-                        error={pointsError ? "Points unavailable" : null}
-                    />
-                </div>
-
-                <PointsTransactionList
-                    transactions={pointsTxn?.items ?? []}
-                    totalPages={pointsTxn?.totalPages ?? 1}
-                    currentPage={pointsPage}
-                    onPageChange={setPointsPage}
-                    isLoading={isTxnLoading}
-                    isError={isTxnError}
-                    error={(txnError as { message?: string })?.message}
-                    onRetry={() => refetchTxn()}
+                <PointsBalanceCard
+                    availablePoints={pointsBalance?.availablePoints ?? 0}
+                    pendingPoints={pointsBalance?.pendingPoints ?? 0}
+                    isLoading={isPointsLoading}
+                    error={pointsError ? "Points unavailable" : null}
                 />
 
                 <div className="grid gap-6">
