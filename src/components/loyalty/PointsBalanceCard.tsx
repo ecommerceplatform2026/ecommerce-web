@@ -5,14 +5,14 @@ import { Card, CardContent } from "@/components/ui/Card"
 import { Skeleton } from "@/components/ui/Skeleton"
 
 interface PointsBalanceCardProps {
-    availablePoints: number
+    balance: number
     pendingPoints: number
-    totalEarned?: number
+    discountEquivalent: number
     isLoading?: boolean
     error?: string | null
 }
 
-function PointsBalanceCard({ availablePoints, pendingPoints, totalEarned, isLoading, error }: PointsBalanceCardProps) {
+function PointsBalanceCard({ balance, pendingPoints, discountEquivalent, isLoading, error }: PointsBalanceCardProps) {
     if (isLoading) {
         return (
             <Card>
@@ -36,16 +36,19 @@ function PointsBalanceCard({ availablePoints, pendingPoints, totalEarned, isLoad
                     Loyalty Points
                 </p>
                 <p className="font-serif text-4xl font-bold tracking-tight">
-                    {availablePoints.toLocaleString()}
+                    {balance.toLocaleString()}
                     <span className="text-base font-normal text-muted-foreground ml-1.5">
-                        points available
+                        pts
                     </span>
                 </p>
                 {pendingPoints > 0 && (
                     <p className="text-sm text-muted-foreground mt-1.5">
-                        {pendingPoints.toLocaleString()} points pending from recent orders
+                        {pendingPoints.toLocaleString()} pts pending
                     </p>
                 )}
+                <p className="text-sm text-muted-foreground mt-1">
+                    ≈ {discountEquivalent.toLocaleString()} VND
+                </p>
             </CardContent>
         </Card>
     )
