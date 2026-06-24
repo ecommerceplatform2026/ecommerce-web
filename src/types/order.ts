@@ -43,58 +43,7 @@ export interface OrderResponse {
 }
 
 export interface CheckoutRequest {
-    paymentMethod: PaymentMethod
-    redeemedPoints?: number | null
-}
-
-export interface CheckoutItemResponse {
-    orderItemId: string
-    productVariantId: string
-    quantity: number
-    price: number
-    productSnapshot: string
-}
-
-export interface CheckoutResponse {
-    orderId: string
-    orderCode: number
-    totalAmount: number
-    discountAmount: number
-    paidAmount: number
-    status: OrderStatus
-    paymentMethod: PaymentMethod
-    items: CheckoutItemResponse[]
-    checkoutUrl?: string | null
-    paymentLinkId?: string | null
-}
-
-export interface OrderItemResponse {
-    id: string
-    productVariantId: string
-    quantity: number
-    price: number
-    productSnapshot: string
-}
-
-export interface TrackingInfo {
-    trackingCode: string
-    carrierCode: string
-    status: DeliveryStatus
-}
-
-export interface OrderResponse {
-    id: string
-    orderCode: number
-    totalAmount: number
-    status: OrderStatus
-    paymentMethod: PaymentMethod
-    createdAt: string
-    items: OrderItemResponse[]
-    tracking?: TrackingInfo | null
-}
-
-export interface CheckoutRequest {
-    paymentMethod: PaymentMethod
+    paymentMethod: string
     redeemedPoints?: number | null
 }
 
