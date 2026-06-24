@@ -1,8 +1,8 @@
 export interface LoyaltyBalanceResponse {
-    availablePoints: number
+    balance: number
     pendingPoints: number
-    totalEarned: number
-    totalRedeemed: number
+    discountEquivalent: number
+    lastUpdated: string
 }
 
 export interface LoyaltyTransaction {
