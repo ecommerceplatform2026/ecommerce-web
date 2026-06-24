@@ -3,7 +3,9 @@
 import { useState } from "react"
 import { Gift, ShoppingBag, TrendingUp, ChevronDown, Award } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/Skeleton"
 import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
+import { usePointsBalance } from "@/hooks/usePoints"
 
 const faqs = [
     {
@@ -93,6 +95,7 @@ function AccordionItem({ question, answer, open, onToggle }: {
 
 export function LoyaltyPageContent() {
     const [openFaq, setOpenFaq] = useState<string | null>(null)
+    const { data: balance, isLoading: isBalanceLoading } = usePointsBalance()
 
     return (
         <main className="flex-1">
@@ -104,26 +107,37 @@ export function LoyaltyPageContent() {
                             <Award className="h-6 w-6" />
                         </div>
                     </div>
-                    <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight mb-4">
-                        25,000
-                        <span className="text-muted-foreground/60 text-4xl md:text-5xl lg:text-6xl">
-                            {" "}(+ 5,000 pending)
-                        </span>
-                        <span className="block text-2xl md:text-3xl font-normal text-muted-foreground mt-2">
-                            points
-                        </span>
-                    </h1>
-                    <div className="flex justify-center gap-8 mt-6 text-sm text-muted-foreground">
-                        <div>
-                            <p className="font-medium text-foreground">75,000</p>
-                            <p>Total earned</p>
+                    {isBalanceLoading ? (
+                        <div className="space-y-3">
+                            <Skeleton className="h-16 w-72 mx-auto" />
+                            <Skeleton className="h-5 w-48 mx-auto" />
                         </div>
-                        <div className="w-px bg-border" />
-                        <div>
-                            <p className="font-medium text-foreground">45,000</p>
-                            <p>Total redeemed</p>
-                        </div>
-                    </div>
+                    ) : (
+                        <>
+                            <h1 className="font-serif text-5xl md:text-6xl lg:text-7xl tracking-tight mb-4">
+                                {(balance?.availablePoints ?? 0).toLocaleString()}
+                                {(balance?.pendingPoints ?? 0) > 0 && (
+                                    <span className="text-muted-foreground/60 text-4xl md:text-5xl lg:text-6xl">
+                                        {" "}(+ {(balance?.pendingPoints ?? 0).toLocaleString()} pending)
+                                    </span>
+                                )}
+                                <span className="block text-2xl md:text-3xl font-normal text-muted-foreground mt-2">
+                                    points
+                                </span>
+                            </h1>
+                            <div className="flex justify-center gap-8 mt-6 text-sm text-muted-foreground">
+                                <div>
+                                    <p className="font-medium text-foreground">{(balance?.totalEarned ?? 0).toLocaleString()}</p>
+                                    <p>Total earned</p>
+                                </div>
+                                <div className="w-px bg-border" />
+                                <div>
+                                    <p className="font-medium text-foreground">{(balance?.totalRedeemed ?? 0).toLocaleString()}</p>
+                                    <p>Total redeemed</p>
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </section>
 
