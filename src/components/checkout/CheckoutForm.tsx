@@ -28,7 +28,7 @@ export function CheckoutForm() {
 
         try {
             const result = await checkoutMutation.mutateAsync({
-                paymentMethod: PaymentMethod[selectedPayment],
+                paymentMethod: selectedPayment,
                 redeemedPoints: pointsToRedeem > 0 ? pointsToRedeem : null,
             })
 
