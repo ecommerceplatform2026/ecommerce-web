@@ -7,12 +7,11 @@ export interface LoyaltyBalanceResponse {
 
 export interface LoyaltyTransaction {
     id: string
-    type: 'earned' | 'redeemed'
+    date: string
+    type: "Earn" | "Redeem" | "Expired"
     points: number
+    orderId: number
     description: string
-    orderCode: number
-    status: 'pending' | 'completed'
-    createdAt: string
 }
 
 export interface PaginatedTransactions {
