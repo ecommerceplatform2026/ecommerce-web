@@ -8,6 +8,7 @@ import {
     selectWishlistCount,
     selectIsInWishlist,
 } from '@/redux/slices/wishlistSlice'
+import { hydrateCart } from '@/redux/slices/cartSlice'
 import { wishlistService } from '@/services/wishlistService'
 import { useAuth } from '@/hooks/useAuth'
 import { Toast } from '@/components/ui/Toast'
@@ -117,6 +118,7 @@ export function useRemoveFromWishlist() {
 
 export function useMoveToCart() {
     const queryClient = useQueryClient()
+    const dispatch = useAppDispatch()
 
     return useMutation({
         mutationFn: ({ variantId, quantity }: { variantId: string; quantity: number }) =>
@@ -134,8 +136,8 @@ export function useMoveToCart() {
         onSuccess: () => {
             Toast('Moved to cart')
             queryClient.invalidateQueries({ queryKey: wishlistKeys.items() })
-            // Also invalidate the cart so it refetches
-            queryClient.invalidateQueries({ queryKey: ['cart'] })
+            // Cart uses Redux — re-hydrate to pick up the new item
+            dispatch(hydrateCart({ isAuthenticated: true }))
         },
         onError: (_err, _vars, context) => {
             // Rollback wishlist
