@@ -19,6 +19,7 @@ import {
 import { Toast } from '@/components/ui/Toast'
 import { useAuth } from "@/hooks/useAuth"
 import { useCart } from "@/hooks/useCart"
+import { useWishlist } from "@/hooks/useWishlist"
 import { UserRole } from "@/constants/enums"
 import { productService } from "@/services/productService"
 import type { Product } from "@/types/product"
@@ -86,6 +87,7 @@ export function Header() {
     const [showResults, setShowResults] = useState(false)
     const { user, logout } = useAuth()
     const { itemCount } = useCart()
+    const { count: wishlistCount } = useWishlist()
     const [badgePulse, setBadgePulse] = useState(false)
 
     const prevItemCount = useRef(itemCount)
@@ -346,6 +348,11 @@ export function Header() {
                             <Link href="/wishlist">
                                 <Button variant="ghost" size="icon" className="relative cursor-pointer min-h-[44px]">
                                     <Heart className="h-5 w-5" />
+                                    {wishlistCount > 0 && (
+                                        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
+                                            {wishlistCount > 99 ? '99+' : wishlistCount}
+                                        </span>
+                                    )}
                                 </Button>
                             </Link>
 
@@ -507,30 +514,43 @@ export function Header() {
                                         className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
-                                    <Package className="mr-3 h-5 w-5" />
+                                        <Package className="mr-3 h-5 w-5" />
                                             My Orders
-                                        </Link>
-                                        <Link
-                                            href="/loyalty"
-                                            className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
-                                            onClick={() => setMobileMenuOpen(false)}
-                                        >
-                                            <Star className="mr-3 h-5 w-5" />
-                                            My Points
-                                        </Link>
-                                        <Link
-                                            href="/cart"
-                                            className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
-                                            onClick={() => setMobileMenuOpen(false)}
-                                        >
-                                            <ShoppingBag className="mr-3 h-5 w-5" />
-                                            Cart
-                                            {itemCount > 0 && (
-                                                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
-                                                    {itemCount > 99 ? '99+' : itemCount}
-                                                </span>
-                                            )}
-                                        </Link>
+                                    </Link>
+                                    <Link
+                                        href="/loyalty"
+                                        className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        <Star className="mr-3 h-5 w-5" />
+                                        My Points
+                                    </Link>
+                                    <Link
+                                        href="/wishlist"
+                                        className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        <Heart className="mr-3 h-5 w-5" />
+                                        Wishlist
+                                        {wishlistCount > 0 && (
+                                            <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
+                                                {wishlistCount > 99 ? '99+' : wishlistCount}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    <Link
+                                        href="/cart"
+                                        className="text-sm tracking-wide py-3 hover:text-muted-foreground transition-colors min-h-[44px] flex items-center"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        <ShoppingBag className="mr-3 h-5 w-5" />
+                                        Cart
+                                        {itemCount > 0 && (
+                                            <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-foreground px-1 text-[11px] font-medium text-background">
+                                                {itemCount > 99 ? '99+' : itemCount}
+                                            </span>
+                                        )}
+                                    </Link>
                                     <button
                                         onClick={() => { handleLogout(); setMobileMenuOpen(false) }}
                                         className="text-sm tracking-wide py-3 text-destructive hover:text-destructive/80 transition-colors min-h-[44px] flex items-center text-left"
