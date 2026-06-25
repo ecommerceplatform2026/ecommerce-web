@@ -1,25 +1,100 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, CheckCircle2, MapPin, Phone, User } from "lucide-react"
+import { AlertCircle, CheckCircle2, Coins, MapPin, Phone, User } from "lucide-react"
+import { z } from "zod"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
+import { Input } from "@/components/ui/Input"
 import { useProfile } from "@/hooks/useProfile"
 import { useCheckout } from "@/hooks/useOrders"
+import { usePointsBalance } from "@/hooks/usePoints"
 import { PaymentMethod } from "@/constants/enums"
 import { Spinner } from "@/components/ui/Spinner"
 import { ROUTES } from "@/constants/routes"
 import type { ApiError } from "@/types/api"
 
-export function CheckoutForm() {
+const POINT_VALUE_VND = 100
+const REDEMPTION_STEP = 100
+const MIN_PAYABLE_TOTAL = 10_000
+
+function formatCurrency(value: number) {
+    return `${value.toLocaleString("vi-VN")} VND`
+}
+
+function createRedemptionSchema(balance: number, orderSubtotal: number) {
+    const balanceInRedeemUnits = Math.floor(balance / REDEMPTION_STEP) * REDEMPTION_STEP
+    const maxByMinimumTotal = Math.max(
+        0,
+        Math.floor((orderSubtotal - MIN_PAYABLE_TOTAL) / POINT_VALUE_VND / REDEMPTION_STEP) * REDEMPTION_STEP,
+    )
+    const maxRedeemable = Math.max(balanceInRedeemUnits, maxByMinimumTotal)
+
+    return {
+        maxRedeemable,
+        schema: z
+            .number()
+            .int("Points must be a whole number.")
+            .min(0, "Points cannot be negative.")
+            .refine((value) => value === 0 || value >= REDEMPTION_STEP, {
+                message: `Redeem at least ${REDEMPTION_STEP} points.`,
+            })
+            .refine((value) => value % REDEMPTION_STEP === 0, {
+                message: `Points must be in multiples of ${REDEMPTION_STEP}.`,
+            })
+            .refine((value) => value <= balance, {
+                message: "You cannot redeem more points than your balance.",
+            })
+            .refine((value) => value <= maxRedeemable, {
+                message: `Order total after discount must be at least ${formatCurrency(MIN_PAYABLE_TOTAL)}.`,
+            }),
+    }
+}
+
+interface CheckoutFormProps {
+    orderSubtotal: number
+    onPointsToRedeemChange: (points: number) => void
+}
+
+export function CheckoutForm({
+    orderSubtotal,
+    onPointsToRedeemChange,
+}: CheckoutFormProps) {
     const router = useRouter()
     const { address, isLoading: isProfileLoading, error: profileError } = useProfile()
+    const { data: pointsBalance, isLoading: isPointsLoading, error: pointsError } = usePointsBalance()
     const checkoutMutation = useCheckout()
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
-    const [pointsToRedeem, setPointsToRedeem] = useState<number>(0)
-    const isPointsInvalid = pointsToRedeem > 0 && pointsToRedeem % 100 !== 0
+    const [pointsInput, setPointsInput] = useState("")
+    const [debouncedPoints, setDebouncedPoints] = useState(0)
+
+    const availablePoints = pointsBalance?.balance ?? 0
+    const { schema: redemptionSchema, maxRedeemable } = useMemo(
+        () => createRedemptionSchema(availablePoints, orderSubtotal),
+        [availablePoints, orderSubtotal],
+    )
+    const parsedPoints = pointsInput.trim() === "" ? 0 : Number(pointsInput)
+    const hasNumericInput = Number.isFinite(parsedPoints)
+    const validation = hasNumericInput
+        ? redemptionSchema.safeParse(parsedPoints)
+        : { success: false as const, error: { issues: [{ message: "Enter a valid points amount." }] } }
+    const pointsErrorMessage = validation.success ? null : validation.error.issues[0]?.message
+    const isPointsInvalid = !validation.success
+    const loyaltyDiscount = debouncedPoints * POINT_VALUE_VND
+    const adjustedSubtotal = Math.max(orderSubtotal - loyaltyDiscount, 0)
+
+    useEffect(() => {
+        const nextPoints = validation.success ? parsedPoints : 0
+
+        const timer = window.setTimeout(() => {
+            setDebouncedPoints(nextPoints)
+            onPointsToRedeemChange(nextPoints)
+        }, 250)
+
+        return () => window.clearTimeout(timer)
+    }, [onPointsToRedeemChange, parsedPoints, validation.success])
 
     const handlePlaceOrder = async () => {
         if (!address) {
@@ -27,10 +102,17 @@ export function CheckoutForm() {
             return
         }
 
+        if (!validation.success) {
+            toast.error(pointsErrorMessage ?? "Please enter a valid points amount.")
+            return
+        }
+
+        const validatedPoints = validation.data
+
         try {
             const result = await checkoutMutation.mutateAsync({
                 paymentMethod: selectedPayment,
-                redeemedPoints: pointsToRedeem > 0 ? pointsToRedeem : null,
+                redeemedPoints: validatedPoints > 0 ? validatedPoints : null,
             })
 
             // AC3: Order Success Notification
@@ -180,7 +262,7 @@ export function CheckoutForm() {
                                 key={method.id}
                                 type="button"
                                 onClick={() => setSelectedPayment(method.id)}
-                                className={`text-left p-5 border transition-all flex flex-col justify-between h-full rounded-none ${
+                                className={`text-left p-5 border bg-card transition-all flex flex-col justify-between h-full rounded-none ${
                                     isSelected
                                         ? "border-foreground bg-secondary-container/10 ring-1 ring-foreground"
                                         : "border-border hover:border-foreground"
@@ -203,25 +285,88 @@ export function CheckoutForm() {
                 </div>
             </div>
 
-            {/* Loyalty Points Section (Optional UI placeholder) */}
+            {/* Loyalty Points Section */}
             <div>
                 <h2 className="font-serif text-2xl mb-4 border-b border-border pb-2">3. Loyalty Points (Optional)</h2>
-                <div className="flex gap-3 max-w-sm">
-                    <input
-                        type="number"
-                        min="0"
-                        step="100"
-                        placeholder="Redeem points"
-                        value={pointsToRedeem || ""}
-                        onChange={(e) => setPointsToRedeem(Math.max(0, parseInt(e.target.value) || 0))}
-                        className="flex-1 px-4 py-2 border border-border rounded-none focus:outline-none focus:border-foreground text-sm"
-                    />
+                <div className="border border-border bg-card p-5 space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center border border-yellow-200 bg-yellow-50 text-yellow-700">
+                                <Coins className="h-4 w-4" />
+                            </div>
+                            <div>
+                                <p className="text-sm font-medium">Redeem rewards</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {isPointsLoading
+                                        ? "Loading your points balance..."
+                                        : pointsError
+                                          ? "Points balance is unavailable right now."
+                                          : `${availablePoints.toLocaleString()} points available`}
+                                </p>
+                            </div>
+                        </div>
+                        {maxRedeemable > 0 && (
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="rounded-none bg-transparent shrink-0"
+                                onClick={() => setPointsInput(String(maxRedeemable))}
+                                disabled={isPointsLoading || !!pointsError}
+                            >
+                                Use max
+                            </Button>
+                        )}
+                    </div>
+
+                    <div className="grid gap-2 max-w-sm">
+                        <Input
+                            type="number"
+                            min="0"
+                            step={REDEMPTION_STEP}
+                            inputMode="numeric"
+                            placeholder="Redeem points"
+                            value={pointsInput}
+                            onChange={(e) => setPointsInput(e.target.value)}
+                            disabled={isPointsLoading || !!pointsError}
+                            aria-invalid={isPointsInvalid}
+                            className="rounded-none"
+                        />
+                        {pointsErrorMessage && pointsInput.trim() !== "" && (
+                            <p className="text-xs text-destructive">{pointsErrorMessage}</p>
+                        )}
+                        {!pointsErrorMessage && debouncedPoints > 0 && (
+                            <p className="text-xs text-emerald-700">
+                                {debouncedPoints.toLocaleString()} points = {formatCurrency(loyaltyDiscount)} off.
+                            </p>
+                        )}
+                    </div>
+
+                    <div className="grid gap-2 border-t border-border pt-4 text-sm">
+                        <div className="flex justify-between text-muted-foreground">
+                            <span>Minimum redeem</span>
+                            <span>{REDEMPTION_STEP.toLocaleString()} pts</span>
+                        </div>
+                        <div className="flex justify-between text-muted-foreground">
+                            <span>Maximum for this order</span>
+                            <span>{maxRedeemable.toLocaleString()} pts</span>
+                        </div>
+                        {debouncedPoints > 0 && (
+                            <>
+                                <div className="flex justify-between text-emerald-700">
+                                    <span>Discount preview</span>
+                                    <span>-{formatCurrency(loyaltyDiscount)}</span>
+                                </div>
+                                <div className="flex justify-between font-medium">
+                                    <span>Subtotal after points</span>
+                                    <span>{formatCurrency(adjustedSubtotal)}</span>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
-                {pointsToRedeem > 0 && pointsToRedeem % 100 !== 0 && (
-                    <p className="text-xs text-destructive mt-2">Points must be in multiples of 100.</p>
-                )}
                 <p className="text-xs text-muted-foreground mt-2">
-                    Enter points to redeem them for discounts. (1 point = 100 VND)
+                    1 point = 100 VND. Points must be redeemed in multiples of 100 and cannot reduce the order below {formatCurrency(MIN_PAYABLE_TOTAL)}.
                 </p>
             </div>
 

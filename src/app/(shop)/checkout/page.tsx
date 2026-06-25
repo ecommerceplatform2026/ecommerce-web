@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo, useState } from "react"
 import { useCart } from "@/hooks/useCart"
 import { CheckoutForm } from "@/components/checkout/CheckoutForm"
 import { OrderSummary } from "@/components/checkout/OrderSummary"
@@ -11,7 +12,16 @@ import { ROUTES } from "@/constants/routes"
 import { ShoppingBag } from "lucide-react"
 
 export default function CheckoutPage() {
-    const { items, isLoading } = useCart()
+    const { items, totalPrice, isLoading } = useCart()
+    const [pointsToRedeem, setPointsToRedeem] = useState(0)
+
+    const redemptionPreview = useMemo(() => {
+        const loyaltyDiscount = pointsToRedeem * 100
+        return {
+            loyaltyDiscount,
+            subtotalAfterDiscount: Math.max(totalPrice - loyaltyDiscount, 0),
+        }
+    }, [pointsToRedeem, totalPrice])
 
     if (isLoading) {
         return (
@@ -52,8 +62,14 @@ export default function CheckoutPage() {
         <div className="container mx-auto px-4 py-12 lg:px-8 lg:py-16">
             <h1 className="font-serif text-4xl md:text-5xl mb-10">Checkout</h1>
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-10 items-start">
-                <CheckoutForm />
-                <OrderSummary />
+                <CheckoutForm
+                    orderSubtotal={totalPrice}
+                    onPointsToRedeemChange={setPointsToRedeem}
+                />
+                <OrderSummary
+                    loyaltyDiscount={redemptionPreview.loyaltyDiscount}
+                    subtotalAfterDiscount={redemptionPreview.subtotalAfterDiscount}
+                />
             </div>
         </div>
     )

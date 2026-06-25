@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { orderService } from '@/services/orderService'
 import { useCart } from '@/hooks/useCart'
+import { pointsKeys } from '@/hooks/usePoints'
 import type { CheckoutRequest } from '@/types/order'
 
 export const orderKeys = {
@@ -20,6 +21,7 @@ export function useCheckout() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: orderKeys.all })
             queryClient.invalidateQueries({ queryKey: ['cart'] })
+            queryClient.invalidateQueries({ queryKey: pointsKeys.all })
             clearCart()
         },
     })
