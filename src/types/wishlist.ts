@@ -22,3 +22,15 @@ export interface AddToWishlistRequest {
 export interface MergeWishlistRequest {
     guestVariantIds: string[]
 }
+
+export interface MoveToCartRequest {
+    quantity: number
+}
+
+/** Response from POST /api/wishlist/items/{variantId}/move-to-cart */
+export interface MoveToCartResponse {
+    cartItemId?: string
+    productVariantId: string
+    quantity: number
+}
+

@@ -182,6 +182,7 @@ export const WISHLIST_ENDPOINTS = {
     GET: '/api/wishlist',
     ADD_ITEM: '/api/wishlist/items',
     REMOVE_ITEM: (variantId: string) => `/api/wishlist/items/${variantId}`,
+    MOVE_TO_CART: (variantId: string) => `/api/wishlist/items/${variantId}/move-to-cart`,
     MERGE: '/api/wishlist/merge',
 } as const
 
