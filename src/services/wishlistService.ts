@@ -1,7 +1,7 @@
 import axiosInstance from '@/lib/axios'
 import { WISHLIST_ENDPOINTS } from '@/constants/api'
 import type { ApiResponse } from '@/types/api'
-import type { WishlistItem, AddToWishlistRequest, MergeWishlistRequest } from '@/types/wishlist'
+import type { WishlistItem, AddToWishlistRequest, MergeWishlistRequest, MoveToCartRequest, MoveToCartResponse } from '@/types/wishlist'
 
 export const wishlistService = {
     getWishlist: async (): Promise<WishlistItem[]> => {
@@ -26,6 +26,15 @@ export const wishlistService = {
         )
     },
 
+    moveToCart: async (variantId: string, quantity: number): Promise<MoveToCartResponse> => {
+        const payload: MoveToCartRequest = { quantity }
+        const res = await axiosInstance.post<ApiResponse<MoveToCartResponse>>(
+            WISHLIST_ENDPOINTS.MOVE_TO_CART(variantId),
+            payload,
+        )
+        return res.data.data
+    },
+
     mergeWishlist: async (guestVariantIds: string[]): Promise<WishlistItem[]> => {
         const payload: MergeWishlistRequest = { guestVariantIds }
         const res = await axiosInstance.post<ApiResponse<WishlistItem[]>>(
@@ -35,3 +44,4 @@ export const wishlistService = {
         return res.data.data
     },
 }
+

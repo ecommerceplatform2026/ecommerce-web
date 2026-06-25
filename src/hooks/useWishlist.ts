@@ -112,6 +112,42 @@ export function useRemoveFromWishlist() {
 }
 
 // -------------------------------------------------------------------
+// Move to cart mutation — atomically moves item from wishlist to cart
+// -------------------------------------------------------------------
+
+export function useMoveToCart() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ variantId, quantity }: { variantId: string; quantity: number }) =>
+            wishlistService.moveToCart(variantId, quantity),
+        onMutate: async ({ variantId }) => {
+            await queryClient.cancelQueries({ queryKey: wishlistKeys.items() })
+            const previous = queryClient.getQueryData<WishlistItem[]>(wishlistKeys.items())
+
+            // Optimistic: remove from wishlist immediately
+            queryClient.setQueryData<WishlistItem[]>(wishlistKeys.items(), (old = []) =>
+                old.filter(i => i.productVariantId !== variantId),
+            )
+            return { previous }
+        },
+        onSuccess: () => {
+            Toast('Moved to cart')
+            queryClient.invalidateQueries({ queryKey: wishlistKeys.items() })
+            // Also invalidate the cart so it refetches
+            queryClient.invalidateQueries({ queryKey: ['cart'] })
+        },
+        onError: (_err, _vars, context) => {
+            // Rollback wishlist
+            if (context?.previous) {
+                queryClient.setQueryData(wishlistKeys.items(), context.previous)
+            }
+            Toast('Failed to move item to cart', 'error')
+        },
+    })
+}
+
+// -------------------------------------------------------------------
 // Main hook — backward-compatible API for ProductCard & ProductDetails
 // Uses server state when authenticated, falls back to Redux for guests
 // -------------------------------------------------------------------
