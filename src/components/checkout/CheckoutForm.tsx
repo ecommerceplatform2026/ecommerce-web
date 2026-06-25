@@ -19,6 +19,7 @@ export function CheckoutForm() {
     const checkoutMutation = useCheckout()
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
     const [pointsToRedeem, setPointsToRedeem] = useState<number>(0)
+    const isPointsInvalid = pointsToRedeem > 0 && pointsToRedeem % 100 !== 0
 
     const handlePlaceOrder = async () => {
         if (!address) {
@@ -209,14 +210,18 @@ export function CheckoutForm() {
                     <input
                         type="number"
                         min="0"
+                        step="100"
                         placeholder="Redeem points"
                         value={pointsToRedeem || ""}
                         onChange={(e) => setPointsToRedeem(Math.max(0, parseInt(e.target.value) || 0))}
                         className="flex-1 px-4 py-2 border border-border rounded-none focus:outline-none focus:border-foreground text-sm"
                     />
                 </div>
+                {pointsToRedeem > 0 && pointsToRedeem % 100 !== 0 && (
+                    <p className="text-xs text-destructive mt-2">Points must be in multiples of 100.</p>
+                )}
                 <p className="text-xs text-muted-foreground mt-2">
-                    Enter points to redeem them for discounts. (1 point = 1,000 VND)
+                    Enter points to redeem them for discounts. (1 point = 100 VND)
                 </p>
             </div>
 
@@ -237,7 +242,7 @@ export function CheckoutForm() {
             <div className="pt-4">
                 <Button
                     onClick={handlePlaceOrder}
-                    disabled={!address || checkoutMutation.isPending}
+                    disabled={!address || isPointsInvalid || checkoutMutation.isPending}
                     className="w-full h-14 text-base font-semibold rounded-none uppercase tracking-widest"
                 >
                     {checkoutMutation.isPending ? (
