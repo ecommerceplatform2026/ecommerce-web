@@ -268,7 +268,7 @@ export default function OrderDetailPage() {
                                         You earned {earnedPoints === 0 ? "0" : earnedPoints.toLocaleString()} point{earnedPoints !== 1 ? "s" : ""} from this order!
                                     </p>
                                     <p className="text-xs text-emerald-600">
-                                        They've been added to your balance.
+                                        They&apos;ve been added to your balance.
                                     </p>
                                 </div>
                             </div>

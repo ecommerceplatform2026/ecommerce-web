@@ -12,11 +12,18 @@ function formatCurrency(value: number) {
     return `${value.toLocaleString("vi-VN")} VND`
 }
 
-export function OrderSummary() {
+interface OrderSummaryProps {
+    loyaltyDiscount?: number
+    subtotalAfterDiscount?: number
+}
+
+export function OrderSummary({ loyaltyDiscount = 0, subtotalAfterDiscount }: OrderSummaryProps) {
     const { items, totalPrice, itemCount } = useCart()
 
     const shipping = items.length === 0 || totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST
-    const total = totalPrice + shipping
+    const discountedSubtotal = Math.max(subtotalAfterDiscount ?? totalPrice, 0)
+    const total = discountedSubtotal + shipping
+    const hasLoyaltyDiscount = loyaltyDiscount > 0
 
     return (
         <div className="border border-border p-6 bg-card space-y-6">
@@ -56,6 +63,12 @@ export function OrderSummary() {
                     <span className="text-muted-foreground">Subtotal ({itemCount} item{itemCount === 1 ? "" : "s"})</span>
                     <span>{formatCurrency(totalPrice)}</span>
                 </div>
+                {hasLoyaltyDiscount && (
+                    <div className="flex justify-between text-emerald-700">
+                        <span>Loyalty discount</span>
+                        <span>-{formatCurrency(loyaltyDiscount)}</span>
+                    </div>
+                )}
                 <div className="flex justify-between">
                     <span className="text-muted-foreground">Shipping</span>
                     <span>{shipping === 0 ? "Free" : formatCurrency(shipping)}</span>
