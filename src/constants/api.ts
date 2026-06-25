@@ -175,6 +175,17 @@ export const UPLOAD_ENDPOINTS = {
 } as const
 
 // ============================================================
+// WISHLIST  (FR09 / ABC-210–213)
+// ============================================================
+
+export const WISHLIST_ENDPOINTS = {
+    GET: '/api/wishlist',
+    ADD_ITEM: '/api/wishlist/items',
+    REMOVE_ITEM: (variantId: string) => `/api/wishlist/items/${variantId}`,
+    MERGE: '/api/wishlist/merge',
+} as const
+
+// ============================================================
 // ADMIN DASHBOARD  (FR15 → FR20)
 // ============================================================
 

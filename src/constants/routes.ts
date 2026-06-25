@@ -51,6 +51,9 @@ export const ROUTES = {
         DETAIL: (id: string) => `/orders/${id}`,    // order detail
     },
 
+    // ------ Wishlist (FR09 / ABC-210–213) ------
+    WISHLIST: '/wishlist',
+
     // ============================================================
     // ADMIN - Admin role required (middleware blocks non-admin users)
     // ============================================================
@@ -104,6 +107,7 @@ export const PROTECTED_ROUTES = [
     '/profile',
     '/checkout',
     '/orders',
+    '/wishlist',
 ] as const
 
 // Routes for Admin only
