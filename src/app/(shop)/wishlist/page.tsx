@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense } from "react"
+import { useState, useCallback, Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Heart, ShoppingBag, Trash2, AlertCircle, PackageX, PackageCheck } from "lucide-react"
@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/Button"
 import { EmptyState } from "@/components/ui/EmptyState"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { Toast } from "@/components/ui/Toast"
-import { useWishlistQuery, useRemoveFromWishlist } from "@/hooks/useWishlist"
-import { useCart } from "@/hooks/useCart"
+import { MoveToCartModal } from "@/components/wishlist/MoveToCartModal"
+import { useWishlistQuery, useRemoveFromWishlist, useMoveToCart } from "@/hooks/useWishlist"
 import { ROUTES } from "@/constants/routes"
 import { formatPrice } from "@/utils/formatPrice"
 import { getProductImage, useImageErrorFallback } from "@/utils/imageHelpers"
@@ -19,44 +19,31 @@ import type { WishlistItem } from "@/types/wishlist"
 // Single wishlist card
 // ---------------------------------------------------------------------------
 
-function WishlistCard({ item }: { item: WishlistItem }) {
+function WishlistCard({
+    item,
+    onMoveToCart,
+}: {
+    item: WishlistItem
+    onMoveToCart: (item: WishlistItem) => void
+}) {
     const removeMutation = useRemoveFromWishlist()
-    const { addItem } = useCart()
 
     const [imgSrc, onImgError] = useImageErrorFallback(
         getProductImage(item.productImageUrl),
     )
 
-    async function handleAddToCart() {
-        if (item.isOutOfStock) {
-            Toast("This item is out of stock", "error")
-            return
-        }
-        try {
-            await addItem({
-                productId: item.productId,
-                variantId: item.productVariantId,
-                sku: item.sku,
-                name: item.productName,
-                price: item.price,
-                size: item.size ?? "",
-                color: item.color ?? "",
-                quantity: 1,
-                stock: item.stock,
-                isOutOfStock: item.isOutOfStock,
-                isLowStock: item.isLowStock,
-                imageUrl: item.productImageUrl,
-            })
-            Toast(`Added ${item.productName} to cart`)
-        } catch {
-            Toast("Could not add to cart", "error")
-        }
-    }
-
     function handleRemove(e: React.MouseEvent) {
         e.preventDefault()
         e.stopPropagation()
         removeMutation.mutate(item.productVariantId)
+    }
+
+    function handleMoveToCart() {
+        if (item.isOutOfStock) {
+            Toast("This item is out of stock", "error")
+            return
+        }
+        onMoveToCart(item)
     }
 
     const isRemoving = removeMutation.isPending
@@ -140,15 +127,15 @@ function WishlistCard({ item }: { item: WishlistItem }) {
                     </div>
                 </div>
 
-                {/* Add to cart */}
+                {/* Move to cart */}
                 <Button
-                    id={`wishlist-add-to-cart-${item.productVariantId}`}
+                    id={`wishlist-move-to-cart-${item.productVariantId}`}
                     className="w-full min-h-[44px] bg-background text-foreground hover:bg-background/90 border border-border rounded-none disabled:opacity-50 text-sm flex items-center gap-2"
                     disabled={item.isOutOfStock}
-                    onClick={handleAddToCart}
+                    onClick={handleMoveToCart}
                 >
                     <ShoppingBag className="h-4 w-4 shrink-0" />
-                    <span>{item.isOutOfStock ? "Out of stock" : "Add to cart"}</span>
+                    <span>{item.isOutOfStock ? "Out of stock" : "Move to cart"}</span>
                 </Button>
             </div>
         </div>
@@ -187,6 +174,31 @@ function WishlistSkeleton() {
 
 function WishlistContent() {
     const { data: items = [], isLoading, error, refetch } = useWishlistQuery()
+    const moveToCart = useMoveToCart()
+
+    // Modal state
+    const [modalItem, setModalItem] = useState<WishlistItem | null>(null)
+    const [modalOpen, setModalOpen] = useState(false)
+
+    const handleOpenMoveModal = useCallback((item: WishlistItem) => {
+        setModalItem(item)
+        setModalOpen(true)
+    }, [])
+
+    const handleConfirmMove = useCallback(
+        (variantId: string, quantity: number) => {
+            moveToCart.mutate(
+                { variantId, quantity },
+                {
+                    onSuccess: () => {
+                        setModalOpen(false)
+                        setModalItem(null)
+                    },
+                },
+            )
+        },
+        [moveToCart],
+    )
 
     if (isLoading) {
         return <WishlistSkeleton />
@@ -239,7 +251,11 @@ function WishlistContent() {
             {/* Product grid */}
             <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                 {items.map((item) => (
-                    <WishlistCard key={item.id} item={item} />
+                    <WishlistCard
+                        key={item.id}
+                        item={item}
+                        onMoveToCart={handleOpenMoveModal}
+                    />
                 ))}
             </div>
 
@@ -249,6 +265,15 @@ function WishlistContent() {
                     <Link href={ROUTES.SHOP.PRODUCTS}>Continue Shopping</Link>
                 </Button>
             </div>
+
+            {/* Move to Cart modal */}
+            <MoveToCartModal
+                item={modalItem}
+                open={modalOpen}
+                onOpenChange={setModalOpen}
+                onConfirm={handleConfirmMove}
+                isPending={moveToCart.isPending}
+            />
         </div>
     )
 }

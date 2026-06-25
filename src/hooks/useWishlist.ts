@@ -8,6 +8,7 @@ import {
     selectWishlistCount,
     selectIsInWishlist,
 } from '@/redux/slices/wishlistSlice'
+import { hydrateCart } from '@/redux/slices/cartSlice'
 import { wishlistService } from '@/services/wishlistService'
 import { useAuth } from '@/hooks/useAuth'
 import { Toast } from '@/components/ui/Toast'
@@ -107,6 +108,43 @@ export function useRemoveFromWishlist() {
                 queryClient.setQueryData(wishlistKeys.items(), context.previous)
             }
             Toast('Failed to remove from wishlist', 'error')
+        },
+    })
+}
+
+// -------------------------------------------------------------------
+// Move to cart mutation — atomically moves item from wishlist to cart
+// -------------------------------------------------------------------
+
+export function useMoveToCart() {
+    const queryClient = useQueryClient()
+    const dispatch = useAppDispatch()
+
+    return useMutation({
+        mutationFn: ({ variantId, quantity }: { variantId: string; quantity: number }) =>
+            wishlistService.moveToCart(variantId, quantity),
+        onMutate: async ({ variantId }) => {
+            await queryClient.cancelQueries({ queryKey: wishlistKeys.items() })
+            const previous = queryClient.getQueryData<WishlistItem[]>(wishlistKeys.items())
+
+            // Optimistic: remove from wishlist immediately
+            queryClient.setQueryData<WishlistItem[]>(wishlistKeys.items(), (old = []) =>
+                old.filter(i => i.productVariantId !== variantId),
+            )
+            return { previous }
+        },
+        onSuccess: () => {
+            Toast('Moved to cart')
+            queryClient.invalidateQueries({ queryKey: wishlistKeys.items() })
+            // Cart uses Redux — re-hydrate to pick up the new item
+            dispatch(hydrateCart({ isAuthenticated: true }))
+        },
+        onError: (_err, _vars, context) => {
+            // Rollback wishlist
+            if (context?.previous) {
+                queryClient.setQueryData(wishlistKeys.items(), context.previous)
+            }
+            Toast('Failed to move item to cart', 'error')
         },
     })
 }
