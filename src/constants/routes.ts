@@ -35,6 +35,9 @@ export const ROUTES = {
         CHANGE_PASSWORD: '/profile/password',  // change password
     },
 
+    // ------ Loyalty / Points (US 6.2) ------
+    LOYALTY: '/loyalty',
+
     // ------ Cart (FR10) ------
     CART: '/cart',
 
@@ -107,6 +110,7 @@ export const PROTECTED_ROUTES = [
     '/profile',
     '/checkout',
     '/orders',
+    '/loyalty',
     '/wishlist',
 ] as const
 
