@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
+import { useQueryClient } from "@tanstack/react-query"
 import { AlertCircle, ArrowLeft, Award, CreditCard, Package, RotateCcw, XCircle } from "lucide-react"
 import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
@@ -14,6 +15,7 @@ import { Badge } from "@/components/ui/Badge"
 import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCancelOrder, useOrderDetail } from "@/hooks/useOrders"
+import { pointsKeys } from "@/hooks/usePoints"
 import { formatPrice } from "@/utils/formatPrice"
 import { formatDateTime } from "@/utils/formatDate"
 import type { ApiError } from "@/types/api"
@@ -46,6 +48,13 @@ export default function OrderDetailPage() {
     const { data: order, isLoading, error: orderError, refetch } = useOrderDetail(id)
     const cancelOrderMutation = useCancelOrder()
     const [isCanceling, setIsCanceling] = useState(false)
+    const queryClient = useQueryClient()
+
+    useEffect(() => {
+        if (order?.status === OrderStatus.Returned) {
+            queryClient.invalidateQueries({ queryKey: pointsKeys.all })
+        }
+    }, [order?.status, queryClient])
 
     const handleCancelOrder = async () => {
         if (!order) return
