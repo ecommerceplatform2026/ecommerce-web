@@ -93,7 +93,7 @@ function PointsTransactionList({
             <CardHeader>
                 <CardTitle>Points History</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="space-y-1 max-h-[480px] overflow-y-auto">
                 {transactions.map((txn) => {
                     const cfg = typeConfig[txn.type] ?? typeConfig.Earn
                     const Icon = cfg.icon
