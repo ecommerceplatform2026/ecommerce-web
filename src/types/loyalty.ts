@@ -12,6 +12,7 @@ export interface LoyaltyTransaction {
     points: number
     orderId: number
     description: string
+    status?: "Pending" | "Completed" | "Cancelled"
 }
 
 export interface PaginatedTransactions {
