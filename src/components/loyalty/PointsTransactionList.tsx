@@ -112,7 +112,14 @@ function PointsTransactionList({
                                     <Icon className="h-4 w-4" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium">{txn.description}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium">{txn.description}</p>
+                                        {txn.status === "Cancelled" && (
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5">
+                                                Cancelled
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
                                         {new Date(txn.date).toLocaleDateString()}
                                     </p>
