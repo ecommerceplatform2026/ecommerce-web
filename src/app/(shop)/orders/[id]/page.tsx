@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { AlertCircle, ArrowLeft, Award, CreditCard, Package, XCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft, Award, CreditCard, Package, RotateCcw, XCircle } from "lucide-react"
 import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
@@ -270,6 +270,28 @@ export default function OrderDetailPage() {
                                     <p className="text-xs text-emerald-600">
                                         They&apos;ve been added to your balance.
                                     </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {order.status === OrderStatus.Returned && (
+                        <div className="border border-amber-200 bg-amber-50 p-4 space-y-1">
+                            <div className="flex items-start gap-3">
+                                <RotateCcw className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                                <div>
+                                    <p className="font-medium text-amber-800 text-sm">
+                                        Points reversed
+                                    </p>
+                                    <p className="text-xs text-amber-600">
+                                        Loyalty points earned from this order were reversed after the return.
+                                    </p>
+                                    <Link
+                                        href={ROUTES.LOYALTY}
+                                        className="text-xs text-amber-700 underline underline-offset-2 hover:text-amber-800 inline-block mt-1"
+                                    >
+                                        View transaction history
+                                    </Link>
                                 </div>
                             </div>
                         </div>
