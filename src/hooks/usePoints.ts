@@ -17,6 +17,6 @@ export function usePointsBalance() {
 export function usePointsTransactions(page: number) {
     return useQuery({
         queryKey: pointsKeys.transactions(page),
-        queryFn: () => loyaltyService.getTransactions(page),
+        queryFn: () => loyaltyService.getTransactions({ page }),
     })
 }
