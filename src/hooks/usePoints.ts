@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
 import { loyaltyService } from '@/services/loyaltyService'
-import type { LoyaltyTransaction } from '@/types/loyalty'
 
 export const pointsKeys = {
     all: ['points'] as const,
@@ -20,16 +19,5 @@ export function usePointsTransactions(page: number, type?: string, status?: stri
     return useQuery({
         queryKey: pointsKeys.transactions(page, type, status),
         queryFn: () => loyaltyService.getTransactions({ page, type, status }),
-    })
-}
-
-export function useOrderLoyaltyTransactions(orderId: string, pageSize: number = 50) {
-    return useQuery({
-        queryKey: [...pointsKeys.all, 'order-transactions', orderId] as const,
-        queryFn: async (): Promise<LoyaltyTransaction[]> => {
-            const result = await loyaltyService.getTransactions({ page: 1, pageSize })
-            return result.items.filter((txn) => txn.orderId === Number(orderId))
-        },
-        enabled: !!orderId,
     })
 }

@@ -1,3 +1,6 @@
+export const LoyaltyTransactionType = { Earn: 0, Redeem: 1, Expired: 2 } as const
+export const LoyaltyTransactionStatus = { Pending: 0, Completed: 1, Cancelled: 2 } as const
+
 export interface LoyaltyBalanceResponse {
     balance: number
     pendingPoints: number
@@ -8,11 +11,11 @@ export interface LoyaltyBalanceResponse {
 export interface LoyaltyTransaction {
     id: string
     date: string
-    type: "Earn" | "Redeem" | "Expired"
+    type: number
     points: number
-    orderId: number
+    orderId: string
     description: string
-    status?: "Pending" | "Completed" | "Cancelled"
+    status: number
 }
 
 export interface PaginatedTransactions {

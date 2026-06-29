@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/Badge"
 import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCancelOrder, useOrderDetail } from "@/hooks/useOrders"
+import { LoyaltyTransactionStatus, LoyaltyTransactionType } from "@/types/loyalty"
 import { pointsKeys } from "@/hooks/usePoints"
 import { formatPrice } from "@/utils/formatPrice"
 import { formatDateTime } from "@/utils/formatDate"
@@ -115,7 +116,12 @@ export default function OrderDetailPage() {
         order.status === OrderStatus.Pending || order.status === OrderStatus.Confirmed
 
     const itemsSubtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    const earnedPoints = Math.floor(order.totalAmount / 10000)
+    const earnedPoints = order.loyaltyTransactions
+        ?.filter(t => t.type === LoyaltyTransactionType.Earn && t.status === LoyaltyTransactionStatus.Completed)
+        .reduce((sum, t) => sum + t.points, 0) ?? 0
+    const reversalPoints = order.loyaltyTransactions
+        ?.filter(t => t.type === LoyaltyTransactionType.Earn && t.status === LoyaltyTransactionStatus.Cancelled)
+        .reduce((sum, t) => sum + Math.abs(t.points), 0) ?? 0
 
     return (
         <div className="container mx-auto px-4 py-12 lg:px-8 max-w-4xl space-y-8">
@@ -290,11 +296,15 @@ export default function OrderDetailPage() {
                                 <RotateCcw className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
                                 <div>
                                     <p className="font-medium text-amber-800 text-sm">
-                                        Points reversed
+                                        {reversalPoints > 0
+                                            ? `${reversalPoints.toLocaleString()} points reversed`
+                                            : "Points reversed"}
                                     </p>
-                                    <p className="text-xs text-amber-600">
-                                        Loyalty points earned from this order were reversed after the return.
-                                    </p>
+                                    {reversalPoints > 0 && (
+                                        <p className="text-xs text-amber-600">
+                                            ≈ {formatPrice(reversalPoints * 100)} VND
+                                        </p>
+                                    )}
                                     <Link
                                         href={ROUTES.LOYALTY}
                                         className="text-xs text-amber-700 underline underline-offset-2 hover:text-amber-800 inline-block mt-1"

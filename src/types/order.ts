@@ -1,4 +1,5 @@
 import { DeliveryStatus, OrderStatus, PaymentMethod } from '@/constants/enums'
+import type { LoyaltyTransaction } from './loyalty'
 
 export interface OrderItemResponse {
     id: string
@@ -40,6 +41,7 @@ export interface OrderResponse {
     createdAt: string
     items: OrderItemResponse[]
     tracking?: TrackingInfo | null
+    loyaltyTransactions?: LoyaltyTransaction[]
 }
 
 export interface CheckoutRequest {
