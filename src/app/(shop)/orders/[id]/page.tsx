@@ -285,12 +285,18 @@ export default function OrderDetailPage() {
                                     <p className="text-xs text-emerald-600">
                                         They&apos;ve been added to your balance.
                                     </p>
+                                    <Link
+                                        href={ROUTES.LOYALTY}
+                                        className="text-xs text-emerald-700 underline underline-offset-2 hover:text-emerald-800 inline-block mt-1"
+                                    >
+                                        View transaction history
+                                    </Link>
                                 </div>
                             </div>
                         </div>
                     )}
 
-                    {(order.status === OrderStatus.Returned || order.status === OrderStatus.Cancelled) && redeemRefund > 0 && (
+                    {redeemRefund > 0 && (
                         <div className="border border-emerald-200 bg-emerald-50 p-4 space-y-1">
                             <div className="flex items-start gap-3">
                                 <RotateCcw className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
