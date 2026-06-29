@@ -119,8 +119,8 @@ export default function OrderDetailPage() {
     const earnedPoints = order.loyaltyTransactions
         ?.filter(t => t.type === LoyaltyTransactionType.Earn && t.status === LoyaltyTransactionStatus.Completed)
         .reduce((sum, t) => sum + t.points, 0) ?? 0
-    const reversalPoints = order.loyaltyTransactions
-        ?.filter(t => t.type === LoyaltyTransactionType.Earn && t.status === LoyaltyTransactionStatus.Cancelled)
+    const redeemRefund = order.loyaltyTransactions
+        ?.filter(t => t.type === LoyaltyTransactionType.Redeem && t.status === LoyaltyTransactionStatus.Cancelled)
         .reduce((sum, t) => sum + Math.abs(t.points), 0) ?? 0
 
     return (
@@ -290,24 +290,20 @@ export default function OrderDetailPage() {
                         </div>
                     )}
 
-                    {order.status === OrderStatus.Returned && (
-                        <div className="border border-amber-200 bg-amber-50 p-4 space-y-1">
+                    {(order.status === OrderStatus.Returned || order.status === OrderStatus.Cancelled) && redeemRefund > 0 && (
+                        <div className="border border-emerald-200 bg-emerald-50 p-4 space-y-1">
                             <div className="flex items-start gap-3">
-                                <RotateCcw className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
+                                <RotateCcw className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
                                 <div>
-                                    <p className="font-medium text-amber-800 text-sm">
-                                        {reversalPoints > 0
-                                            ? `${reversalPoints.toLocaleString()} points reversed`
-                                            : "Points reversed"}
+                                    <p className="font-medium text-emerald-800 text-sm">
+                                        {redeemRefund.toLocaleString()} points restored to your balance
                                     </p>
-                                    {reversalPoints > 0 && (
-                                        <p className="text-xs text-amber-600">
-                                            ≈ {formatPrice(reversalPoints * 100)} VND
-                                        </p>
-                                    )}
+                                    <p className="text-xs text-emerald-600">
+                                        Points redeemed on this order were returned.
+                                    </p>
                                     <Link
                                         href={ROUTES.LOYALTY}
-                                        className="text-xs text-amber-700 underline underline-offset-2 hover:text-amber-800 inline-block mt-1"
+                                        className="text-xs text-emerald-700 underline underline-offset-2 hover:text-emerald-800 inline-block mt-1"
                                     >
                                         View transaction history
                                     </Link>
