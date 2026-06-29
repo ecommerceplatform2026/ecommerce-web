@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { AlertCircle, ArrowLeft, Award, CreditCard, Package, XCircle } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
+import { AlertCircle, ArrowLeft, Award, CreditCard, Package, RotateCcw, XCircle } from "lucide-react"
 import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
@@ -14,6 +15,8 @@ import { Badge } from "@/components/ui/Badge"
 import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCancelOrder, useOrderDetail } from "@/hooks/useOrders"
+import { LoyaltyTransactionStatus, LoyaltyTransactionType } from "@/types/loyalty"
+import { pointsKeys } from "@/hooks/usePoints"
 import { formatPrice } from "@/utils/formatPrice"
 import { formatDateTime } from "@/utils/formatDate"
 import type { ApiError } from "@/types/api"
@@ -46,6 +49,13 @@ export default function OrderDetailPage() {
     const { data: order, isLoading, error: orderError, refetch } = useOrderDetail(id)
     const cancelOrderMutation = useCancelOrder()
     const [isCanceling, setIsCanceling] = useState(false)
+    const queryClient = useQueryClient()
+
+    useEffect(() => {
+        if (order?.status === OrderStatus.Returned) {
+            queryClient.invalidateQueries({ queryKey: pointsKeys.all })
+        }
+    }, [order?.status, queryClient])
 
     const handleCancelOrder = async () => {
         if (!order) return
@@ -106,7 +116,12 @@ export default function OrderDetailPage() {
         order.status === OrderStatus.Pending || order.status === OrderStatus.Confirmed
 
     const itemsSubtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0)
-    const earnedPoints = Math.floor(order.totalAmount / 10000)
+    const earnedPoints = order.loyaltyTransactions
+        ?.filter(t => t.type === LoyaltyTransactionType.Earn && t.status === LoyaltyTransactionStatus.Completed)
+        .reduce((sum, t) => sum + t.points, 0) ?? 0
+    const redeemRefund = order.loyaltyTransactions
+        ?.filter(t => t.type === LoyaltyTransactionType.Redeem && t.status === LoyaltyTransactionStatus.Cancelled)
+        .reduce((sum, t) => sum + Math.abs(t.points), 0) ?? 0
 
     return (
         <div className="container mx-auto px-4 py-12 lg:px-8 max-w-4xl space-y-8">
@@ -270,6 +285,34 @@ export default function OrderDetailPage() {
                                     <p className="text-xs text-emerald-600">
                                         They&apos;ve been added to your balance.
                                     </p>
+                                    <Link
+                                        href={ROUTES.LOYALTY}
+                                        className="text-xs text-emerald-700 underline underline-offset-2 hover:text-emerald-800 inline-block mt-1"
+                                    >
+                                        View transaction history
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {redeemRefund > 0 && (
+                        <div className="border border-emerald-200 bg-emerald-50 p-4 space-y-1">
+                            <div className="flex items-start gap-3">
+                                <RotateCcw className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
+                                <div>
+                                    <p className="font-medium text-emerald-800 text-sm">
+                                        {redeemRefund.toLocaleString()} points restored to your balance
+                                    </p>
+                                    <p className="text-xs text-emerald-600">
+                                        Points redeemed on this order were returned.
+                                    </p>
+                                    <Link
+                                        href={ROUTES.LOYALTY}
+                                        className="text-xs text-emerald-700 underline underline-offset-2 hover:text-emerald-800 inline-block mt-1"
+                                    >
+                                        View transaction history
+                                    </Link>
                                 </div>
                             </div>
                         </div>

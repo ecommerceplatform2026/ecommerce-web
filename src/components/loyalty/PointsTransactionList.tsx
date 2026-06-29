@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { EmptyState } from "@/components/ui/EmptyState"
+import { LoyaltyTransactionType, LoyaltyTransactionStatus } from "@/types/loyalty"
 import type { LoyaltyTransaction } from "@/types/loyalty"
 
 interface PointsTransactionListProps {
@@ -20,11 +21,11 @@ interface PointsTransactionListProps {
     onRetry?: () => void
 }
 
-const typeConfig = {
-    Earn: { icon: ArrowUpRight, bg: "bg-green-100 text-green-700", textColor: "text-green-700", sign: "+" },
-    Redeem: { icon: ArrowDownRight, bg: "bg-red-100 text-red-700", textColor: "text-red-700", sign: "−" },
-    Expired: { icon: Clock, bg: "bg-amber-100 text-amber-700", textColor: "text-amber-700", sign: "−" },
-} as const
+const typeConfig: Record<number, { icon: typeof ArrowUpRight; bg: string; textColor: string; sign: string }> = {
+    [LoyaltyTransactionType.Earn]: { icon: ArrowUpRight, bg: "bg-green-100 text-green-700", textColor: "text-green-700", sign: "+" },
+    [LoyaltyTransactionType.Redeem]: { icon: ArrowDownRight, bg: "bg-red-100 text-red-700", textColor: "text-red-700", sign: "−" },
+    [LoyaltyTransactionType.Expired]: { icon: Clock, bg: "bg-amber-100 text-amber-700", textColor: "text-amber-700", sign: "−" },
+}
 
 function PointsTransactionList({
     transactions,
@@ -93,9 +94,9 @@ function PointsTransactionList({
             <CardHeader>
                 <CardTitle>Points History</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1">
+            <CardContent className="space-y-1 max-h-[480px] overflow-y-auto">
                 {transactions.map((txn) => {
-                    const cfg = typeConfig[txn.type] ?? typeConfig.Earn
+                    const cfg = typeConfig[txn.type] ?? typeConfig[LoyaltyTransactionType.Earn]
                     const Icon = cfg.icon
                     return (
                         <div
@@ -112,7 +113,14 @@ function PointsTransactionList({
                                     <Icon className="h-4 w-4" />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-medium">{txn.description}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium">{txn.description}</p>
+                                        {txn.status === LoyaltyTransactionStatus.Cancelled && (
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5">
+                                                Cancelled
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
                                         {new Date(txn.date).toLocaleDateString()}
                                     </p>
