@@ -1,13 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, Bell, LayoutDashboard, Star } from "lucide-react"
+import { ShoppingBag, Menu, X, Search, User, LogOut, Heart, Package, LayoutDashboard, Star } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/Input"
 import { useState, useRef, useCallback, useEffect } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { ROUTES } from "@/constants/routes"
+import { NotificationBell } from "@/components/notifications/NotificationBell"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -265,10 +266,7 @@ export function Header() {
                                 {mobileSearchOpen ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
                             </button>
 
-                            {/* Notification icon */}
-                            <Button variant="ghost" size="icon" className="relative cursor-pointer min-h-[44px]">
-                                <Bell className="h-5 w-5" />
-                            </Button>
+                            <NotificationBell />
 
                             {/* User info icon:
                                 - Guest -> go to /login
