@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input"
 import { useProfile } from "@/hooks/useProfile"
 import { useCheckout } from "@/hooks/useOrders"
 import { usePointsBalance } from "@/hooks/usePoints"
+import { useNotifications } from "@/hooks/useNotifications"
 import { PaymentMethod } from "@/constants/enums"
 import { Spinner } from "@/components/ui/Spinner"
 import { ROUTES } from "@/constants/routes"
@@ -66,6 +67,7 @@ export function CheckoutForm({
     const { address, isLoading: isProfileLoading, error: profileError } = useProfile()
     const { data: pointsBalance, isLoading: isPointsLoading, error: pointsError } = usePointsBalance()
     const checkoutMutation = useCheckout()
+    const { add: addNotification } = useNotifications()
     const [selectedPayment, setSelectedPayment] = useState<PaymentMethod>(PaymentMethod.COD)
     const [pointsInput, setPointsInput] = useState("")
     const [debouncedPoints, setDebouncedPoints] = useState(0)
@@ -148,6 +150,11 @@ export function CheckoutForm({
                 ),
                 { duration: 6000 }
             )
+
+            addNotification("order", "Order Placed", `Order #${result.orderCode} has been placed.`, `/orders/${result.orderId}`)
+            if (validatedPoints > 0) {
+                addNotification("points", "Points Redeemed", `${validatedPoints.toLocaleString()} points redeemed.`, "/loyalty")
+            }
 
             // If not redirecting immediately to checkoutUrl
             if (!result.checkoutUrl) {
