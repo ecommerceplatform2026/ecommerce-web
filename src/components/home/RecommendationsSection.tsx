@@ -57,7 +57,7 @@ export function RecommendationsSection() {
                     <div className="flex items-end justify-between mb-12">
                         <div>
                             <p className="text-xs tracking-[0.3em] text-muted-foreground uppercase mb-3">
-                                What's trending
+                                What&apos;s trending
                             </p>
                             <h2 className="font-serif text-4xl md:text-5xl">Popular Right Now</h2>
                         </div>
