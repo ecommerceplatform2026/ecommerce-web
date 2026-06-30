@@ -204,3 +204,13 @@ export const LOYALTY_ENDPOINTS = {
     BALANCE: '/api/loyalty/balance',
     TRANSACTIONS: '/api/loyalty/transactions',
 } as const
+
+// ============================================================
+// RECOMMENDATIONS
+// ============================================================
+
+export const RECOMMENDATION_ENDPOINTS = {
+    POPULAR: '/api/recommendations/popular',
+    FOR_YOU: '/api/recommendations/for-you',
+    SIMILAR: (productId: string) => `/api/recommendations/similar/${productId}`,
+} as const

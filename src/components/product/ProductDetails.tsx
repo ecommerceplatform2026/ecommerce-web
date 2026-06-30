@@ -15,6 +15,7 @@ import { formatPrice } from "@/utils/formatPrice"
 import { ProductImageGallery } from "./ProductImageGallery"
 import { ReviewSection } from "@/components/review/ReviewSection"
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs"
+import { SimilarProducts } from "./SimilarProducts"
 import type { CartItem } from "@/types/cart"
 import type { ProductDetail, ProductDetailVariant } from "@/types/product"
 import type { ApiError } from "@/types/api"
@@ -439,6 +440,8 @@ export function ProductDetails({ product }: ProductDetailsProps) {
                 averageRating={product.averageRating ?? 0}
                 reviewCount={product.reviewCount ?? 0}
             />
+
+            <SimilarProducts productId={product.id} />
         </div>
     )
 }
