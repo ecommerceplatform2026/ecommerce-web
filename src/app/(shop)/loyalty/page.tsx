@@ -1,11 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Gift, ShoppingBag, Clock, Info } from "lucide-react"
 import { PointsBalanceCard } from "@/components/loyalty/PointsBalanceCard"
+import { PointsExpiryBanner } from "@/components/loyalty/PointsExpiryBanner"
 import { PointsTransactionList } from "@/components/loyalty/PointsTransactionList"
-import { usePointsBalance, usePointsTransactions } from "@/hooks/usePoints"
+import { usePointsBalance, usePointsTransactions, useExpiringPoints } from "@/hooks/usePoints"
+import { useNotifications } from "@/hooks/useNotifications"
+import { Toast } from "@/components/ui/Toast"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 
 export default function LoyaltyPage() {
@@ -18,10 +21,30 @@ export default function LoyaltyPage() {
         error: txError,
         refetch: refetchTx,
     } = usePointsTransactions(page)
+    const { data: expiring } = useExpiringPoints()
+    const { add, hasSeen, markSeen } = useNotifications()
+
+    const [bannerDismissed, setBannerDismissed] = useState(() => hasSeen("expiry_banner"))
+
+    useEffect(() => {
+        if (expiring && !hasSeen("expiry_toast")) {
+            Toast("Your points will expire soon", "info")
+            add("points", "Points expiring", "Your points will expire soon due to inactivity.", "/loyalty")
+            markSeen("expiry_toast")
+        }
+    }, [expiring, add, hasSeen, markSeen])
+
+    function handleDismissBanner() {
+        markSeen("expiry_banner")
+        setBannerDismissed(true)
+    }
 
     return (
         <div className="py-16 px-4 lg:px-8">
             <div className="container mx-auto max-w-4xl">
+                <div className="mb-6">
+                    <PointsExpiryBanner open={!!expiring && !bannerDismissed} onDismiss={handleDismissBanner} />
+                </div>
                 <div className="grid md:grid-cols-3 gap-6 mb-8">
                     <div className="md:col-span-2">
                         <PointsBalanceCard

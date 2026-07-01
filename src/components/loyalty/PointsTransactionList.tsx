@@ -115,7 +115,15 @@ function PointsTransactionList({
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm font-medium">{txn.description}</p>
-                                        {txn.status === LoyaltyTransactionStatus.Cancelled && (
+                                        {txn.type === LoyaltyTransactionType.Expired && txn.status === LoyaltyTransactionStatus.Pending ? (
+                                            <span className="text-[10px] uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5">
+                                                Expiring soon
+                                            </span>
+                                        ) : txn.type === LoyaltyTransactionType.Expired && txn.status === LoyaltyTransactionStatus.Completed ? (
+                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5">
+                                                Expired
+                                            </span>
+                                        ) : txn.status === LoyaltyTransactionStatus.Cancelled && (
                                             <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5">
                                                 Cancelled
                                             </span>
