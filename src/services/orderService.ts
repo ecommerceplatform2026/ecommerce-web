@@ -32,4 +32,16 @@ export const orderService = {
             ORDER_ENDPOINTS.CANCEL(id),
         )
     },
+
+    completeOrder: async (id: string): Promise<void> => {
+        await axiosInstance.post<ApiResponse<unknown>>(
+            ORDER_ENDPOINTS.COMPLETE(id),
+        )
+    },
+
+    returnOrder: async (id: string): Promise<void> => {
+        await axiosInstance.post<ApiResponse<unknown>>(
+            ORDER_ENDPOINTS.RETURN(id),
+        )
+    },
 }
