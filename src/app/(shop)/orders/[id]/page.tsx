@@ -5,7 +5,7 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useQueryClient } from "@tanstack/react-query"
-import { AlertCircle, ArrowLeft, Award, CreditCard, Package, RotateCcw, XCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft, Award, CheckCircle, CreditCard, Package, RotateCcw, XCircle } from "lucide-react"
 import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
@@ -14,7 +14,7 @@ import { Spinner } from "@/components/ui/Spinner"
 import { Badge } from "@/components/ui/Badge"
 import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
-import { useCancelOrder, useOrderDetail } from "@/hooks/useOrders"
+import { useCancelOrder, useCompleteOrder, useOrderDetail, useReturnOrder } from "@/hooks/useOrders"
 import { LoyaltyTransactionStatus, LoyaltyTransactionType } from "@/types/loyalty"
 import { pointsKeys } from "@/hooks/usePoints"
 import { formatPrice } from "@/utils/formatPrice"
@@ -48,7 +48,11 @@ export default function OrderDetailPage() {
 
     const { data: order, isLoading, error: orderError, refetch } = useOrderDetail(id)
     const cancelOrderMutation = useCancelOrder()
+    const completeOrderMutation = useCompleteOrder()
+    const returnOrderMutation = useReturnOrder()
     const [isCanceling, setIsCanceling] = useState(false)
+    const [isCompleting, setIsCompleting] = useState(false)
+    const [isReturning, setIsReturning] = useState(false)
     const queryClient = useQueryClient()
 
     useEffect(() => {
@@ -70,6 +74,37 @@ export default function OrderDetailPage() {
             toast.error(apiError.message ?? "Unable to cancel order. Please try again.")
         } finally {
             setIsCanceling(false)
+        }
+    }
+
+    const handleReceive = async () => {
+        if (!order) return
+
+        setIsCompleting(true)
+        try {
+            await completeOrderMutation.mutateAsync(order.id)
+            toast.success("Order has been received successfully.")
+        } catch (err) {
+            const apiError = err as ApiError
+            toast.error(apiError.message ?? "Unable to confirm receipt. Please try again.")
+        } finally {
+            setIsCompleting(false)
+        }
+    }
+
+    const handleReturn = async () => {
+        if (!order) return
+        if (!confirm("Are you sure you want to return this order?")) return
+
+        setIsReturning(true)
+        try {
+            await returnOrderMutation.mutateAsync(order.id)
+            toast.success("Return request has been submitted successfully.")
+        } catch (err) {
+            const apiError = err as ApiError
+            toast.error(apiError.message ?? "Unable to submit return request. Please try again.")
+        } finally {
+            setIsReturning(false)
         }
     }
 
@@ -112,6 +147,7 @@ export default function OrderDetailPage() {
         )
     }
 
+    const isDelivered = order.status === OrderStatus.Delivered
     const isPendingOrConfirmed =
         order.status === OrderStatus.Pending || order.status === OrderStatus.Confirmed
 
@@ -236,6 +272,47 @@ export default function OrderDetailPage() {
             {/* Price breakdown and Cancel CTA */}
             <div className="flex flex-col md:flex-row justify-between items-start gap-6 border-t border-border pt-6">
                 <div>
+                    {isDelivered && (
+                        <>
+                            <Button
+                                variant="outline"
+                                disabled={isCompleting || isReturning}
+                                onClick={handleReceive}
+                                className="rounded-none text-green-600 border-green-600/20 hover:bg-green-600/5"
+                            >
+                                {isCompleting ? (
+                                    <>
+                                        <Spinner size="sm" className="mr-2" />
+                                        Confirming...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle className="h-4 w-4 mr-2" />
+                                        Receive
+                                    </>
+                                )}
+                            </Button>
+
+                            <Button
+                                variant="outline"
+                                disabled={isCompleting || isReturning}
+                                onClick={handleReturn}
+                                className="rounded-none text-orange-600 border-orange-600/20 hover:bg-orange-600/5"
+                            >
+                                {isReturning ? (
+                                    <>
+                                        <Spinner size="sm" className="mr-2" />
+                                        Requesting Return...
+                                    </>
+                                ) : (
+                                    <>
+                                        <RotateCcw className="h-4 w-4 mr-2" />
+                                        Return
+                                    </>
+                                )}
+                            </Button>
+                        </>
+                    )}
                     {isPendingOrConfirmed && (
                         <Button
                             variant="outline"
