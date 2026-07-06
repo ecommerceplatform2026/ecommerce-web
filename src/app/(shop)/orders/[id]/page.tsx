@@ -5,14 +5,14 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useQueryClient } from "@tanstack/react-query"
-import { AlertCircle, ArrowLeft, Award, CreditCard, ExternalLink, Package, RotateCcw, XCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft, Award, Check, CreditCard, ExternalLink, Package, RotateCcw, XCircle } from "lucide-react"
 import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { Spinner } from "@/components/ui/Spinner"
 import { Badge } from "@/components/ui/Badge"
-import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus, DELIVERY_STATUS_COLOR, DELIVERY_STATUS_LABEL } from "@/constants/enums"
+import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus, DELIVERY_STATUS_COLOR, DELIVERY_STATUS_LABEL, DeliveryStatus } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCancelOrder, useOrderDetail } from "@/hooks/useOrders"
 import { LoyaltyTransactionStatus, LoyaltyTransactionType } from "@/types/loyalty"
@@ -51,6 +51,83 @@ function getTrackingUrl(carrierCode: string, trackingCode: string): string | nul
         return `https://donhang.ghn.vn/?order_code=${trackingCode}`
     }
     return null
+}
+
+interface TimelineStep {
+    label: string
+    description?: string
+    isCompleted: boolean
+    isCurrent: boolean
+    isError?: boolean
+}
+
+function getTimelineSteps(status: DeliveryStatus): TimelineStep[] {
+    const steps: TimelineStep[] = []
+    
+    const isCancelled = status === DeliveryStatus.Cancelled
+    const isFailed = status === DeliveryStatus.Failed
+    const isReturned = status === DeliveryStatus.Returned
+    const isException = status === DeliveryStatus.Exception
+
+    const standardSequence = [
+        DeliveryStatus.Pending,
+        DeliveryStatus.Created,
+        DeliveryStatus.PickedUp,
+        DeliveryStatus.InTransit,
+        DeliveryStatus.OutForDelivery,
+        DeliveryStatus.Delivered
+    ]
+
+    const labels: Record<number, { label: string; desc: string }> = {
+        [DeliveryStatus.Pending]: { label: "Pending", desc: "Awaiting preparation" },
+        [DeliveryStatus.Created]: { label: "Created", desc: "Package prepared" },
+        [DeliveryStatus.PickedUp]: { label: "Picked Up", desc: "Handed over to carrier" },
+        [DeliveryStatus.InTransit]: { label: "In Transit", desc: "Package is in transit" },
+        [DeliveryStatus.OutForDelivery]: { label: "Out for Delivery", desc: "Out for local delivery" },
+        [DeliveryStatus.Delivered]: { label: "Delivered", desc: "Delivered successfully" },
+    }
+
+    if (isCancelled) {
+        steps.push({ label: "Pending", description: "Order confirmed", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Cancelled", description: "Delivery cancelled", isCompleted: false, isCurrent: true, isError: true })
+        return steps
+    }
+
+    if (isFailed) {
+        steps.push({ label: "Pending", description: "Order confirmed", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Created", description: "Package prepared", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Failed", description: "Delivery failed", isCompleted: false, isCurrent: true, isError: true })
+        return steps
+    }
+
+    if (isReturned) {
+        steps.push({ label: "Pending", description: "Order confirmed", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Created", description: "Package prepared", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Picked Up", description: "Picked up by carrier", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Returned", description: "Returned to sender", isCompleted: false, isCurrent: true, isError: true })
+        return steps
+    }
+
+    if (isException) {
+        steps.push({ label: "Pending", description: "Order confirmed", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Created", description: "Package prepared", isCompleted: true, isCurrent: false })
+        steps.push({ label: "Exception", description: "Delivery exception", isCompleted: false, isCurrent: true, isError: true })
+        return steps
+    }
+
+    const currentIndex = standardSequence.indexOf(status)
+    
+    standardSequence.forEach((stepStatus, index) => {
+        const info = labels[stepStatus]
+        steps.push({
+            label: info.label,
+            description: info.desc,
+            isCompleted: index < currentIndex,
+            isCurrent: index === currentIndex,
+        })
+    })
+
+    return steps
 }
 
 export default function OrderDetailPage() {
@@ -182,48 +259,107 @@ export default function OrderDetailPage() {
 
                 {/* Delivery Tracking */}
                 <div className="border border-border p-5 bg-card space-y-2">
-                    <h3 className="font-medium text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                    <h3 className="font-medium text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 border-b border-border pb-2.5">
                         <Package className="h-4 w-4" />
                         Tracking Details
                     </h3>
-                    <div className="text-sm">
+                    <div className="text-sm pt-1">
                         {order.tracking ? (
-                            <div className="space-y-2">
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="font-medium text-xs">Carrier:</span>
-                                    <span className="text-xs text-foreground font-semibold">
-                                        {CARRIER_NAME_MAP[order.tracking.carrierCode] || order.tracking.carrierCode}
-                                    </span>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="font-medium text-xs">Status:</span>
-                                    <Badge variant="secondary" className={`${DELIVERY_STATUS_COLOR[order.tracking.status]} border-none rounded-none px-2 py-0.5 font-medium text-xs`}>
-                                        {DELIVERY_STATUS_LABEL[order.tracking.status]}
-                                    </Badge>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="font-medium text-xs">Tracking Code:</span>
-                                    {getTrackingUrl(order.tracking.carrierCode, order.tracking.trackingCode) ? (
-                                        <a
-                                            href={getTrackingUrl(order.tracking.carrierCode, order.tracking.trackingCode)!}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 text-xs font-mono text-primary hover:underline"
-                                        >
-                                            {order.tracking.trackingCode}
-                                            <ExternalLink className="h-3.5 w-3.5" />
-                                        </a>
-                                    ) : (
-                                        <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 inline-block select-all">
-                                            {order.tracking.trackingCode}
+                            <div className="space-y-4">
+                                <div className="space-y-2 border-b border-border/60 pb-3">
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="font-medium text-xs text-muted-foreground">Carrier</span>
+                                        <span className="text-xs text-foreground font-semibold">
+                                            {CARRIER_NAME_MAP[order.tracking.carrierCode] || order.tracking.carrierCode}
                                         </span>
-                                    )}
+                                    </div>
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="font-medium text-xs text-muted-foreground">Status</span>
+                                        <Badge variant="secondary" className={`${DELIVERY_STATUS_COLOR[order.tracking.status]} border-none rounded-none px-2 py-0.5 font-medium text-xs`}>
+                                            {DELIVERY_STATUS_LABEL[order.tracking.status]}
+                                        </Badge>
+                                    </div>
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <span className="font-medium text-xs text-muted-foreground">Tracking Code</span>
+                                        {getTrackingUrl(order.tracking.carrierCode, order.tracking.trackingCode) ? (
+                                            <a
+                                                href={getTrackingUrl(order.tracking.carrierCode, order.tracking.trackingCode)!}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="inline-flex items-center gap-1 text-xs font-mono text-primary hover:underline"
+                                            >
+                                                {order.tracking.trackingCode}
+                                                <ExternalLink className="h-3.5 w-3.5" />
+                                            </a>
+                                        ) : (
+                                            <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 inline-block select-all">
+                                                {order.tracking.trackingCode}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Step Progress Timeline */}
+                                <div className="space-y-3">
+                                    <h4 className="font-medium text-[11px] uppercase tracking-wider text-muted-foreground">
+                                        Delivery Progress
+                                    </h4>
+                                    
+                                    <div className="flex flex-col space-y-5 relative pl-4 before:absolute before:left-[9px] before:top-2 before:bottom-2 before:w-0.5 before:bg-muted">
+                                        {getTimelineSteps(order.tracking.status).map((step, idx, arr) => (
+                                            <div key={idx} className="flex gap-4 relative">
+                                                {/* Connector line overlay for completed vertical steps */}
+                                                {idx < arr.length - 1 && step.isCompleted && (
+                                                    <div className="absolute left-[-15px] top-6 bottom-[-20px] w-0.5 bg-primary z-0" />
+                                                )}
+                                                
+                                                {/* Circle indicator */}
+                                                <div 
+                                                    className={`h-5 w-5 rounded-full flex items-center justify-center border shrink-0 relative z-10 transition-all duration-300 ${
+                                                        step.isCompleted 
+                                                            ? "bg-primary border-primary text-primary-foreground" 
+                                                            : step.isCurrent 
+                                                                ? step.isError 
+                                                                    ? "bg-destructive border-destructive text-destructive-foreground animate-pulse"
+                                                                    : "bg-background border-primary text-primary ring-4 ring-primary/10" 
+                                                                : "bg-background border-muted text-muted-foreground"
+                                                    }`}
+                                                >
+                                                    {step.isCompleted ? (
+                                                        <Check className="h-3 w-3 stroke-[3]" />
+                                                    ) : step.isCurrent && step.isError ? (
+                                                        <AlertCircle className="h-3 w-3" />
+                                                    ) : (
+                                                        <div className={`h-1.5 w-1.5 rounded-full ${step.isCurrent ? "bg-primary" : "bg-transparent"}`} />
+                                                    )}
+                                                </div>
+                                                
+                                                {/* Label and description */}
+                                                <div className="space-y-0.5">
+                                                    <p className={`text-xs font-semibold leading-none ${step.isCurrent ? "text-foreground font-bold" : "text-muted-foreground"}`}>
+                                                        {step.label}
+                                                    </p>
+                                                    {step.description && (
+                                                        <p className="text-[11px] text-muted-foreground leading-normal mt-0.5">
+                                                            {step.description}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-xs text-muted-foreground italic">
-                                Tracking information will be updated once shipped.
-                            </p>
+                            <div className="flex items-start gap-3 bg-muted/40 border border-border p-4 rounded-none">
+                                <AlertCircle className="h-5 w-5 text-muted-foreground/60 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-medium text-xs text-foreground">Tracking Unavailable</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5 leading-normal">
+                                        Tracking information is currently unavailable. This will be updated once the order is shipped.
+                                    </p>
+                                </div>
+                            </div>
                         )}
                     </div>
                 </div>
