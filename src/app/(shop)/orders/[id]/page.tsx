@@ -5,14 +5,14 @@ import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { useQueryClient } from "@tanstack/react-query"
-import { AlertCircle, ArrowLeft, Award, CreditCard, Package, RotateCcw, XCircle } from "lucide-react"
+import { AlertCircle, ArrowLeft, Award, CreditCard, ExternalLink, Package, RotateCcw, XCircle } from "lucide-react"
 import { getProductImage } from "@/utils/imageHelpers"
 import toast from "react-hot-toast"
 import { Button } from "@/components/ui/Button"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { Spinner } from "@/components/ui/Spinner"
 import { Badge } from "@/components/ui/Badge"
-import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus } from "@/constants/enums"
+import { ORDER_STATUS_COLOR, ORDER_STATUS_LABEL, PAYMENT_METHOD_LABEL, OrderStatus, DELIVERY_STATUS_COLOR, DELIVERY_STATUS_LABEL } from "@/constants/enums"
 import { ROUTES } from "@/constants/routes"
 import { useCancelOrder, useOrderDetail } from "@/hooks/useOrders"
 import { LoyaltyTransactionStatus, LoyaltyTransactionType } from "@/types/loyalty"
@@ -40,6 +40,17 @@ function parseProductSnapshot(snapshot: string): ParsedSnapshot {
     } catch {
         return { name: snapshot || "Product" }
     }
+}
+
+const CARRIER_NAME_MAP: Record<string, string> = {
+    GHN: "Giao Hàng Nhanh (GHN)",
+}
+
+function getTrackingUrl(carrierCode: string, trackingCode: string): string | null {
+    if (carrierCode.toUpperCase() === "GHN") {
+        return `https://donhang.ghn.vn/?order_code=${trackingCode}`
+    }
+    return null
 }
 
 export default function OrderDetailPage() {
@@ -177,11 +188,37 @@ export default function OrderDetailPage() {
                     </h3>
                     <div className="text-sm">
                         {order.tracking ? (
-                            <div className="space-y-1">
-                                <p className="font-medium text-xs">Carrier: {order.tracking.carrierCode}</p>
-                                <p className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 inline-block select-all">
-                                    {order.tracking.trackingCode}
-                                </p>
+                            <div className="space-y-2">
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-medium text-xs">Carrier:</span>
+                                    <span className="text-xs text-foreground font-semibold">
+                                        {CARRIER_NAME_MAP[order.tracking.carrierCode] || order.tracking.carrierCode}
+                                    </span>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-medium text-xs">Status:</span>
+                                    <Badge variant="secondary" className={`${DELIVERY_STATUS_COLOR[order.tracking.status]} border-none rounded-none px-2 py-0.5 font-medium text-xs`}>
+                                        {DELIVERY_STATUS_LABEL[order.tracking.status]}
+                                    </Badge>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="font-medium text-xs">Tracking Code:</span>
+                                    {getTrackingUrl(order.tracking.carrierCode, order.tracking.trackingCode) ? (
+                                        <a
+                                            href={getTrackingUrl(order.tracking.carrierCode, order.tracking.trackingCode)!}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 text-xs font-mono text-primary hover:underline"
+                                        >
+                                            {order.tracking.trackingCode}
+                                            <ExternalLink className="h-3.5 w-3.5" />
+                                        </a>
+                                    ) : (
+                                        <span className="text-xs font-mono text-muted-foreground bg-secondary px-2 py-1 inline-block select-all">
+                                            {order.tracking.trackingCode}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <p className="text-xs text-muted-foreground italic">
