@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
 import { orderService } from '@/services/orderService'
 import { useCart } from '@/hooks/useCart'
 import { pointsKeys } from '@/hooks/usePoints'
-import type { CheckoutRequest } from '@/types/order'
+import type { CheckoutRequest, OrderResponse } from '@/types/order'
 
 export const orderKeys = {
     all: ['orders'] as const,
@@ -35,11 +35,15 @@ export function useOrdersList(params?: { page?: number; pageSize?: number; statu
     })
 }
 
-export function useOrderDetail(id: string) {
-    return useQuery({
+export function useOrderDetail(
+    id: string,
+    options?: Omit<UseQueryOptions<OrderResponse, Error>, 'queryKey' | 'queryFn'>
+) {
+    return useQuery<OrderResponse, Error>({
         queryKey: orderKeys.detail(id),
         queryFn: () => orderService.getOrderById(id),
         enabled: !!id,
+        ...options,
     })
 }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -20,6 +20,7 @@ import { pointsKeys } from "@/hooks/usePoints"
 import { formatPrice } from "@/utils/formatPrice"
 import { formatDateTime } from "@/utils/formatDate"
 import type { ApiError } from "@/types/api"
+import type { OrderResponse } from "@/types/order"
 
 interface ParsedSnapshot {
     name: string
@@ -134,7 +135,21 @@ export default function OrderDetailPage() {
     const params = useParams()
     const id = params.id as string
 
-    const { data: order, isLoading, error: orderError, refetch } = useOrderDetail(id)
+    const prevStatusRef = useRef<OrderStatus | null>(null)
+    const prevTrackingStatusRef = useRef<DeliveryStatus | null>(null)
+
+    const { data: order, isLoading, error: orderError, refetch } = useOrderDetail(id, {
+        staleTime: 0,
+        refetchInterval: (query: unknown) => {
+            const data = (query as { state?: { data?: OrderResponse } })?.state?.data
+            if (!data) return 5000
+            const active =
+                data.status !== OrderStatus.Completed &&
+                data.status !== OrderStatus.Cancelled &&
+                data.status !== OrderStatus.Returned
+            return active ? 5000 : false
+        },
+    })
     const cancelOrderMutation = useCancelOrder()
     const [isCanceling, setIsCanceling] = useState(false)
     const queryClient = useQueryClient()
@@ -144,6 +159,34 @@ export default function OrderDetailPage() {
             queryClient.invalidateQueries({ queryKey: pointsKeys.all })
         }
     }, [order?.status, queryClient])
+
+    useEffect(() => {
+        if (order) {
+            // Notify on order status change
+            if (prevStatusRef.current !== null && order.status !== prevStatusRef.current) {
+                const oldLabel = ORDER_STATUS_LABEL[prevStatusRef.current]
+                const newLabel = ORDER_STATUS_LABEL[order.status]
+                toast.success(`Order status updated from "${oldLabel}" to "${newLabel}"`, {
+                    icon: "📦",
+                    duration: 5000,
+                })
+            }
+            prevStatusRef.current = order.status
+
+            // Notify on tracking/delivery status change
+            if (order.tracking) {
+                if (prevTrackingStatusRef.current !== null && order.tracking.status !== prevTrackingStatusRef.current) {
+                    const oldLabel = DELIVERY_STATUS_LABEL[prevTrackingStatusRef.current]
+                    const newLabel = DELIVERY_STATUS_LABEL[order.tracking.status]
+                    toast.success(`Delivery status updated from "${oldLabel}" to "${newLabel}"`, {
+                        icon: "🚚",
+                        duration: 5000,
+                    })
+                }
+                prevTrackingStatusRef.current = order.tracking.status
+            }
+        }
+    }, [order])
 
     const handleCancelOrder = async () => {
         if (!order) return
