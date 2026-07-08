@@ -42,6 +42,8 @@ export interface OrderResponse {
     items: OrderItemResponse[]
     tracking?: TrackingInfo | null
     loyaltyTransactions?: LoyaltyTransaction[]
+    canBeReturned?: boolean
+    returnByDate?: string
 }
 
 export interface CheckoutRequest {
