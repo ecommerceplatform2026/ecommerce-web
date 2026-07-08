@@ -283,6 +283,9 @@ export default function OrderDetailPage() {
         order.status === OrderStatus.Pending || order.status === OrderStatus.Confirmed
 
     const itemsSubtotal = order.items.reduce((acc, item) => acc + item.price * item.quantity, 0)
+    const paidAmount = order.paidAmount ?? order.totalAmount
+    const discountAmount = order.discountAmount ?? 0
+    const shippingAndFees = Math.max(0, paidAmount + discountAmount - itemsSubtotal)
     const earnedPoints = order.loyaltyTransactions
         ?.filter(t => t.type === LoyaltyTransactionType.Earn && t.status === LoyaltyTransactionStatus.Completed)
         .reduce((sum, t) => sum + t.points, 0) ?? 0
@@ -552,19 +555,25 @@ export default function OrderDetailPage() {
                 </div>
 
                 <div className="w-full md:w-80 space-y-3 text-sm">
-                    <div className="flex justify-between text-muted-foreground">
-                        <span>Items Subtotal</span>
-                        <span>{formatPrice(itemsSubtotal)}</span>
-                    </div>
-                    {order.totalAmount !== itemsSubtotal && (
+                    <div className="rounded-none border border-border bg-muted/30 p-4 space-y-2">
+                        <div className="flex justify-between text-muted-foreground">
+                            <span>Items Subtotal</span>
+                            <span>{formatPrice(itemsSubtotal)}</span>
+                        </div>
                         <div className="flex justify-between text-muted-foreground">
                             <span>Shipping & fees</span>
-                            <span>{order.totalAmount > itemsSubtotal ? formatPrice(order.totalAmount - itemsSubtotal) : "Included"}</span>
+                            <span>{shippingAndFees > 0 ? formatPrice(shippingAndFees) : "Included"}</span>
                         </div>
-                    )}
-                    <div className="border-t border-border pt-3 flex justify-between items-end">
-                        <span className="font-medium">Order Total</span>
-                        <span className="font-serif text-2xl font-bold text-foreground">{formatPrice(order.totalAmount)}</span>
+                        {discountAmount > 0 && (
+                            <div className="flex justify-between text-muted-foreground">
+                                <span>Discount</span>
+                                <span>-{formatPrice(discountAmount)}</span>
+                            </div>
+                        )}
+                        <div className="border-t border-border pt-2 flex justify-between items-end">
+                            <span className="font-medium">Paid</span>
+                            <span className="font-serif text-xl font-bold text-foreground">{formatPrice(paidAmount)}</span>
+                        </div>
                     </div>
 
                     {order.status === OrderStatus.Completed && (

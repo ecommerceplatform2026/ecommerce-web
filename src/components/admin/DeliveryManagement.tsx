@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ChevronLeft, ChevronRight, RefreshCcw, Search, Truck } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus, RefreshCcw, Search, Truck } from "lucide-react"
 import { Toast } from '@/components/ui/Toast'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -82,6 +82,10 @@ export function DeliveryManagement() {
     const [endDateFilter, setEndDateFilter] = useState("")
     const [retryTarget, setRetryTarget] = useState<DeliveryListItem | null>(null)
     const [isRetrying, setIsRetrying] = useState(false)
+    const [isCreating, setIsCreating] = useState(false)
+    const [isCreateOpen, setIsCreateOpen] = useState(false)
+    const [newOrderId, setNewOrderId] = useState("")
+    const [newCarrier, setNewCarrier] = useState("GHN")
 
     const queryFilters = useMemo<DeliveryListFilters>(() => ({
         page,
@@ -133,6 +137,33 @@ export function DeliveryManagement() {
         }
     }
 
+    const handleCreateDelivery = async () => {
+        const orderId = newOrderId.trim()
+        if (!orderId) {
+            Toast("Order ID is required.", "error")
+            return
+        }
+
+        setIsCreating(true)
+
+        try {
+            await deliveryService.createDelivery({
+                orderId,
+                carrier: newCarrier.trim() || "GHN",
+            })
+            Toast("Delivery created successfully.")
+            setIsCreateOpen(false)
+            setNewOrderId("")
+            setNewCarrier("GHN")
+            await refetch()
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Unable to create delivery at the moment."
+            Toast(message, "error")
+        } finally {
+            setIsCreating(false)
+        }
+    }
+
     const totalPages = data?.totalPages ?? 1
     const currentPage = data?.page ?? 1
     const items = data?.items ?? []
@@ -150,10 +181,16 @@ export function DeliveryManagement() {
                             Monitor fulfillment activity, filter by shipment status, and retry exception shipments when needed.
                         </p>
                     </div>
-                    <Button variant="outline" onClick={() => refetch()} className="h-11 w-full rounded-none lg:w-auto">
-                        <RefreshCcw className="h-4 w-4" />
-                        Refresh
-                    </Button>
+                    <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+                        <Button onClick={() => setIsCreateOpen(true)} className="h-11 w-full rounded-none lg:w-auto">
+                            <Plus className="h-4 w-4" />
+                            Create Delivery
+                        </Button>
+                        <Button variant="outline" onClick={() => refetch()} className="h-11 w-full rounded-none lg:w-auto">
+                            <RefreshCcw className="h-4 w-4" />
+                            Refresh
+                        </Button>
+                    </div>
                 </div>
 
                 <section className="mb-6 grid gap-4 border border-border bg-card p-4 md:grid-cols-2 xl:grid-cols-4">
@@ -344,6 +381,53 @@ export function DeliveryManagement() {
                     </div>
                 )}
             </div>
+
+            <Dialog open={isCreateOpen} onOpenChange={(open) => {
+                setIsCreateOpen(open)
+                if (!open) {
+                    setNewOrderId("")
+                    setNewCarrier("GHN")
+                }
+            }}>
+                <DialogContent className="max-w-md rounded-none">
+                    <DialogHeader>
+                        <DialogTitle>Create delivery</DialogTitle>
+                        <DialogDescription>
+                            Submit a new shipment request using the order ID and carrier. The carrier defaults to GHN when left blank.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="new-order-id">Order ID</Label>
+                            <Input
+                                id="new-order-id"
+                                value={newOrderId}
+                                onChange={(event) => setNewOrderId(event.target.value)}
+                                placeholder="Enter order ID"
+                                className="h-10 rounded-none"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="new-carrier">Carrier</Label>
+                            <Input
+                                id="new-carrier"
+                                value={newCarrier}
+                                onChange={(event) => setNewCarrier(event.target.value)}
+                                placeholder="GHN"
+                                className="h-10 rounded-none"
+                            />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex justify-end gap-3">
+                        <Button variant="outline" className="rounded-none bg-transparent" onClick={() => setIsCreateOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button className="rounded-none" disabled={isCreating} onClick={handleCreateDelivery}>
+                            {isCreating ? "Creating..." : "Create shipment"}
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={Boolean(retryTarget)} onOpenChange={(open) => !open && setRetryTarget(null)}>
                 <DialogContent className="max-w-md rounded-none">

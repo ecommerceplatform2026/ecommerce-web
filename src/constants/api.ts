@@ -136,6 +136,7 @@ export const ORDER_ENDPOINTS = {
 
 export const DELIVERY_ENDPOINTS = {
     GET_ALL: '/api/delivery',
+    CREATE: '/api/delivery',
     RETRY: '/api/delivery/retry',
 } as const
 

@@ -1,7 +1,7 @@
 import axiosInstance from '@/lib/axios'
 import { DELIVERY_ENDPOINTS } from '@/constants/api'
 import type { ApiResponse, PaginatedResponse } from '@/types/api'
-import type { DeliveryListData, DeliveryListFilters, DeliveryListItem } from '@/types/delivery'
+import type { CreateDeliveryRequest, DeliveryListData, DeliveryListFilters, DeliveryListItem } from '@/types/delivery'
 
 export const deliveryService = {
     getDeliveries: async (params?: DeliveryListFilters): Promise<DeliveryListData> => {
@@ -10,6 +10,13 @@ export const deliveryService = {
             { params },
         )
         return res.data.data
+    },
+
+    createDelivery: async (payload: CreateDeliveryRequest): Promise<void> => {
+        await axiosInstance.post<ApiResponse<unknown>>(
+            DELIVERY_ENDPOINTS.CREATE,
+            payload,
+        )
     },
 
     retryDelivery: async (deliveryId: string): Promise<void> => {

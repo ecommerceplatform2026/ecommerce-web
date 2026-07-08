@@ -20,6 +20,11 @@ export interface DeliveryListFilters {
     endDate?: string
 }
 
+export interface CreateDeliveryRequest {
+    orderId: string
+    carrier?: string | null
+}
+
 export interface DeliveryListData {
     items: DeliveryListItem[]
     page: number
