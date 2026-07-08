@@ -133,17 +133,16 @@ export function CheckoutForm({
                         <div className="flex gap-3 w-full">
                             <Button
                                 className="flex-1 rounded-none"
-                                onClick={() => {
-                                    toast.dismiss(t.id)
-                                    // If checkout has online URL, redirect user to pay
-                                    if (result.checkoutUrl) {
-                                        window.location.href = result.checkoutUrl
-                                    } else {
-                                        router.push(ROUTES.ORDERS.INDEX)
-                                    }
-                                }}
-                            >
-                                {result.checkoutUrl ? "Proceed to Payment" : "View My Orders"}
+                                    onClick={() => {
+                                        toast.dismiss(t.id)
+                                        if (result.checkoutUrl) {
+                                            window.location.href = result.checkoutUrl
+                                        } else {
+                                            router.push(ROUTES.ORDERS.INDEX)
+                                        }
+                                    }}
+                                >
+                                    {result.checkoutUrl ? "Proceed to Payment" : "View My Orders"}
                             </Button>
                         </div>
                     </div>
@@ -156,7 +155,6 @@ export function CheckoutForm({
                 addNotification("points", "Points Redeemed", `${validatedPoints.toLocaleString()} points redeemed.`, "/loyalty")
             }
 
-            // If not redirecting immediately to checkoutUrl
             if (!result.checkoutUrl) {
                 router.push(ROUTES.ORDERS.INDEX)
             }

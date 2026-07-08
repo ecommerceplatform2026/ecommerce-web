@@ -44,8 +44,7 @@ export const ROUTES = {
     // ------ Checkout (FR11, FR12) ------
     CHECKOUT: {
         INDEX: '/checkout',           // address form and payment selection
-        SUCCESS: '/checkout/success',   // payment success
-        FAILED: '/checkout/failed',    // payment failed
+        STATUS: '/checkout/status',    // polls payments/{orderCode}/status
     },
 
     // ------ Orders (FR03, FR13) ------
