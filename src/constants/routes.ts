@@ -85,6 +85,11 @@ export const ROUTES = {
             DETAIL: (id: string) => `/admin/orders/${id}`,   // detail and status update
         },
 
+        // ------ Deliveries (US 6.4) ------
+        DELIVERIES: {
+            INDEX: '/admin/deliveries',
+        },
+
         // ------ Users (FR02) ------
         USERS: {
             INDEX: '/admin/users',                          // user list
