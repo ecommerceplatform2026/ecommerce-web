@@ -120,6 +120,8 @@ export const ORDER_ENDPOINTS = {
     GET_ALL: '/api/orders',                           // GET - order history
     GET_BY_ID: (id: string) => `/api/orders/${id}`,     // GET - order detail
     CANCEL: (id: string) => `/api/orders/${id}/cancel`, // POST - cancel order
+    COMPLETE: (id: string) => `/api/orders/${id}/complete`, // POST - receive/complete
+    RETURN: (id: string) => `/api/orders/${id}/return`,     // POST - return
 
     // Admin
     ADMIN_GET_ALL: '/api/orders',

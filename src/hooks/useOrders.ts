@@ -58,3 +58,25 @@ export function useCancelOrder() {
         },
     })
 }
+
+export function useCompleteOrder() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (id: string) => orderService.completeOrder(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: orderKeys.all })
+        },
+    })
+}
+
+export function useReturnOrder() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (id: string) => orderService.returnOrder(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: orderKeys.all })
+        },
+    })
+}
