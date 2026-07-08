@@ -7,6 +7,7 @@ import {
     Package,
     FolderTree,
     ShoppingBag,
+    Truck,
     Users,
     MessageSquare,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ const navItems = [
     { href: ROUTES.ADMIN.PRODUCTS.INDEX, label: 'Products', icon: Package },
     { href: ROUTES.ADMIN.CATEGORIES.INDEX, label: 'Categories', icon: FolderTree },
     { href: ROUTES.ADMIN.ORDERS.INDEX, label: 'Orders', icon: ShoppingBag },
+    { href: ROUTES.ADMIN.DELIVERIES.INDEX, label: 'Deliveries', icon: Truck },
     { href: ROUTES.ADMIN.USERS.INDEX, label: 'Users', icon: Users },
     { href: ROUTES.ADMIN.REVIEWS.INDEX, label: 'Reviews', icon: MessageSquare },
 ] as const

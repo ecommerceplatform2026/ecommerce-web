@@ -51,6 +51,8 @@ export default function LoyaltyPage() {
                             balance={balance?.balance ?? 0}
                             pendingPoints={balance?.pendingPoints ?? 0}
                             discountEquivalent={balance?.discountEquivalent ?? 0}
+                            totalEarned={balance?.totalEarned ?? 0}
+                            totalRedeemed={balance?.totalRedeemed ?? 0}
                             lastUpdated={balance?.lastUpdated}
                             isLoading={isBalanceLoading}
                             error={balanceError ? "Failed to load points" : null}

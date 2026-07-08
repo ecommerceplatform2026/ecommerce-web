@@ -131,6 +131,16 @@ export const ORDER_ENDPOINTS = {
 } as const
 
 // ============================================================
+// DELIVERY  (US 6.4)
+// ============================================================
+
+export const DELIVERY_ENDPOINTS = {
+    GET_ALL: '/api/delivery',
+    CREATE: '/api/delivery',
+    RETRY: '/api/delivery/retry',
+} as const
+
+// ============================================================
 // PAYMENT  (FR12)
 // ============================================================
 // TODO: backend not implemented yet

@@ -36,6 +36,8 @@ export interface OrderResponse {
     id: string
     orderCode: number
     totalAmount: number
+    discountAmount: number
+    paidAmount: number
     status: OrderStatus
     paymentMethod: PaymentMethod
     createdAt: string

@@ -5,6 +5,8 @@ export interface LoyaltyBalanceResponse {
     balance: number
     pendingPoints: number
     discountEquivalent: number
+    totalEarned: number
+    totalRedeemed: number
     lastUpdated: string
 }
 

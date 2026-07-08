@@ -65,7 +65,8 @@ export const tokenHelper = {
         Cookies.set(COOKIE_KEYS.ACCESS_TOKEN, accessToken, {
             expires: 1,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
+            path: '/',
         })
 
         // Refresh token expires after 7 days
@@ -73,7 +74,8 @@ export const tokenHelper = {
             Cookies.set(COOKIE_KEYS.REFRESH_TOKEN, refreshToken, {
                 expires: 7,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
+                sameSite: 'lax',
+                path: '/',
             })
         }
     },
