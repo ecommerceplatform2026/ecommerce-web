@@ -212,7 +212,7 @@ function OrderHistoryContent() {
                                 <div>
                                     <span className="text-muted-foreground mr-1">Total:</span>
                                     <span className="font-serif font-bold text-foreground text-base">
-                                        {formatPrice(order.totalAmount)}
+                                        {formatPrice(order.paidAmount)}
                                     </span>
                                 </div>
                             </div>

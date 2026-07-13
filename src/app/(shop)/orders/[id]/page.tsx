@@ -33,7 +33,7 @@ function parseProductSnapshot(snapshot: string): ParsedSnapshot {
     try {
         const parsed = JSON.parse(snapshot)
         return {
-            name: parsed.Name || parsed.name || "Product",
+            name: parsed.ProductName || parsed.name || "Product",
             size: parsed.Size || parsed.size,
             color: parsed.Color || parsed.color,
             imageUrl: parsed.ImageUrl || parsed.imageUrl || parsed.ProductImageUrl || parsed.productImageUrl,
