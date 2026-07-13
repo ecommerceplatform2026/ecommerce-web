@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Star, ArrowRight, TrendingUp, TrendingDown } from "lucide-react"
+import { Star, ArrowRight, TrendingUp, TrendingDown, Sparkles } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/Card"
 import { Skeleton } from "@/components/ui/Skeleton"
 import { Button } from "@/components/ui/Button"
@@ -30,10 +30,11 @@ function PointsBalanceCard({
     if (isLoading) {
         return (
             <Card className="h-full">
-                <CardContent className="p-5 space-y-3">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-10 w-40" />
-                    <Skeleton className="h-3 w-56" />
+                <CardContent className="p-6 space-y-4">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-12 w-48" />
+                    <Skeleton className="h-3 w-40" />
+                    <Skeleton className="h-16 w-full mt-4" />
                 </CardContent>
             </Card>
         )
@@ -44,59 +45,75 @@ function PointsBalanceCard({
     }
 
     return (
-        <Card className="h-full">
-            <CardContent className="p-5 flex flex-col h-full">
-                <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-1.5">
-                        <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                        <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                            Loyalty Rewards
-                        </p>
+        <Card className="h-full relative overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-secondary/20 pointer-events-none" aria-hidden />
+            <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-secondary/15 pointer-events-none" aria-hidden />
+
+            <CardContent className="p-6 flex flex-col h-full relative">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-primary text-primary-foreground">
+                            <Star className="h-4 w-4" />
+                        </div>
+                        <div>
+                            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground font-sans">
+                                Loyalty Rewards
+                            </p>
+                        </div>
                     </div>
-                    <Button variant="outline" size="sm" className="bg-transparent shrink-0" asChild>
+                    <Button variant="outline" size="sm" className="bg-transparent shrink-0 text-xs h-8 px-3" asChild>
                         <a href="#how-points-work">
-                            How points work <ArrowRight className="h-3.5 w-3.5 ml-1" />
+                            How it works <ArrowRight className="h-3 w-3 ml-1" />
                         </a>
                     </Button>
                 </div>
 
+                {/* Hero balance */}
                 <div className="flex-1">
-                    <p className="font-serif text-4xl font-bold tracking-tight">
-                        {balance.toLocaleString()}
-                        {pendingPoints > 0 && (
-                            <span className="text-lg font-normal text-muted-foreground ml-1.5">
-                                (+{pendingPoints.toLocaleString()})
+                    <div className="relative">
+                        <p className="font-serif text-5xl md:text-6xl font-medium tracking-tight leading-none">
+                            {balance.toLocaleString()}
+                            <span className="text-lg font-sans font-normal text-muted-foreground ml-2 align-baseline">
+                                pts
                             </span>
+                        </p>
+                        {pendingPoints > 0 && (
+                            <p className="flex items-center gap-1 text-sm text-muted-foreground mt-1.5">
+                                <Sparkles className="h-3.5 w-3.5" />
+                                <span>{pendingPoints.toLocaleString()} pending</span>
+                            </p>
                         )}
-                        <span className="text-base font-normal text-muted-foreground ml-1.5">
-                            pts
-                        </span>
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        ≈ {discountEquivalent.toLocaleString()} VND
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-2 font-sans">
+                        <span className="font-medium text-foreground">{discountEquivalent.toLocaleString()} VND</span> in rewards available
                     </p>
 
-                    <div className="mt-4 pt-4 border-t border-border space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                            <TrendingUp className="h-4 w-4 text-green-600 shrink-0" />
-                            <span className="text-muted-foreground">Total earned</span>
-                            <span className="ml-auto font-medium text-green-700">
-                                +{totalEarned.toLocaleString()}
-                            </span>
+                    {/* Stats block - editorial color-block style */}
+                    <div className="mt-6 grid grid-cols-2 gap-px bg-border">
+                        <div className="bg-secondary/30 p-4 relative overflow-hidden">
+                            <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-secondary/20 pointer-events-none" aria-hidden />
+                            <div className="flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] text-muted-foreground mb-2 font-sans">
+                                <TrendingUp className="h-3 w-3" />
+                                Earned
+                            </div>
+                            <p className="font-serif text-xl font-medium relative">+{totalEarned.toLocaleString()}</p>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                            <TrendingDown className="h-4 w-4 text-red-600 shrink-0" />
-                            <span className="text-muted-foreground">Total redeemed</span>
-                            <span className="ml-auto font-medium text-red-700">
-                                −{totalRedeemed.toLocaleString()}
-                            </span>
+                        <div className="bg-secondary/30 p-4 relative overflow-hidden">
+                            <div className="absolute -bottom-4 -left-4 w-16 h-16 rounded-full bg-secondary/20 pointer-events-none" aria-hidden />
+                            <div className="flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] text-muted-foreground mb-2 font-sans">
+                                <TrendingDown className="h-3 w-3" />
+                                Redeemed
+                            </div>
+                            <p className="font-serif text-xl font-medium relative">−{totalRedeemed.toLocaleString()}</p>
                         </div>
                     </div>
                 </div>
 
+                {/* Footer */}
                 {lastUpdated && (
-                    <p className="text-xs text-muted-foreground mt-4 pt-4 border-t border-border">
-                        Last updated: {new Date(lastUpdated).toLocaleDateString("en-GB", {
+                    <p className="text-[11px] text-muted-foreground mt-4 pt-4 border-t border-border font-sans">
+                        Last updated {new Date(lastUpdated).toLocaleDateString("en-GB", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
