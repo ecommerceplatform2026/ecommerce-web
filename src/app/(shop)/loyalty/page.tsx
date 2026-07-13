@@ -71,21 +71,21 @@ export default function LoyaltyPage() {
                                     <ShoppingBag className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
                                     <div>
                                         <p className="font-medium">Earn</p>
-                                        <p className="text-muted-foreground">1 point per 10,000 VND spent</p>
+                                        <p className="text-muted-foreground">1 pt per 10,000 VND spent. Credited when you received the order.</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <Gift className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
                                     <div>
                                         <p className="font-medium">Redeem</p>
-                                        <p className="text-muted-foreground">1 point = 100 VND discount (min 100 pts)</p>
+                                        <p className="text-muted-foreground">1 pt = 100 VND off. For every 100 pts you can spend 10,000 VND.</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-2">
                                     <Clock className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
                                     <div>
                                         <p className="font-medium">Expiry</p>
-                                        <p className="text-muted-foreground">Points expire after 12 months</p>
+                                        <p className="text-muted-foreground">12 months after last your last purchase activity.</p>
                                     </div>
                                 </div>
                             </CardContent>
