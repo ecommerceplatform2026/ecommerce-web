@@ -8,6 +8,7 @@ export const orderService = {
         const res = await axiosInstance.post<ApiResponse<CheckoutResponse>>(
             CHECKOUT_ENDPOINTS.CREATE,
             payload,
+            { timeout: 30000 },
         )
         return res.data.data
     },
