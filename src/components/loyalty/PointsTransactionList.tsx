@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArrowUpRight, ArrowDownRight, Clock, RefreshCw } from "lucide-react"
+import { Clock, CircleX, CheckCircle2, RefreshCw } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card"
 import { Button } from "@/components/ui/Button"
@@ -21,10 +21,16 @@ interface PointsTransactionListProps {
     onRetry?: () => void
 }
 
-const typeConfig: Record<number, { icon: typeof ArrowUpRight; bg: string; textColor: string; sign: string }> = {
-    [LoyaltyTransactionType.Earn]: { icon: ArrowUpRight, bg: "bg-green-100 text-green-700", textColor: "text-green-700", sign: "+" },
-    [LoyaltyTransactionType.Redeem]: { icon: ArrowDownRight, bg: "bg-red-100 text-red-700", textColor: "text-red-700", sign: "−" },
-    [LoyaltyTransactionType.Expired]: { icon: Clock, bg: "bg-amber-100 text-amber-700", textColor: "text-amber-700", sign: "−" },
+const typeSign: Record<number, string> = {
+    [LoyaltyTransactionType.Earn]: "+",
+    [LoyaltyTransactionType.Redeem]: "−",
+    [LoyaltyTransactionType.Expired]: "−",
+}
+
+const statusConfig: Record<number, { icon: typeof Clock; bg: string; textColor: string }> = {
+    [LoyaltyTransactionStatus.Pending]: { icon: Clock, bg: "bg-yellow-100 text-yellow-700", textColor: "text-yellow-700" },
+    [LoyaltyTransactionStatus.Completed]: { icon: CheckCircle2, bg: "bg-green-100 text-green-700", textColor: "text-green-700" },
+    [LoyaltyTransactionStatus.Cancelled]: { icon: CircleX, bg: "bg-red-100 text-red-700", textColor: "text-red-700" },
 }
 
 function PointsTransactionList({
@@ -96,8 +102,11 @@ function PointsTransactionList({
             </CardHeader>
             <CardContent className="space-y-1 max-h-[480px] overflow-y-auto">
                 {transactions.map((txn) => {
-                    const cfg = typeConfig[txn.type] ?? typeConfig[LoyaltyTransactionType.Earn]
-                    const Icon = cfg.icon
+                    const sCfg = statusConfig[txn.status] ?? statusConfig[LoyaltyTransactionStatus.Completed]
+                    const sign = txn.status === LoyaltyTransactionStatus.Cancelled
+                        ? (typeSign[txn.type] === "+" ? "−" : "+")
+                        : (typeSign[txn.type] ?? "+")
+                    const Icon = sCfg.icon
                     return (
                         <div
                             key={txn.id}
@@ -107,7 +116,7 @@ function PointsTransactionList({
                                 <div
                                     className={cn(
                                         "flex h-8 w-8 items-center justify-center rounded-full",
-                                        cfg.bg,
+                                        sCfg.bg,
                                     )}
                                 >
                                     <Icon className="h-4 w-4" />
@@ -115,28 +124,31 @@ function PointsTransactionList({
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm font-medium">{txn.description}</p>
-                                        {txn.type === LoyaltyTransactionType.Expired && txn.status === LoyaltyTransactionStatus.Pending ? (
-                                            <span className="text-[10px] uppercase tracking-wider text-amber-700 bg-amber-100 px-1.5 py-0.5">
-                                                Expiring soon
+                                        {txn.status === LoyaltyTransactionStatus.Pending && (
+                                            <span className="text-[10px] uppercase tracking-wider text-yellow-700 bg-yellow-100 px-1.5 py-0.5 rounded">
+                                                Pending
                                             </span>
-                                        ) : txn.type === LoyaltyTransactionType.Expired && txn.status === LoyaltyTransactionStatus.Completed ? (
-                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5">
-                                                Expired
-                                            </span>
-                                        ) : txn.status === LoyaltyTransactionStatus.Cancelled && (
-                                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5">
+                                        )}
+                                        {txn.status === LoyaltyTransactionStatus.Cancelled && (
+                                            <span className="text-[10px] uppercase tracking-wider text-red-700 bg-red-100 px-1.5 py-0.5 rounded">
                                                 Cancelled
                                             </span>
                                         )}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
-                                        {new Date(txn.date).toLocaleDateString()}
+                                        {new Date(txn.date).toLocaleString(undefined, {
+                                            year: "numeric",
+                                            month: "short",
+                                            day: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        })}
                                     </p>
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className={cn("text-sm font-semibold", cfg.textColor)}>
-                                    {cfg.sign}
+                                <p className={cn("text-sm font-semibold", sCfg.textColor)}>
+                                    {sign}
                                     {txn.points.toLocaleString()}
                                 </p>
                             </div>
